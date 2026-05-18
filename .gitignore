@@ -1,0 +1,15 @@
+node_modules
+.turbo
+dist
+.next
+.env
+.env.local
+.env.*.local
+*.log
+coverage
+.DS_Store
+Thumbs.db
+artifacts
+cache
+typechain-types
+deployments/localhost

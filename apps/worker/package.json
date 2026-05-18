@@ -1,0 +1,23 @@
+{
+  "name": "@carbonafrika/worker",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@carbonafrika/db": "*",
+    "@carbonafrika/types": "*",
+    "bullmq": "^5.8.1",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@carbonafrika/contracts",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:mumbai": "hardhat run scripts/deploy.ts --network mumbai",
+    "deploy:polygon": "hardhat run scripts/deploy.ts --network polygon",
+    "verify": "hardhat verify"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/node": "^20.12.12",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.3",
+    "typescript": "^5.4.5"
+  }
+}

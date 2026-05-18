@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  LANDOWNER
+  BUYER
+  VERIFIER
+  ADMIN
+}
+
+enum LandType {
+  FOREST
+  SAVANNA
+  GRASSLAND
+  FARMLAND
+  WETLAND
+  MANGROVE
+}
+
+enum ProjectStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  ACTIVE
+  COMPLETED
+}
+
+enum VerificationStatus {
+  PENDING
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+}
+
+enum CreditStatus {
+  AVAILABLE
+  LISTED
+  SOLD
+  RETIRED
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  passwordHash  String?
+  walletAddress String?   @unique
+  walletNonce   String?
+  name          String
+  role          UserRole  @default(LANDOWNER)
+  phone         String?
+  country       String?
+  bio           String?
+  avatarUrl     String?
+  kycVerified   Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  projects      Project[]
+  purchases     Purchase[]
+  verifications Verification[]
+
+  @@index([walletAddress])
+  @@index([email])
+}
+
+model Project {
+  id               String        @id @default(cuid())
+  ownerId          String
+  owner            User          @relation(fields: [ownerId], references: [id])
+  title            String
+  description      String
+  landType         LandType
+  country          String
+  region           String?
+  lat              Float
+  lng              Float
+  hectares         Float
+  estimatedTons    Float
+  status           ProjectStatus @default(PENDING)
+  ipfsDocumentHash String?
+  satelliteImageUrl String?
+  onChainId        String?       @unique
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  verifications    Verification[]
+  credits          CarbonCredit[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([landType])
+  @@index([country])
+}
+
+model Verification {
+  id          String             @id @default(cuid())
+  projectId   String
+  project     Project            @relation(fields: [projectId], references: [id])
+  verifierId  String?
+  verifier    User?              @relation(fields: [verifierId], references: [id])
+  status      VerificationStatus @default(PENDING)
+  notes       String?
+  carbonTons  Float?
+  txHash      String?
+  reportIpfsHash String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model CarbonCredit {
+  id          String       @id @default(cuid())
+  projectId   String
+  project     Project      @relation(fields: [projectId], references: [id])
+  tokenId     String       @unique
+  amount      Float
+  status      CreditStatus @default(AVAILABLE)
+  mintTxHash  String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  listings    Listing[]
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model Listing {
+  id          String        @id @default(cuid())
+  creditId    String
+  credit      CarbonCredit  @relation(fields: [creditId], references: [id])
+  pricePerTon Float
+  totalTons   Float
+  currency    String        @default("USDC")
+  status      ListingStatus @default(ACTIVE)
+  txHash      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  purchases   Purchase[]
+
+  @@index([status])
+  @@index([creditId])
+}
+
+model Purchase {
+  id                String   @id @default(cuid())
+  listingId         String
+  listing           Listing  @relation(fields: [listingId], references: [id])
+  buyerId           String
+  buyer             User     @relation(fields: [buyerId], references: [id])
+  totalTons         Float
+  totalPrice        Float
+  currency          String   @default("USDC")
+  txHash            String?
+  retired           Boolean  @default(false)
+  retirementTxHash  String?
+  nftTokenId        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([buyerId])
+  @@index([listingId])
+}
+
+model JobLog {
+  id        String   @id @default(cuid())
+  jobId     String
+  queue     String
+  status    String
+  payload   Json
+  result    Json?
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([queue, status])
+}
