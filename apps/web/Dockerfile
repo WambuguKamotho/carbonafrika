@@ -1,26 +1,25 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine AS builder
 WORKDIR /app
-RUN npm install -g turbo
 
-FROM base AS builder
-COPY . .
-RUN turbo prune --scope=@carbonafrika/web --docker
+COPY package*.json turbo.json tsconfig.base.json ./
+COPY packages/types/package.json ./packages/types/
+COPY apps/web/package.json ./apps/web/
 
-FROM base AS installer
-COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/package-lock.json ./package-lock.json
 RUN npm ci
-COPY --from=builder /app/out/full/ .
-RUN npm run build --workspace=apps/web
+
+COPY packages/types/ ./packages/types/
+COPY apps/web/ ./apps/web/
+
+RUN npm run build --workspace=@carbonafrika/web
 
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-COPY --from=installer /app/apps/web/.next/standalone ./
-COPY --from=installer /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=installer /app/apps/web/public ./apps/web/public
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public/
 
 EXPOSE 3000
 CMD ["node", "apps/web/server.js"]

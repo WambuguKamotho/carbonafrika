@@ -1,23 +1,25 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine AS builder
 WORKDIR /app
-RUN npm install -g turbo
 
-FROM base AS builder
-COPY . .
-RUN turbo prune --scope=@carbonafrika/worker --docker
+COPY package*.json turbo.json tsconfig.base.json ./
+COPY packages/db/package.json ./packages/db/
+COPY packages/types/package.json ./packages/types/
+COPY apps/worker/package.json ./apps/worker/
 
-FROM base AS installer
-COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/package-lock.json ./package-lock.json
 RUN npm ci
-COPY --from=builder /app/out/full/ .
+
+COPY packages/ ./packages/
+COPY apps/worker/ ./apps/worker/
+
 RUN npx prisma generate --schema=packages/db/prisma/schema.prisma
-RUN npm run build --workspace=apps/worker
+RUN npm run build --workspace=@carbonafrika/worker
 
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=installer /app/apps/worker/dist ./dist
-COPY --from=installer /app/node_modules ./node_modules
-COPY --from=installer /app/packages ./packages
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/worker/dist ./dist
+
 CMD ["node", "dist/index.js"]
