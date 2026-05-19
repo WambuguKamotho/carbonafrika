@@ -1,17 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-  }
-
   * {
-    @apply box-border;
+    box-sizing: border-box;
   }
 
   html {
@@ -20,12 +13,12 @@
 
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 
 @layer components {
-  /* ── Buttons ── */
+  /* Buttons */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2
            bg-forest-600 hover:bg-forest-700 active:bg-forest-800
@@ -36,19 +29,13 @@
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2
-           bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-100
+           bg-white border border-gray-200 hover:bg-gray-50
            text-gray-800 font-semibold px-5 py-2.5 rounded-xl
            transition-all duration-150 shadow-sm
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2
-           hover:bg-gray-100 text-gray-700 font-medium px-4 py-2 rounded-lg
-           transition-all duration-150;
-  }
-
-  /* ── Inputs ── */
+  /* Inputs */
   .input {
     @apply w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm
            text-gray-900 placeholder-gray-400
@@ -56,56 +43,24 @@
            transition-all duration-150;
   }
 
-  .input-error {
-    @apply input border-red-400 focus:ring-red-400/30 focus:border-red-400;
-  }
-
   .label {
     @apply block text-sm font-medium text-gray-700 mb-1.5;
   }
 
-  /* ── Cards ── */
+  /* Cards */
   .card {
     @apply bg-white rounded-2xl border border-gray-100 shadow-card p-6;
   }
 
   .card-hover {
-    @apply card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 cursor-pointer;
+    @apply card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200;
   }
 
-  /* ── Badges ── */
-  .badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
-  }
-  .badge-green  { @apply badge bg-forest-100 text-forest-800 ring-1 ring-forest-200; }
-  .badge-yellow { @apply badge bg-savanna-100 text-savanna-800 ring-1 ring-savanna-200; }
-  .badge-red    { @apply badge bg-red-100 text-red-700 ring-1 ring-red-200; }
-  .badge-gray   { @apply badge bg-gray-100 text-gray-600 ring-1 ring-gray-200; }
-  .badge-blue   { @apply badge bg-blue-100 text-blue-700 ring-1 ring-blue-200; }
-
-  /* ── Page section ── */
-  .section {
-    @apply py-20 px-4;
-  }
-
-  .container {
-    @apply max-w-6xl mx-auto;
-  }
-
-  /* ── Stat card ── */
-  .stat-card {
-    @apply card flex flex-col gap-1;
-  }
-
-  /* ── Divider ── */
-  .divider {
-    @apply relative my-6;
-  }
-  .divider::before {
-    content: '';
-    @apply absolute inset-0 flex items-center border-t border-gray-200;
-  }
-  .divider span {
-    @apply relative bg-white px-3 text-xs text-gray-400 mx-auto;
-  }
+  /* Badges */
+  .badge        { @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold; }
+  .badge-green  { @apply badge bg-forest-100 text-forest-800; }
+  .badge-yellow { @apply badge bg-savanna-100 text-savanna-800; }
+  .badge-red    { @apply badge bg-red-100 text-red-700; }
+  .badge-gray   { @apply badge bg-gray-100 text-gray-600; }
+  .badge-blue   { @apply badge bg-blue-100 text-blue-700; }
 }
