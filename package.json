@@ -16,6 +16,7 @@
     "db:push": "turbo run db:push"
   },
   "devDependencies": {
+    "prisma": "^5.13.0",
     "turbo": "^2.0.0",
     "typescript": "^5.4.5",
     "prettier": "^3.2.5"
@@ -23,5 +24,5 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "packageManager": "npm@10.7.0"
+  "packageManager": "npm@11.7.0"
 }

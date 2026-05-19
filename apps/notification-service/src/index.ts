@@ -9,7 +9,7 @@ import { templates } from "./templates";
 
 const app = express();
 const PORT = process.env.NOTIFICATION_PORT || 3005;
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const connection = { url: process.env.REDIS_URL! };
 
 app.use(helmet());
@@ -39,6 +39,11 @@ const notificationWorker = new Worker(
       const tmpl = templates[template];
       if (!tmpl) {
         console.warn(`[notification] Unknown template: ${template}`);
+        return;
+      }
+
+      if (!resend) {
+        console.log(`[notification] No RESEND_API_KEY — skipping email to ${user.email} (${template})`);
         return;
       }
 

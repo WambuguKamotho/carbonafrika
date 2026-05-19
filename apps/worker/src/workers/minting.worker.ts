@@ -7,7 +7,7 @@ export function startMintingWorker(connection: { url: string }) {
   const worker = new Worker<MintingJobPayload>(
     "minting",
     async (job: Job<MintingJobPayload>) => {
-      const { projectId, verificationId, carbonTons, ownerWallet } = job.data;
+      const { projectId, carbonTons, ownerWallet } = job.data;
 
       console.log(`[minting] Minting ${carbonTons} credits for project ${projectId}`);
 
