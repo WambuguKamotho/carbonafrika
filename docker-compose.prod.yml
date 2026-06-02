@@ -1,20 +1,130 @@
-# Production deploy — run with:  docker compose -f docker-compose.prod.yml up -d --build
+# Production stack for kabon.africa — full Phase 2.
+#   docker compose -f docker-compose.prod.yml up -d --build
 #
-# Phase 1 (now): kabon.africa website only — Next.js web behind Caddy (auto HTTPS).
-# Phase 2 (later): add gateway + the 5 services + worker + notification, and bring
-# Postgres/Redis from docker-compose.yml into this file (or a shared override).
+# Networking model: Caddy is the ONLY container that binds host ports (80/443).
+# Every other container is on the private default Docker network and is reached
+# by service name (e.g. http://auth-service:3001) — never from the internet.
+# This is why the ufw rules only need 22/80/443.
+#
+# Config & secrets come from ./.env (gitignored). `env_file: .env` hands the
+# whole file to each service; it uses the vars it needs and ignores the rest.
 
 services:
+  # ── Stateful tier (persistent volumes so data survives restarts) ──────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-carbonafrika}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-carbonafrika}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-carbonafrika}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]   # persist BullMQ queues
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── HTTP microservices (internal only; reached via the gateway) ───────────
+  auth-service:
+    build: { context: ., dockerfile: apps/auth-service/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    expose: ["3001"]
+
+  project-service:
+    build: { context: ., dockerfile: apps/project-service/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+    expose: ["3002"]
+
+  marketplace-service:
+    build: { context: ., dockerfile: apps/marketplace-service/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+    expose: ["3003"]
+
+  verification-service:
+    build: { context: ., dockerfile: apps/verification-service/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+    expose: ["3004"]
+
+  iot-service:
+    build: { context: ., dockerfile: apps/iot-service/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+    expose: ["3005"]
+
+  # ── Background workers (BullMQ; no HTTP port) ─────────────────────────────
+  notification-service:
+    build: { context: ., dockerfile: apps/notification-service/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+
+  worker:
+    build: { context: ., dockerfile: apps/worker/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+
+  # ── Public API entrypoint (api.kabon.africa → here) ───────────────────────
+  gateway:
+    build: { context: ., dockerfile: apps/gateway/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - auth-service
+      - project-service
+      - marketplace-service
+      - verification-service
+      - iot-service
+    expose: ["8080"]
+
+  # ── Web app (kabon.africa). NEXT_PUBLIC_* are baked at build time. ────────
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.kabon.africa}
+        NEXT_PUBLIC_POLYGON_CHAIN_ID: ${NEXT_PUBLIC_POLYGON_CHAIN_ID:-80002}
+        NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID:-}
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-    expose:
-      - "3000"          # internal only; Caddy terminates TLS and proxies in
+    expose: ["3000"]
 
+  # ── Edge: TLS termination + routing (the only public container) ───────────
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -23,11 +133,14 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data       # persists issued TLS certificates across restarts
+      - caddy_data:/data            # persists issued TLS certificates
       - caddy_config:/config
     depends_on:
       - web
+      - gateway
 
 volumes:
+  postgres_data:
+  redis_data:
   caddy_data:
   caddy_config:

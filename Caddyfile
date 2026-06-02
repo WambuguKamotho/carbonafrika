@@ -15,8 +15,8 @@ kabon.africa {
 	reverse_proxy web:3000
 }
 
-# Phase 2: uncomment once the gateway is in docker-compose.prod.yml
-# api.kabon.africa {
-# 	encode gzip
-# 	reverse_proxy gateway:8080
-# }
+# Public API — fans out to the microservices via the Express gateway.
+api.kabon.africa {
+	encode gzip
+	reverse_proxy gateway:8080
+}

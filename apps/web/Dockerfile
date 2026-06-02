@@ -24,6 +24,15 @@ RUN npm install
 COPY --from=pruner /app/out/full/ .
 # `turbo prune` omits root config files; web's tsconfig.json extends this one.
 COPY --from=pruner /app/tsconfig.base.json ./tsconfig.base.json
+# NEXT_PUBLIC_* are inlined into the client bundle at build time, so they must
+# be present here (the runtime .env is too late and is dockerignored anyway).
+# Passed from docker-compose's `build.args`.
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_POLYGON_CHAIN_ID
+ARG NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_POLYGON_CHAIN_ID=$NEXT_PUBLIC_POLYGON_CHAIN_ID \
+    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=$NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 RUN turbo run build --filter=@carbonafrika/web
 RUN rm -rf apps/web/.next/cache
 
