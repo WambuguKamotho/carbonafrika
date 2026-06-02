@@ -22,6 +22,8 @@ COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/package-lock.json ./package-lock.json
 RUN npm install
 COPY --from=pruner /app/out/full/ .
+# `turbo prune` omits root config files; web's tsconfig.json extends this one.
+COPY --from=pruner /app/tsconfig.base.json ./tsconfig.base.json
 RUN turbo run build --filter=@carbonafrika/web
 RUN rm -rf apps/web/.next/cache
 
