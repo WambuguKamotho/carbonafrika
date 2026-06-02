@@ -9,10 +9,16 @@ www.kabon.africa {
 	redir https://kabon.africa{uri} permanent
 }
 
-# The website
+# The website. API calls (relative /api/* from the browser) are routed to the
+# gateway so they're same-origin (no CORS); everything else hits the Next.js app.
 kabon.africa {
 	encode gzip
-	reverse_proxy web:3000
+	handle /api/* {
+		reverse_proxy gateway:8080
+	}
+	handle {
+		reverse_proxy web:3000
+	}
 }
 
 # Public API — fans out to the microservices via the Express gateway.
