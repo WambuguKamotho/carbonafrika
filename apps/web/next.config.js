@@ -40,9 +40,11 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
+              // Google Fonts (Inter) stylesheet + Leaflet CSS from unpkg.
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
               "img-src 'self' data: blob: https:",
-              "font-src 'self' data:",
+              // Google Fonts serves the actual font files from fonts.gstatic.com.
+              "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' https: wss:",
               "frame-ancestors 'none'",
               "object-src 'none'",
