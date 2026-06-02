@@ -1,0 +1,33 @@
+# Production deploy — run with:  docker compose -f docker-compose.prod.yml up -d --build
+#
+# Phase 1 (now): kabon.africa website only — Next.js web behind Caddy (auto HTTPS).
+# Phase 2 (later): add gateway + the 5 services + worker + notification, and bring
+# Postgres/Redis from docker-compose.yml into this file (or a shared override).
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    expose:
+      - "3000"          # internal only; Caddy terminates TLS and proxies in
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data       # persists issued TLS certificates across restarts
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:

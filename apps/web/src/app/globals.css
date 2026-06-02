@@ -47,6 +47,11 @@
     @apply block text-sm font-medium text-gray-700 mb-1.5;
   }
 
+  /* Page sections */
+  .section {
+    @apply py-20 px-4 sm:px-6 lg:px-8 md:py-28;
+  }
+
   /* Cards */
   .card {
     @apply bg-white rounded-2xl border border-gray-100 shadow-card p-6;
@@ -63,4 +68,35 @@
   .badge-red    { @apply badge bg-red-100 text-red-700; }
   .badge-gray   { @apply badge bg-gray-100 text-gray-600; }
   .badge-blue   { @apply badge bg-blue-100 text-blue-700; }
+  .badge-orange { @apply badge bg-orange-100 text-orange-700; }
+}
+
+@media print {
+  @page {
+    margin: 0.5in;
+    size: A4 portrait;
+  }
+
+  /*
+   * Certificate clone (#cert-print-copy) is appended to <body> by the
+   * handlePrint() function below, then removed after printing.
+   * body.cert-printing hides every other body child so only the
+   * certificate renders — no modal wrappers contributing page height.
+   */
+  body.cert-printing > *:not(#cert-print-copy) {
+    display: none !important;
+  }
+
+  #cert-print-copy {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* Force colour backgrounds to print without "Background graphics" toggle */
+  #cert-print-copy,
+  #cert-print-copy * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }

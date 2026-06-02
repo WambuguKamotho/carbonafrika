@@ -8,7 +8,11 @@ import { prisma } from "@carbonafrika/db";
 import { templates } from "./templates";
 
 const app = express();
-const PORT = process.env.NOTIFICATION_PORT || 3005;
+// 3007 to avoid colliding with iot-service (3005) and worker (3006).
+// notification-service is queue-driven and isn't fronted by the Next.js
+// rewrites, so the exact port here doesn't matter — it just needs to be
+// unique on the host.
+const PORT = process.env.NOTIFICATION_PORT || 3007;
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const connection = { url: process.env.REDIS_URL! };
 
@@ -57,15 +61,23 @@ const notificationWorker = new Worker(
       console.log(`[notification] Email sent to ${user.email} (${template})`);
     }
   },
-  { connection, concurrency: 10 }
+  { connection, concurrency: 10, drainDelay: 30000, stalledInterval: 30000 }
 );
 
 notificationWorker.on("failed", (job, err) => {
   console.error(`[notification] Job ${job?.id} failed:`, err.message);
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`notification-service running on port ${PORT}`);
+});
+
+server.on("error", (err: NodeJS.ErrnoException) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`[notification-service] Port ${PORT} already in use — exiting cleanly for restart`);
+    process.exit(1);
+  }
+  throw err;
 });
 
 const shutdown = async () => {

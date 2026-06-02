@@ -1,4 +1,4 @@
-export type UserRole = "LANDOWNER" | "BUYER" | "VERIFIER" | "ADMIN";
+export type UserRole = "LANDOWNER" | "BUYER" | "VERIFIER" | "ADMIN" | "COMMUNITY_PARTNER" | "VIEWER";
 export type LandType =
   | "FOREST"
   | "SAVANNA"
@@ -85,3 +85,5 @@ export interface NotificationPayload {
   template: string;
   data: Record<string, unknown>;
 }
+
+export { redisConnectionOptions } from "./redis";

@@ -15,9 +15,19 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     return;
   }
   try {
-    req.user = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as JwtPayload;
+    req.user = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!, { algorithms: ["HS256"] }) as JwtPayload;
     next();
   } catch {
     res.status(401).json({ success: false, error: "Invalid token" });
   }
+}
+
+export function requireRole(...roles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      res.status(403).json({ success: false, error: "Forbidden" });
+      return;
+    }
+    next();
+  };
 }

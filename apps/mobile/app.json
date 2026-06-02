@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Kabon.Africa",
+    "slug": "kabon-africa",
+    "scheme": "kabon",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#052e16"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "africa.kabon.app"
+    },
+    "android": {
+      "package": "africa.kabon.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#052e16"
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Kabon uses your location to place your project on the map when you register it."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kabon uses your photos to attach evidence images to your project.",
+          "cameraPermission": "Kabon uses your camera to capture project evidence photos."
+        }
+      ],
+      "expo-notifications"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4b784722-31c9-4452-9d9c-f9709a0df990"
+      },
+      "router": {
+        "origin": false
+      }
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

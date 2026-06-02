@@ -1,0 +1,15 @@
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/.expo
+**/coverage
+.git
+.gitignore
+**/*.log
+# Never bake dev secrets into an image — env comes from compose / the host
+.env
+**/.env.local
+# Mobile native build dirs (not needed to build the web app)
+apps/mobile/android
+apps/mobile/ios

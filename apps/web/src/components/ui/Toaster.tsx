@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, createContext, useContext, useCallback } from "react";
+import { useState, createContext, useContext, useCallback } from "react";
 import { X } from "lucide-react";
 
 interface Toast {

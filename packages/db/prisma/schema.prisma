@@ -12,6 +12,15 @@ enum UserRole {
   BUYER
   VERIFIER
   ADMIN
+  COMMUNITY_PARTNER
+  // Read-only access to the admin UI — for investors, press, auditors.
+  // All admin GET endpoints are accessible; mutating endpoints reject VIEWER.
+  VIEWER
+}
+
+enum ProjectType {
+  LAND_RESTORATION
+  CLEAN_ENERGY
 }
 
 enum LandType {
@@ -21,6 +30,23 @@ enum LandType {
   FARMLAND
   WETLAND
   MANGROVE
+}
+
+enum EnergyType {
+  BIOGAS
+  SOLAR_PV
+  BIOCHARCOAL
+  COOKSTOVES
+  MICRO_HYDRO
+  WIND
+}
+
+enum DeviceType {
+  ENERGY_METER      // kWh output — solar, biogas, wind, hydro
+  WEATHER_STATION   // temperature, humidity, rainfall
+  SOIL_SENSOR       // moisture, temperature, carbon proxy
+  FLOW_METER        // biogas flow rate m³/hr
+  FUEL_SENSOR       // fuel consumption for cookstoves
 }
 
 enum ProjectStatus {
@@ -52,6 +78,18 @@ enum ListingStatus {
   CANCELLED
 }
 
+enum SettlementStatus {
+  PENDING        // Purchase row created, awaiting on-chain buyer payment
+  COLLECTING     // transferFrom(buyer → treasury) submitted, waiting confirmations
+  COLLECTED      // Buyer funds confirmed in treasury, awaiting credit delivery
+  DELIVERED      // Credits delivered to buyer; auto-release timer started
+  RELEASED       // Seller paid out — final happy state
+  DISPUTED       // Admin intervention required
+  REFUNDED       // Funds returned to buyer
+  FAILED         // Terminal failure (transient errors retry within COLLECTING)
+  SETTLED        // Legacy — kept for back-compat with pre-escrow rows; treat as RELEASED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String?   @unique
@@ -64,13 +102,49 @@ model User {
   country       String?
   bio           String?
   avatarUrl     String?
-  kycVerified   Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  kycVerified         Boolean   @default(false)
+  // When the user clicked "Submit for KYC" — admin picks these up from a queue.
+  // Cleared (set null) when admin verifies (kycVerified flips true) or rejects.
+  kycRequestedAt      DateTime?
+  kycSubmissionNote   String?
+  resetToken       String?
+  resetTokenExpiry DateTime?
 
-  projects      Project[]
-  purchases     Purchase[]
-  verifications Verification[]
+  // Sectors a VERIFIER is authorised to assess. Empty = all sectors (back-compat).
+  // Enforced when a verification is assigned, so a clean-energy reviewer can't
+  // take a land-restoration project and vice-versa.
+  verifierScopes   ProjectType[] @default([])
+
+  // Expo push tokens — one per device the user has logged in from. The
+  // notification worker pushes to all of them alongside email.
+  pushTokens       String[]      @default([])
+
+  // Buyers don't self-register; admin creates the account from an approved
+  // BuyerInquiry, generates this one-time invite token, and emails it as a magic
+  // link. The buyer opens the link, sets a password, and the token is cleared.
+  inviteToken         String?   @unique
+  inviteTokenExpiry   DateTime?
+
+  // Bank payout details — collected for the future fiat phase
+  // (Kabon.Africa as intermediary: buyer wires to platform → platform wires to seller)
+  bankAccountName  String?
+  bankName         String?
+  bankAccountNumber String?
+  bankIban         String?
+  bankSwiftBic     String?
+  bankCountry      String?
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  projects           Project[]
+  purchases          Purchase[]
+  verifications      Verification[]
+  projectComments    ProjectComment[]   @relation("ProjectComments")
+  partneredProjects  Project[]          @relation("PartneredProjects")
+  partnerEarnings    PartnerEarning[]
+  resaleRequests     ResaleRequest[]
+  resaleListings     Listing[]          @relation("ResaleListings")
 
   @@index([walletAddress])
   @@index([email])
@@ -82,27 +156,242 @@ model Project {
   owner            User          @relation(fields: [ownerId], references: [id])
   title            String
   description      String
-  landType         LandType
+
+  // Project category — land restoration or clean energy
+  projectType      ProjectType   @default(LAND_RESTORATION)
+
+  // Land restoration fields (null for energy projects)
+  landType         LandType?
+
+  // Clean energy fields (null for land projects)
+  energyType       EnergyType?
+  capacityKw       Float?        // installed capacity (solar kWp, biogas kW, etc.)
+  householdsServed Int?          // number of households benefitting
+  fuelDisplacedKgY Float?        // kg of solid fuel displaced per year (cookstoves/biochar)
+
+  // Kabon Carbon Standard methodology — describes how carbon impact is
+  // calculated for this project type. Optional so legacy rows still work; new
+  // projects are required to pick one in the UI/API.
+  methodologyCode  String?
+  methodology      Methodology?  @relation(fields: [methodologyCode], references: [code])
+
+  // Community partner who brought this project to Kabon. Royalty % is locked
+  // here at attribution time so platform-wide rate changes don't retroactively
+  // affect already-registered projects. Comes from the seller's share of every
+  // sale.
+  partnerId             String?
+  partner               User?    @relation("PartneredProjects", fields: [partnerId], references: [id])
+  partnerRoyaltyPercent Float    @default(0)   // 0 means no partner attached
+
   country          String
   region           String?
   lat              Float
   lng              Float
-  hectares         Float
-  estimatedTons    Float
+  boundary         Json?         // GeoJSON polygon
+  hectares         Float         // land area OR project footprint
+  estimatedTons    Float         // estimated CO2e per year
   status           ProjectStatus @default(PENDING)
   ipfsDocumentHash String?
   satelliteImageUrl String?
+  mediaUrls         String[]
   onChainId        String?       @unique
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
+  // Admin approval workflow
+  // Set when admin reviews the project at signup. PENDING projects are
+  // invisible to the public; UNDER_REVIEW means admin approved and the
+  // verifier flow has been started.
+  adminReviewedById String?
+  adminReviewedAt   DateTime?
+  rejectionReason   String?
+
   verifications    Verification[]
   credits          CarbonCredit[]
+  satellites       SatelliteSnapshot[]
+  devices          IoTDevice[]
+  deviceReadings   DeviceReading[]
+  comments         ProjectComment[]
+  monitoringPeriods MonitoringPeriod[]
 
   @@index([ownerId])
   @@index([status])
   @@index([landType])
+  @@index([energyType])
+  @@index([projectType])
   @@index([country])
+  @@index([methodologyCode])
+  @@index([partnerId])
+}
+
+// ── Kabon Carbon Standard methodology library ───────────────────────────────
+// A curated set of methodologies our projects can be assessed against. Modelled
+// on the VCS / Plan Vivo methodology patterns but adapted for the African
+// smallholder and community-scale projects we serve. Each methodology defines
+// the buffer reserve % and the monitoring cadence we expect.
+model Methodology {
+  // Stable short code — used in URLs, project records, certificates.
+  // Format: "KCS-XXX-NN" (Kabon Carbon Standard — category — number).
+  code               String      @id
+  name               String
+  // Project family this methodology applies to (informational, mirrors ProjectType).
+  category           String      // "Land Restoration" | "Clean Energy"
+  // Optional narrower scope; e.g. "Afforestation, Reforestation"
+  scope              String?
+  summary            String      // one-paragraph public-facing description
+  bufferPercent      Float       @default(15)   // % of every issuance held in buffer pool
+  // How often credits should be re-verified after the initial assessment.
+  // Stored as months so 0 means "one-shot, no re-verification required."
+  monitoringPeriodMonths Int     @default(12)
+  // Public URL to a longer write-up. Optional — if null, /standard/methodology/[code]
+  // serves a default page from this row.
+  documentUrl        String?
+  active             Boolean     @default(true)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  projects           Project[]
+}
+
+// Platform-wide buffer pool. Singleton: one row, accumulates contributions from
+// every credit issuance to insure against reversal events (fire, conversion,
+// project failure). Admin can debit from this pool to retire backfill credits
+// when a reversal occurs.
+model BufferPool {
+  id            String   @id @default(cuid())
+  totalReserved Float    @default(0)   // running balance in tonnes
+  totalDrawn    Float    @default(0)   // tonnes already used for reversals
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  contributions BufferContribution[]
+}
+
+// Audit trail — one row per pool movement. Issuance rows (reason="issuance")
+// link to the credit whose buffer slice funded the pool. Drawdown rows
+// (reason="reversal_backfill") record tonnes pulled OUT to cover a reversed
+// project; they carry the projectId and an admin note, and creditId is null.
+// Sign convention: tonnes is always positive — `reason` tells you the direction.
+model BufferContribution {
+  id          String   @id @default(cuid())
+  poolId      String
+  pool        BufferPool    @relation(fields: [poolId], references: [id])
+  creditId    String?
+  credit      CarbonCredit? @relation(fields: [creditId], references: [id])
+  projectId   String?
+  tonnes      Float
+  reason      String   @default("issuance")  // "issuance" | "manual" | "reversal_backfill"
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([poolId, createdAt])
+  @@index([creditId])
+  @@index([projectId])
+}
+
+// Monitoring cycle — a fixed window during which the project's impact is
+// measured for re-verification. Optional in phase A (we may not do re-verification
+// for early projects) but the schema is here so we can wire it up later without
+// a migration.
+model MonitoringPeriod {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  startsAt    DateTime
+  endsAt      DateTime
+  status      String   @default("OPEN")    // "OPEN" | "SUBMITTED" | "VERIFIED" | "REJECTED"
+  reportIpfsHash String?
+  verifiedTons Float?
+  verifiedAt  DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([projectId, startsAt])
+}
+
+// Back-and-forth notes between admin and landowner during project review.
+// Visible only to the project owner and admins.
+model ProjectComment {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("ProjectComments", fields: [authorId], references: [id])
+  body      String
+  // Free-form tag so the UI can render system events differently
+  // (e.g. "comment", "approval", "rejection", "status_change").
+  kind      String   @default("comment")
+  createdAt DateTime @default(now())
+
+  @@index([projectId, createdAt])
+}
+
+model IoTDevice {
+  id          String     @id @default(cuid())
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id])
+  deviceKey   String     @unique   // API key stored on the physical device
+  deviceType  DeviceType
+  label       String?              // human label e.g. "Main inverter", "Rain gauge #2"
+  lat         Float?               // device GPS (may differ from project centre)
+  lng         Float?
+  active      Boolean    @default(true)
+  lastSeenAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  readings    DeviceReading[]
+
+  @@index([projectId])
+  @@index([deviceKey])
+}
+
+model DeviceReading {
+  id        String    @id @default(cuid())
+  deviceId  String
+  device    IoTDevice @relation(fields: [deviceId], references: [id])
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id])
+
+  // Energy metrics
+  kwhGenerated     Float?   // kWh produced since last reading
+  co2AvoidedKg     Float?   // kg CO2e avoided (calculated server-side)
+  householdsServed Int?     // active households at time of reading
+  fuelDisplacedKg  Float?   // kg solid fuel displaced (cookstoves/biochar)
+
+  // Climate / environmental metrics
+  temperatureC     Float?   // ambient temperature °C
+  humidityPct      Float?   // relative humidity %
+  soilMoisturePct  Float?   // volumetric soil moisture %
+  rainfallMm       Float?   // rainfall since last reading mm
+  windSpeedMs      Float?   // wind speed m/s
+
+  // Biogas specific
+  gasFlowM3h       Float?   // gas flow rate m³/hr
+  pressureKpa      Float?   // digester pressure kPa
+
+  recordedAt  DateTime          // timestamp from the device clock
+  receivedAt  DateTime @default(now())  // timestamp when server received it
+
+  @@index([projectId, recordedAt])
+  @@index([deviceId, recordedAt])
+}
+
+model SatelliteSnapshot {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  ndvi        Float
+  cloudCover  Float
+  capturedAt  DateTime
+  fetchedAt   DateTime @default(now())
+  imageUrl    String?
+  source      String   @default("sentinel-2-l2a")
+  bbox        Json?
+
+  @@index([projectId])
+  @@index([capturedAt])
 }
 
 model Verification {
@@ -116,6 +405,14 @@ model Verification {
   carbonTons  Float?
   txHash      String?
   reportIpfsHash String?
+
+  // Maker-checker: a verifier APPROVES (the maker), but credits are only minted
+  // when an admin issues them (the checker). Until issuance, an APPROVED
+  // verification has creditsIssued=false and no CarbonCredit exists yet.
+  creditsIssued Boolean          @default(false)
+  issuedById    String?
+  issuedAt      DateTime?
+
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
@@ -128,13 +425,16 @@ model CarbonCredit {
   projectId   String
   project     Project      @relation(fields: [projectId], references: [id])
   tokenId     String       @unique
-  amount      Float
+  amount      Float        // net tonnes available for sale (excludes buffer)
+  bufferTons  Float        @default(0)   // tonnes diverted to buffer pool at issuance
+  vintageYear Int?
   status      CreditStatus @default(AVAILABLE)
   mintTxHash  String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  listings    Listing[]
+  listings           Listing[]
+  bufferContributions BufferContribution[]
 
   @@index([projectId])
   @@index([status])
@@ -149,6 +449,17 @@ model Listing {
   currency    String        @default("USDC")
   status      ListingStatus @default(ACTIVE)
   txHash      String?
+
+  // Resale support. On a primary listing these are null/false and the seller is
+  // the project owner. When an admin approves a buyer's resale request, a new
+  // Listing is created against the same credit with isResale=true and
+  // sellerUserId set to the reselling buyer — the settlement worker pays that
+  // user instead of the project owner.
+  isResale           Boolean   @default(false)
+  sellerUserId       String?
+  seller             User?     @relation("ResaleListings", fields: [sellerUserId], references: [id])
+  resaleOfPurchaseId String?
+
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -156,26 +467,265 @@ model Listing {
 
   @@index([status])
   @@index([creditId])
+  @@index([sellerUserId])
 }
 
 model Purchase {
-  id                String   @id @default(cuid())
+  id                String           @id @default(cuid())
   listingId         String
-  listing           Listing  @relation(fields: [listingId], references: [id])
+  listing           Listing          @relation(fields: [listingId], references: [id])
   buyerId           String
-  buyer             User     @relation(fields: [buyerId], references: [id])
+  buyer             User             @relation(fields: [buyerId], references: [id])
   totalTons         Float
   totalPrice        Float
-  currency          String   @default("USDC")
+  feeAmount         Float?
+  buyerTotal        Float?
+  currency          String           @default("USDC")
+
+  // On-chain transaction hashes (collect = buyer→treasury, deliver = credit transfer, tx = seller payout)
   txHash            String?
-  retired           Boolean  @default(false)
+  collectTxHash     String?
+  deliverTxHash     String?
+
+  // Escrow state machine — drives the settlement worker
+  settlementStatus  SettlementStatus @default(PENDING)
+  settlementError   String?
+  collectedAt       DateTime?
+  deliveredAt       DateTime?
+  releasedAt        DateTime?
+  refundedAt        DateTime?
+  disputeOpenedAt   DateTime?
+  disputeReason     String?
+  buyerConfirmedAt  DateTime?       // buyer pressed "Confirm receipt"; can short-circuit auto-release
+  autoReleaseAt     DateTime?       // set when status flips to DELIVERED — worker releases after this
+
+  retired           Boolean          @default(false)
   retirementTxHash  String?
   nftTokenId        String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  retirementReason  String?
+  retirementNote    String?
+  retiredAt         DateTime?
+
+  // Resale — set true once an admin approves a resale request for this purchase
+  // and creates the relisting. A resold purchase can no longer be retired by the
+  // original buyer; the new buyer's fresh Purchase row carries the credits forward.
+  resold            Boolean          @default(false)
+  resaleRequests    ResaleRequest[]
+
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   @@index([buyerId])
   @@index([listingId])
+  @@index([settlementStatus])
+  @@index([autoReleaseAt])
+}
+
+// ── Secondary market (buyer resale) ─────────────────────────────────────────
+// Buyers cannot self-list. To resell credits they own, they file a
+// ResaleRequest; an admin reviews it (re-pricing if needed) and, on approval,
+// a fresh Listing is created against the same credit with the reselling buyer
+// as the seller. This keeps Kabon as the intermediary on every secondary trade
+// and keeps prices coherent. Mirrors the BuyerInquiry / PartnerApplication
+// review pattern.
+enum ResaleRequestStatus {
+  REQUESTED   // buyer submitted, awaiting admin review
+  APPROVED    // admin approved → relisting created (listingId set)
+  REJECTED    // admin declined
+  CANCELLED   // buyer withdrew before review
+}
+
+model ResaleRequest {
+  id                  String              @id @default(cuid())
+  purchaseId          String
+  purchase            Purchase            @relation(fields: [purchaseId], references: [id])
+  buyerId             String              // the reselling buyer (current owner)
+  buyer               User                @relation(fields: [buyerId], references: [id])
+  tons                Float
+  proposedPricePerTon Float
+  approvedPricePerTon Float?              // admin may override at approval
+  currency            String              @default("USDC")
+  status              ResaleRequestStatus @default(REQUESTED)
+  buyerNote           String?
+  adminNote           String?
+  rejectionReason     String?
+  reviewedById        String?
+  reviewedAt          DateTime?
+  listingId           String?             @unique  // set when approved → relisted
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([status, createdAt])
+  @@index([buyerId])
+  @@index([purchaseId])
+}
+
+// Inbound buyer access requests. Public-facing form lands here; admin reviews
+// each one, runs KYC, and either approves (creates a User + sends invite email)
+// or rejects with a reason.
+enum BuyerInquiryStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model BuyerInquiry {
+  id              String             @id @default(cuid())
+  companyName     String
+  contactName     String
+  email           String
+  phone           String?
+  country         String?
+  estimatedAnnualTons  Float?         // self-reported volume
+  useCase         String?            // ESG reporting, product offset, retirement, etc.
+  message         String?
+  source          String?            // utm_source / landing page reference
+
+  status          BuyerInquiryStatus @default(PENDING)
+  reviewedById    String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  createdUserId   String?            @unique  // populated after approval
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+// Anonymous newsletter sign-ups. Separate from User because most subscribers
+// will never create a buyer account.
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String?  // where they signed up from (footer, landing, etc.)
+  createdAt DateTime @default(now())
+}
+
+// ── Community Partner programme ────────────────────────────────────────────
+// Local organizers (NGOs, extension officers, cooperative leads) apply via a
+// public form; admin reviews and approves, creating a COMMUNITY_PARTNER user.
+// Approved partners earn a royalty on every credit sale from projects they
+// bring to the platform — paid in USDC out of the seller's share.
+
+enum PartnerApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PartnerApplication {
+  id              String                   @id @default(cuid())
+  fullName        String
+  email           String
+  phone           String?
+  country         String
+  region          String?
+  organization    String?       // NGO, cooperative, extension office, etc.
+  yearsExperience Int?
+  communitiesServed String?     // free-form description of where they work
+  message         String?
+  source          String?
+  status          PartnerApplicationStatus @default(PENDING)
+  reviewedById    String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  createdUserId   String?                  @unique
+
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+// Audit-trail ledger for every payment due to a community partner. Rows are
+// written by:
+//   - admin approving a project (kind=ONBOARDING)
+//   - verifier approving the project's carbon assessment (kind=VERIFICATION)
+//   - settlement worker releasing a Purchase (kind=ROYALTY)
+//
+// Status flow: PENDING (accrued, owed) → PAID (USDC transferred). Phase A
+// keeps everything PENDING — we manually pay until the auto-payout cron is
+// built. Refunds reverse to status=REVERSED.
+enum PartnerEarningKind {
+  ONBOARDING
+  VERIFICATION
+  ROYALTY
+}
+
+enum PartnerEarningStatus {
+  PENDING
+  PAID
+  REVERSED
+}
+
+model PartnerEarning {
+  id          String              @id @default(cuid())
+  partnerId   String
+  partner     User                @relation(fields: [partnerId], references: [id])
+  projectId   String?
+  purchaseId  String?             // only set for ROYALTY rows
+  kind        PartnerEarningKind
+  amount      Float               // USDC (or platform currency)
+  currency    String              @default("USDC")
+  status      PartnerEarningStatus @default(PENDING)
+  paidAt      DateTime?
+  payoutTxHash String?
+  note        String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([partnerId, status])
+  @@index([projectId])
+  @@index([purchaseId])
+}
+
+// ── Blog ────────────────────────────────────────────────────────────────────
+// Public articles. Admin-authored via /admin/blog. Phase A is plaintext-markdown
+// in the body field; a future revision could split into a richer editor schema.
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model BlogPost {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  excerpt     String         // shown on /blog index cards
+  body        String         // markdown
+  coverUrl    String?        // hero image
+  tags        String[]       @default([])
+  authorName  String         // free-text — articles may have guest authors
+  authorRole  String?        // "Founder", "Field Lead", etc.
+  status      BlogPostStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([slug])
+}
+
+// Immutable trail of privileged actions — who did what, to which entity, when.
+// Written by admin + verifier + settlement flows. Read-only in the UI.
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?              // user who performed the action (null = system/worker)
+  actorRole   String?
+  action      String               // e.g. "user.role_change", "verification.issue", "buffer.drawdown"
+  targetType  String?              // "User" | "Project" | "Verification" | "Purchase" | ...
+  targetId    String?
+  summary     String?              // human-readable one-liner
+  metadata    Json?                // before/after or extra context
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  @@index([action, createdAt])
+  @@index([targetType, targetId])
+  @@index([actorId])
 }
 
 model JobLog {

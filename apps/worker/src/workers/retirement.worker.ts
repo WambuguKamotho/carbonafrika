@@ -26,7 +26,9 @@ export function startRetirementWorker(connection: { url: string }) {
         },
       });
 
-      if (!purchase || purchase.retired) return;
+      if (!purchase) return;
+      // retirementTxHash being set means the blockchain step already ran — skip to avoid double-burn
+      if (purchase.retirementTxHash) return;
       if (!purchase.buyer.walletAddress) throw new Error("Buyer has no wallet address");
 
       const tokenContract = getCarbonTokenContract();
@@ -55,15 +57,27 @@ export function startRetirementWorker(connection: { url: string }) {
       await prisma.purchase.update({
         where: { id: purchaseId },
         data: {
-          retired: true,
+          // retired was already set true by the endpoint — just add blockchain proof
           retirementTxHash: burnReceipt.hash,
           nftTokenId: nftTokenId.toString(),
         },
       });
 
+      // Phase C: if all purchases across all listings for this credit are retired, mark the credit RETIRED
+      const creditId = purchase.listing.creditId;
+      const openPurchases = await prisma.purchase.count({
+        where: { listing: { creditId }, retired: false },
+      });
+      if (openPurchases === 0) {
+        await prisma.carbonCredit.update({
+          where: { id: creditId },
+          data: { status: "RETIRED" },
+        });
+      }
+
       console.log(`[retirement] Purchase ${purchaseId} retired. NFT: ${nftTokenId}`);
     },
-    { connection, concurrency: 1 }
+    { connection, concurrency: 1, drainDelay: 30000, stalledInterval: 30000 }
   );
 
   worker.on("failed", (job, err) => {

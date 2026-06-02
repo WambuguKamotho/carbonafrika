@@ -15,12 +15,25 @@ export default function LoginPage() {
   const [walletLoading, setWalletLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Post-login landing per role. Keep in sync with /dashboard's role redirect
+  // and /redeem-invite's role redirect so all three entry points behave the same.
+  const redirectAfterLogin = (user: { role?: string }) => {
+    const next =
+      user?.role === "ADMIN"             ? "/admin"     :
+      user?.role === "VIEWER"            ? "/admin"     :  // viewer uses the admin UI in read-only mode
+      user?.role === "VERIFIER"          ? "/verifier"  :
+      user?.role === "BUYER"             ? "/portfolio" :
+      user?.role === "COMMUNITY_PARTNER" ? "/partner"   :
+                                            "/dashboard";  // LANDOWNER default
+    router.push(next);
+  };
+
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setError("");
     try {
-      await loginWithEmail(email, password);
-      router.push("/dashboard");
+      const { user } = await loginWithEmail(email, password);
+      redirectAfterLogin(user as { role?: string });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally { setLoading(false); }
@@ -30,8 +43,8 @@ export default function LoginPage() {
     setWalletLoading(true); setError("");
     try {
       const { address, signer } = await connectWallet();
-      await loginWithWallet(address, (msg) => signMessage(signer, msg));
-      router.push("/dashboard");
+      const { user } = await loginWithWallet(address, (msg) => signMessage(signer, msg));
+      redirectAfterLogin(user as { role?: string });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Wallet login failed");
     } finally { setWalletLoading(false); }
@@ -41,12 +54,20 @@ export default function LoginPage() {
     <div className="min-h-[100vh] flex">
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-forest-950 flex-col items-center justify-center p-12 relative overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600&q=80&auto=format&fit=crop"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-forest-950/85 via-forest-900/70 to-forest-950/90" />
         <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(ellipse at 30% 40%, rgb(22 101 52 / 0.5) 0%, transparent 60%)" }} />
         <div className="relative text-center">
           <div className="w-16 h-16 bg-forest-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-forest-900">
             <Leaf className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl font-black text-white mb-4">CarbonAfrika</h2>
+          <h2 className="text-3xl font-black text-white mb-4">Kabon.Africa</h2>
           <p className="text-forest-300 text-lg max-w-xs leading-relaxed">
             Every login is a step toward a greener, wealthier Africa.
           </p>
@@ -75,7 +96,7 @@ export default function LoginPage() {
               <div className="w-8 h-8 bg-forest-600 rounded-lg flex items-center justify-center">
                 <Leaf className="w-4 h-4 text-white" />
               </div>
-              CarbonAfrika
+              Kabon.Africa
             </Link>
           </div>
 
@@ -101,7 +122,7 @@ export default function LoginPage() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="label mb-0">Password</label>
-                  <button type="button" className="text-xs text-forest-600 hover:underline">Forgot password?</button>
+                  <Link href="/forgot-password" className="text-xs text-forest-600 hover:underline">Forgot password?</Link>
                 </div>
                 <div className="relative">
                   <input type={showPass ? "text" : "password"} value={password}

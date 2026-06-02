@@ -1,0 +1,22 @@
+# Caddy automatically obtains + renews Let's Encrypt TLS for these hostnames.
+# Change the email to a real inbox for cert-expiry notices.
+{
+	email tembomediaagency@gmail.com
+}
+
+# Redirect www → apex
+www.kabon.africa {
+	redir https://kabon.africa{uri} permanent
+}
+
+# The website
+kabon.africa {
+	encode gzip
+	reverse_proxy web:3000
+}
+
+# Phase 2: uncomment once the gateway is in docker-compose.prod.yml
+# api.kabon.africa {
+# 	encode gzip
+# 	reverse_proxy gateway:8080
+# }

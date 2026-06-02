@@ -5,18 +5,22 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy:mumbai": "hardhat run scripts/deploy.ts --network mumbai",
+    "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy",
     "deploy:polygon": "hardhat run scripts/deploy.ts --network polygon",
-    "verify": "hardhat verify"
+    "verify:amoy": "hardhat verify --network amoy",
+    "verify:polygon": "hardhat verify --network polygon"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
     "@types/node": "^20.12.12",
     "dotenv": "^16.4.5",
+    "ethers": "^6.12.1",
     "hardhat": "^2.22.3",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }
 }

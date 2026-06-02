@@ -1,0 +1,13 @@
+{
+  "network": "amoy",
+  "chainId": 80002,
+  "deployer": "0x4DF3dEc79317c9Efb853Ee5902eDe7cbBB4F5137",
+  "deployedAt": "2026-05-21T00:00:00.000Z",
+  "contracts": {
+    "mockUsdc": "0x9e440d5846911aC9D7f5E0989C64eA74a26D4F71",
+    "carbonToken": "0x19Db266b01A42CEcae590196aB263c0305D39209",
+    "projectRegistry": "0x694a0AA1BB645261aFAD6023a172f094a22323d7",
+    "marketplace": "",
+    "retirementCertificate": ""
+  }
+}

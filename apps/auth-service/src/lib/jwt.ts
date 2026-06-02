@@ -7,19 +7,20 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "15m";
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
 
 export function signAccessToken(payload: Omit<JwtPayload, "iat" | "exp">) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN, algorithm: "HS256" } as jwt.SignOptions);
 }
 
 export function signRefreshToken(payload: Omit<JwtPayload, "iat" | "exp">) {
   return jwt.sign(payload, JWT_REFRESH_SECRET, {
     expiresIn: JWT_REFRESH_EXPIRES_IN,
+    algorithm: "HS256",
   } as jwt.SignOptions);
 }
 
 export function verifyAccessToken(token: string): JwtPayload {
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] }) as JwtPayload;
 }
 
 export function verifyRefreshToken(token: string): JwtPayload {
-  return jwt.verify(token, JWT_REFRESH_SECRET) as JwtPayload;
+  return jwt.verify(token, JWT_REFRESH_SECRET, { algorithms: ["HS256"] }) as JwtPayload;
 }

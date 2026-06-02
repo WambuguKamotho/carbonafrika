@@ -1,13 +1,19 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
+// Must read from the SAME places lib/auth.ts writes the token:
+// sessionStorage (per-tab) with a session cookie fallback (cross-tab, same browser session).
+// Reading localStorage here is a bug — the token is never stored there, so every request
+// would go without Authorization and the 401 handler below would log the user straight out.
 function getToken() {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("ca_token");
+  return (
+    sessionStorage.getItem("ca_token") ??
+    document.cookie.match(/(?:^|;\s*)ca_token=([^;]+)/)?.[1] ??
+    null
+  );
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(path, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -16,9 +22,51 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
 
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
-  return json;
+  if (!res.ok) {
+    if (res.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("ca_token");
+      localStorage.removeItem("ca_user");
+      document.cookie = "ca_token=; path=/; max-age=0";
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+      throw new Error("Session expired");
+    }
+    let message = `HTTP ${res.status}`;
+    try {
+      const j = await res.json();
+      message = formatServerError(j) ?? message;
+    } catch { /* non-JSON body */ }
+    // Surface in dev so failures aren't invisible if the UI swallows the toast.
+    if (typeof window !== "undefined") console.error(`[api] ${path} → ${res.status}`, message);
+    throw new Error(message);
+  }
+  return res.json();
+}
+
+/**
+ * Normalise the variety of error shapes our backend hands back into a single
+ * human-readable string. Zod's `.flatten()` returns a structured object — we
+ * need to flatten that further so users see "methodologyCode: Required" instead
+ * of "[object Object]".
+ */
+function formatServerError(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const b = body as Record<string, unknown>;
+  // Server templates: { success: false, error: string | ZodFlattened, message?: string }
+  if (typeof b.message === "string") return b.message;
+  const err = b.error;
+  if (typeof err === "string") return err;
+  if (err && typeof err === "object") {
+    const e = err as { formErrors?: string[]; fieldErrors?: Record<string, string[]> };
+    const parts: string[] = [];
+    if (Array.isArray(e.formErrors)) parts.push(...e.formErrors);
+    if (e.fieldErrors) {
+      for (const [field, msgs] of Object.entries(e.fieldErrors)) {
+        if (Array.isArray(msgs) && msgs.length) parts.push(`${field}: ${msgs.join(", ")}`);
+      }
+    }
+    if (parts.length) return parts.join(" · ");
+  }
+  return null;
 }
 
 export const api = {
