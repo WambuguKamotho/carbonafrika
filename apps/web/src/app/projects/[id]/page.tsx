@@ -7,6 +7,7 @@ import { ArrowLeft, MapPin, Calendar, Leaf, BarChart3, Globe, User, Zap, Thermom
 import { getUser, getToken } from '@/lib/auth';
 import ProjectCommentThread from '@/components/projects/ProjectCommentThread';
 import { DynamicMapPicker } from '@/components/map/DynamicMapPicker';
+import { CreditClassBadges } from '@/lib/creditClass';
 import {
   BarChart, Bar, AreaChart, Area, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend,
@@ -517,6 +518,7 @@ export default function ProjectDetailPage() {
               </span>
             )}
           </div>
+          <CreditClassBadges project={project} className="mb-2" />
           <p className="text-white/70 text-sm">
             {project.country}{project.region ? `, ${project.region}` : ''} · {typeLabel}
             {isEnergy && project.capacityKw ? ` · ${project.capacityKw} kW` : ` · ${project.hectares.toLocaleString()} ha`}

@@ -8,6 +8,7 @@ import Link from "next/link";
 import RetirementIntentModal from "@/components/ui/RetirementIntentModal";
 import { getUser } from "@/lib/auth";
 import { connectWallet, approveUsdcForTreasury } from "@/lib/web3";
+import { CreditClassBadges } from "@/lib/creditClass";
 
 const TYPE_LABEL: Record<string, string> = {
   FOREST: "Forest", SAVANNA: "Savanna", GRASSLAND: "Grassland", FARMLAND: "Farmland",
@@ -265,11 +266,12 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
           <div className="md:col-span-2 space-y-6">
             <div>
               <h1 className="text-2xl font-black text-gray-900 mb-2">{project.title}</h1>
-              <div className="flex items-center gap-1.5 text-gray-500 text-sm mb-4">
+              <div className="flex items-center gap-1.5 text-gray-500 text-sm mb-3">
                 <MapPin className="w-4 h-4 flex-shrink-0" />
                 {project.country}{project.region ? `, ${project.region}` : ""}
                 <span className="ml-1 text-gray-400">· by {project.owner.name}</span>
               </div>
+              <CreditClassBadges project={project} className="mb-4" />
               <p className="text-gray-600 leading-relaxed">{project.description}</p>
             </div>
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
+import { CreditClassBadges } from "@/lib/creditClass";
 
 const TYPE_EMOJI: Record<string, string> = {
   FOREST: "🌳", SAVANNA: "🌿", GRASSLAND: "🌾", FARMLAND: "🌱", WETLAND: "💧", MANGROVE: "🌊",
@@ -88,7 +89,8 @@ export default function ProjectCard({ project }: { project: ProjectCardData }) {
           <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
           {project.country}{project.region ? `, ${project.region}` : ""}
         </div>
-        <div className="text-xs text-gray-400 mb-4">by {project.owner.name}</div>
+        <div className="text-xs text-gray-400 mb-3">by {project.owner.name}</div>
+        <CreditClassBadges project={project} className="mb-4" />
         <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
           <div className="text-sm">
             <span className="font-bold text-gray-900">

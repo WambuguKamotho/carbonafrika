@@ -4,6 +4,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { MapPin, Leaf, SlidersHorizontal, ArrowRight, TrendingUp } from "lucide-react";
 import { useState } from "react";
+import { CreditClassBadges } from "@/lib/creditClass";
 
 const typeColors: Record<string, string> = {
   FOREST: "badge-green", SAVANNA: "badge-yellow", GRASSLAND: "badge-green",
@@ -106,12 +107,13 @@ function ListingCard({ listing }: { listing: Listing }) {
           <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
           <span>{project.country}{project.region ? `, ${project.region}` : ""}</span>
         </div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <div className="text-xs text-gray-400">by {project.owner.name}</div>
           {vintageYear && (
             <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">{vintageYear}</span>
           )}
         </div>
+        <CreditClassBadges project={project} className="mb-4" />
 
         <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
           <div>
