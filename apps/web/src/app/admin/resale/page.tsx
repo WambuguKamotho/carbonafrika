@@ -332,7 +332,7 @@ function ResaleDrawer({
                   <div className="text-xs text-gray-400 font-mono truncate">Payout wallet: {request.buyer.walletAddress}</div>
                 )}
                 {!request.buyer.walletAddress && (
-                  <div className="text-xs text-amber-600">⚠ No payout wallet on file — seller can't be paid until they connect one.</div>
+                  <div className="text-xs text-amber-600">⚠ No payout wallet on file. Seller can't be paid until they connect one.</div>
                 )}
               </div>
 
@@ -365,7 +365,7 @@ function ResaleDrawer({
               {done && (
                 <div className="bg-forest-50 border border-forest-200 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center gap-2 text-forest-700 font-semibold text-sm">
-                    <CheckCircle className="w-4 h-4" /> Approved — relisted at ${done.pricePerTon.toFixed(2)}/t
+                    <CheckCircle className="w-4 h-4" /> Approved. Relisted at ${done.pricePerTon.toFixed(2)}/t
                   </div>
                   <p className="text-xs text-forest-800 leading-relaxed">
                     The credits are now live on the marketplace with {request.buyer.name} as the seller.
@@ -375,7 +375,7 @@ function ResaleDrawer({
                     View listing →
                   </a>
                   <button onClick={onResolved} className="block text-xs font-semibold text-forest-700 hover:underline">
-                    Done — back to queue
+                    Done, back to queue
                   </button>
                 </div>
               )}

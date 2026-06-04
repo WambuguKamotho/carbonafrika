@@ -28,7 +28,7 @@ export default function BetaBanner() {
         <span className="font-semibold uppercase tracking-wide">Beta</span>
         <p className="flex-1">
           This platform is in active development. Projects and data shown are for
-          demonstration purposes only — no real carbon credits are being sold yet.
+          demonstration purposes only. No real carbon credits are being sold yet.
         </p>
         <button
           type="button"

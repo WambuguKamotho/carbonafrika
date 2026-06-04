@@ -693,7 +693,7 @@ export default function AdminPage() {
 
               {newDeviceKey && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-                  <p className="text-sm font-semibold text-amber-800 mb-2">⚠️ Device registered! Copy the API key now — it will not be shown again.</p>
+                  <p className="text-sm font-semibold text-amber-800 mb-2">⚠️ Device registered! Copy the API key now. It will not be shown again.</p>
                   <div className="font-mono text-xs bg-white border border-amber-200 rounded-lg p-3 break-all select-all text-gray-800">{newDeviceKey}</div>
                   <p className="text-xs text-amber-600 mt-2">Flash this key into the device firmware as <code>X-Device-Key</code> header value.</p>
                 </div>

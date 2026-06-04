@@ -29,7 +29,7 @@ const ROLES: Role[] = [
       "5+ years building production web apps (Next.js / Node ideal)",
       "Comfortable with Postgres + Prisma",
       "Track record of shipping features end-to-end",
-      "Excellent written communication — most of our team is distributed",
+      "Excellent written communication, since most of our team is distributed",
     ],
     niceToHave: [
       "Experience with Solidity / ethers.js",
@@ -39,7 +39,7 @@ const ROLES: Role[] = [
   },
   {
     slug: "carbon-project-lead",
-    title: "Carbon Project Lead — East Africa",
+    title: "Carbon Project Lead, East Africa",
     team: "Operations",
     location: "Nairobi or Kampala",
     type: "Full-time",
@@ -63,7 +63,7 @@ const ROLES: Role[] = [
     location: "Remote (East / Southern Africa)",
     type: "Full-time",
     description:
-      "Grow our Community Partner network — the NGOs, cooperatives and extension officers who bring landowners to Kabon.Africa. You'll own partner onboarding, training, and retention.",
+      "Grow our Community Partner network: the NGOs, cooperatives and extension officers who bring landowners to Kabon.Africa. You'll own partner onboarding, training, and retention.",
     requirements: [
       "4+ years in NGO partnerships, agribusiness extension, or rural marketing",
       "Existing relationships with East-African conservation orgs / cooperatives",
@@ -86,7 +86,7 @@ const VALUES = [
   {
     icon: TrendingUp,
     title: "Builders, not theorists",
-    body: "Whether engineering, ops, or growth — we hire people who ship and follow through. Bias for action.",
+    body: "Whether engineering, ops, or growth, we hire people who ship and follow through. Bias for action.",
   },
   {
     icon: Sparkles,
@@ -110,7 +110,7 @@ export default function CareersPage() {
             Build the carbon market<br />Africa actually needs.
           </h1>
           <p className="text-forest-200 text-lg max-w-2xl leading-relaxed">
-            We're a small team building infrastructure for the next generation of African climate finance — the
+            We're a small team building infrastructure for the next generation of African climate finance: the
             registry, the marketplace, the field operations. Join us.
           </p>
         </div>
@@ -182,7 +182,7 @@ export default function CareersPage() {
 
 function RoleCard({ role }: { role: Role }) {
   const applyHref =
-    `mailto:careers@kabon.africa?subject=${encodeURIComponent(`Application — ${role.title}`)}`;
+    `mailto:careers@kabon.africa?subject=${encodeURIComponent(`Application: ${role.title}`)}`;
 
   return (
     <article id={role.slug} className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 scroll-mt-24">

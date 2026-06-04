@@ -83,7 +83,7 @@ export default function AdminBufferPage() {
             </div>
             <div>
               <h1 className="text-xl font-black text-gray-900">Buffer Pool</h1>
-              <p className="text-sm text-gray-500 mt-0.5">Permanence reserve — held against project reversals</p>
+              <p className="text-sm text-gray-500 mt-0.5">Permanence reserve, held against project reversals</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ function DrawdownPanel({ available, onClose, onDone }: {
           <div>
             <label className="label">Reversed project <span className="text-gray-400 font-normal">(optional)</span></label>
             <select className="input" value={projectId} onChange={e => setProjectId(e.target.value)}>
-              <option value="">— not linked —</option>
+              <option value="">(not linked)</option>
               {projects.map(p => <option key={p.id} value={p.id}>{p.title} · {p.country}</option>)}
             </select>
           </div>

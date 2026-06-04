@@ -470,7 +470,7 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
                         Retire immediately after purchase
                       </span>
                       <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">
-                        Skip the holding phase — offset right now. You'll document the reason and it goes straight to your certificate.
+                        Skip the holding phase and offset right now. You'll document the reason and it goes straight to your certificate.
                       </p>
                     </div>
                   </label>

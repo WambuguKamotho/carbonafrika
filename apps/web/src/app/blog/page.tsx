@@ -57,7 +57,7 @@ export default function BlogIndexPage() {
             <Loader2 className="w-6 h-6 text-forest-600 animate-spin mx-auto" />
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">No articles yet — check back soon.</div>
+          <div className="text-center py-20 text-gray-400">No articles yet. Check back soon.</div>
         ) : (
           <>
             {/* Tag filter */}

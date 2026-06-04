@@ -130,7 +130,7 @@ function RequestAccessInner() {
               </div>
               <div>
                 <div className="font-bold text-gray-900">Direct from landowner</div>
-                <div className="text-gray-500 text-xs">No reseller markup — proceeds reach communities.</div>
+                <div className="text-gray-500 text-xs">No reseller markup, so proceeds reach communities.</div>
               </div>
             </li>
             <li className="flex items-start gap-3">
@@ -184,7 +184,7 @@ function RequestAccessInner() {
               placeholder="jane@acme.com"
             />
             <p className="text-xs text-gray-400 mt-1">
-              Please use your work address — invites go here. Generic addresses (gmail / yahoo) will slow your review.
+              Please use your work address, since invites go here. Generic addresses (gmail / yahoo) will slow your review.
             </p>
           </div>
 

@@ -76,7 +76,7 @@ export default function StandardPage() {
           </h1>
           <p className="text-forest-200 text-lg max-w-2xl leading-relaxed">
             Every credit on Kabon.Africa is issued under a published methodology, backed by a permanence buffer pool,
-            and tracked on Polygon. We're not Verra — we're a faster, simpler, Africa-first alternative for
+            and tracked on Polygon. We're not Verra. We're a faster, simpler, Africa-first alternative for
             projects too small or too local for the global registries.
           </p>
         </div>
@@ -135,13 +135,13 @@ export default function StandardPage() {
                 <StandardStep number={2} title="Admin review"
                   body="The Kabon team reviews the submission for completeness, legitimacy, and methodology fit. Communication happens through the project's private comment thread. Documents are stored on IPFS for an immutable trail." />
                 <StandardStep number={3} title="Carbon assessment"
-                  body="An assigned reviewer measures the carbon impact against the chosen methodology — baseline, project emissions, and net tonnes. The number stamps onto a Verification record." />
+                  body="An assigned reviewer measures the carbon impact against the chosen methodology: baseline, project emissions, and net tonnes. The number stamps onto a Verification record." />
                 <StandardStep number={4} title="Issuance + buffer split"
                   body="Credits are minted on Polygon (ERC-1155). The methodology's buffer percentage is automatically diverted to the platform-wide Buffer Pool. Only the remainder is tradeable." />
                 <StandardStep number={5} title="Trade & retirement"
                   body="Approved buyers purchase credits in USDC. Retired credits become non-transferable on-chain and receive a printable retirement certificate with QR-verified provenance." />
                 <StandardStep number={6} title="Ongoing monitoring"
-                  body="Per the methodology, projects re-submit monitoring evidence on a fixed cadence. Reversal events (fire, conversion) trigger pool drawdown — pool credits are retired to backfill, so buyer offsets stay whole." />
+                  body="Per the methodology, projects re-submit monitoring evidence on a fixed cadence. Reversal events (fire, conversion) trigger pool drawdown, where pool credits are retired to backfill so buyer offsets stay whole." />
               </ol>
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function StandardPage() {
         <section className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
           <h2 className="text-lg font-black text-amber-900 mb-3 flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-amber-600" />
-            What we are — and aren't
+            What we are, and what we aren't
           </h2>
           <div className="space-y-3 text-sm text-amber-900 leading-relaxed">
             <p>

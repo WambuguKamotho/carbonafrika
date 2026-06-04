@@ -242,9 +242,9 @@ export default function MapPicker({ lat, lng, readonly = false, onChange, bounda
       {!readonly && (
         <p className="mt-1.5 text-xs text-gray-500">
           {locateState === "denied"
-            ? "Location permission denied — click on the map to place a marker, or type coordinates below."
+            ? "Location permission denied. Click on the map to place a marker, or type coordinates below."
             : locateState === "unavailable"
-              ? "We couldn't read your location — click on the map to place a marker, or type coordinates below."
+              ? "We couldn't read your location. Click on the map to place a marker, or type coordinates below."
               : "Click \"Use my location\" to auto-place a marker, or click anywhere on the map. Drag to reposition."}
         </p>
       )}

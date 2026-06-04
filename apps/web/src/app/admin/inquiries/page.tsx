@@ -328,7 +328,7 @@ function InquiryDrawer({
               {approval && (
                 <div className="bg-forest-50 border border-forest-200 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center gap-2 text-forest-700 font-semibold text-sm">
-                    <CheckCircle className="w-4 h-4" /> Approved — invite ready
+                    <CheckCircle className="w-4 h-4" /> Approved. Invite ready
                   </div>
                   <p className="text-xs text-forest-800 leading-relaxed">
                     We've emailed the magic link to <strong>{inquiry.email}</strong>.
@@ -344,7 +344,7 @@ function InquiryDrawer({
                   </div>
                   <button onClick={onResolved}
                     className="text-xs font-semibold text-forest-700 hover:underline">
-                    Done — back to queue
+                    Done, back to queue
                   </button>
                 </div>
               )}

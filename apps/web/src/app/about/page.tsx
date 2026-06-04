@@ -11,8 +11,8 @@ const chapters = [
     photo: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=900&q=80&auto=format&fit=crop",
     photoAlt: "Documentary filmmaker at work",
     paras: [
-      "Fourteen years behind a camera across the continent — BBC Global Questions in Nairobi, CNN Africa, TEDx, Firelight Foundation across Zambia and Malawi, and Emmy-winning Shujaaz Inc. Not covering politics or celebrity: in rural communities watching farmers replant degraded hillsides, filming women's cooperatives protecting wetlands, listening to village elders describe the rains that no longer came on schedule.",
-      "The same story repeated from Senegal to Malawi: communities doing the hard, invisible work of ecological restoration — and receiving nothing for it. International NGOs flew in, captured the story, and flew out. The land stayed restored. The families stayed poor.",
+      "Fourteen years behind a camera across the continent: BBC Global Questions in Nairobi, CNN Africa, TEDx, Firelight Foundation across Zambia and Malawi, and Emmy-winning Shujaaz Inc. Not covering politics or celebrity, but in rural communities, watching farmers replant degraded hillsides, filming women's cooperatives protecting wetlands, listening to village elders describe the rains that no longer came on schedule.",
+      "The same story repeated from Senegal to Malawi: communities doing the hard, invisible work of ecological restoration, and receiving nothing for it. International NGOs flew in, captured the story, and flew out. The land stayed restored. The families stayed poor.",
     ],
   },
   {
@@ -24,8 +24,8 @@ const chapters = [
     photo: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=900&q=80&auto=format&fit=crop",
     photoAlt: "Trucks on an African road",
     paras: [
-      "Running Wafalme Logistics and later joining Fork Freight took Wambugu into a different kind of Africa — the extraction economy. Copper cathode loaded in Kolwezi, DRC, trucked 3,000 km to Dar es Salaam, shipped to China. Eleven trucks, border crossings, fuel, bribes, delays. A separate mandate representing Lugymar in Sierra Leone, verifying the existence of gold.",
-      "What struck him wasn't the logistics — it was the asymmetry. Raw resources left the continent at commodity prices. Value-added products came back at retail prices. The same logic applied to carbon: African land was sequestering carbon that European corporations would claim credit for through intermediary brokers who never set foot on the actual soil. The communities holding title to that land saw none of it.",
+      "Running Wafalme Logistics and later joining Fork Freight took Wambugu into a different kind of Africa: the extraction economy. Copper cathode loaded in Kolwezi, DRC, trucked 3,000 km to Dar es Salaam, shipped to China. Eleven trucks, border crossings, fuel, bribes, delays. A separate mandate representing Lugymar in Sierra Leone, verifying the existence of gold.",
+      "What struck him wasn't the logistics. It was the asymmetry. Raw resources left the continent at commodity prices. Value-added products came back at retail prices. The same logic applied to carbon: African land was sequestering carbon that European corporations would claim credit for through intermediary brokers who never set foot on the actual soil. The communities holding title to that land saw none of it.",
     ],
   },
   {
@@ -37,28 +37,28 @@ const chapters = [
     photo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&q=80&auto=format&fit=crop",
     photoAlt: "IoT sensor circuit board",
     paras: [
-      "As Director at Bandika IoT, Wambugu worked on real-time sensor networks for fleet and asset tracking across East Africa. The technology insight was simple but profound: cheap, connected sensors produce tamper-proof, timestamped data streams from anywhere on the continent — including remote conservation sites with no road access.",
-      "That meant the verification problem in carbon markets — how do you prove a forest in rural Tanzania is actually growing? — was technically solved. NDVI satellite imagery, soil moisture sensors, gas flow meters on biogas digesters: all of it could be logged automatically, stored immutably, and audited without a single expensive consultant flying in from Geneva.",
+      "As Director at Bandika IoT, Wambugu worked on real-time sensor networks for fleet and asset tracking across East Africa. The technology insight was simple but profound: cheap, connected sensors produce tamper-proof, timestamped data streams from anywhere on the continent, including remote conservation sites with no road access.",
+      "That meant the verification problem in carbon markets (how do you prove a forest in rural Tanzania is actually growing?) was technically solved. NDVI satellite imagery, soil moisture sensors, gas flow meters on biogas digesters: all of it could be logged automatically, stored immutably, and audited without a single expensive consultant flying in from Geneva.",
     ],
   },
 ];
 
 const timeline = [
   { year: "2010", event: "Starts career in film, first NGO documentary work across East Africa" },
-  { year: "2012", event: "Vision Mixer & Script Supervisor on Mali Project — Kenya's first soap opera (NTV, ~320 episodes)" },
+  { year: "2012", event: "Vision Mixer & Script Supervisor on Mali Project, Kenya's first soap opera (NTV, ~320 episodes)" },
   { year: "2014", event: "Founds Wafalme Logistics, begins cross-continental commodity trading" },
   { year: "2015", event: "Joins Shujaaz Inc (Emmy Award winners) as Visual Content Producer" },
   { year: "2017", event: "Wafalme shortlisted by USAID for Post-Harvest Loss solutions in Tanzania" },
   { year: "2022", event: "Joins Fork Freight, expanding freight logistics into African markets" },
-  { year: "2023", event: "Leads Bandika IoT as Director — real-time sensor networks across East Africa" },
-  { year: "2024", event: "Films Firelight Foundation across Zambia & Malawi — the insight crystallises" },
-  { year: "2025", event: "Founds Kabon.Africa — IoT proof + blockchain settlement + direct community income" },
+  { year: "2023", event: "Leads Bandika IoT as Director, building real-time sensor networks across East Africa" },
+  { year: "2024", event: "Films Firelight Foundation across Zambia & Malawi, where the insight crystallises" },
+  { year: "2025", event: "Founds Kabon.Africa: IoT proof, blockchain settlement, and direct community income" },
 ];
 
 const differentiators = [
   {
     title: "IoT-verified data",
-    desc: "Soil sensors, gas flow meters, satellite NDVI — continuous, tamper-proof readings from the project site. No self-reporting. No consultants with clipboards.",
+    desc: "Soil sensors, gas flow meters, satellite NDVI: continuous, tamper-proof readings from the project site. No self-reporting. No consultants with clipboards.",
     photo: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=600&q=80&auto=format&fit=crop",
     alt: "Smart agriculture sensor in field",
   },
@@ -145,7 +145,7 @@ export default function AboutPage() {
                   className="text-forest-700 font-semibold hover:underline inline-flex items-center gap-1">
                   Bandika IoT <ExternalLink className="w-3 h-3" />
                 </a>.
-                Covered climate stories on four continents — from BBC studios in Nairobi to rural communities in Zambia and Malawi — before deciding the story he needed to tell required building infrastructure, not just recording it.
+                Covered climate stories on four continents, from BBC studios in Nairobi to rural communities in Zambia and Malawi, before deciding the story he needed to tell required building infrastructure, not just recording it.
               </p>
               <div className="flex flex-wrap gap-2">
                 {["Documentary Filmmaker", "Commodity Logistics", "IoT Director @ Bandika", "Prince2 Certified", "BBC · CNN · Firelight"].map(tag => (
@@ -226,7 +226,7 @@ export default function AboutPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80&auto=format&fit=crop"
-          alt="Sunlit woodland — Zambia miombo forest"
+          alt="Sunlit woodland, Zambia miombo forest"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-forest-950/85" />
@@ -236,7 +236,7 @@ export default function AboutPage() {
             A question that wouldn&rsquo;t go away
           </span>
           <blockquote className="text-2xl md:text-3xl font-bold text-white leading-snug mb-8">
-            &ldquo;Through years of travelling the continent — filming for NGOs, moving commodities, deploying sensors — I kept seeing the same thing: indigenous forests disappearing, communities destroying what was left because they had no resources, no income, and no alternative. The global climate conversation was happening, billions were being pledged, but it wasn&rsquo;t reaching the people whose land and labour made it possible. I couldn&rsquo;t stop asking why.&rdquo;
+            &ldquo;Through years of travelling the continent (filming for NGOs, moving commodities, deploying sensors), I kept seeing the same thing: indigenous forests disappearing, communities destroying what was left because they had no resources, no income, and no alternative. The global climate conversation was happening, billions were being pledged, but it wasn&rsquo;t reaching the people whose land and labour made it possible. I couldn&rsquo;t stop asking why.&rdquo;
           </blockquote>
           <div className="flex items-center justify-center gap-3">
             <div className="w-10 h-10 rounded-full bg-forest-600 flex items-center justify-center text-white text-xs font-black">WK</div>
@@ -288,7 +288,7 @@ export default function AboutPage() {
           <div className="text-center mb-14">
             <span className="text-xs font-semibold text-forest-600 uppercase tracking-widest">The platform</span>
             <h2 className="text-4xl font-bold text-gray-900 mt-2 mb-3">What Kabon.Africa does differently</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Designed from the ground up for the African carbon market — not adapted from frameworks built for European forestry projects.</p>
+            <p className="text-gray-500 max-w-xl mx-auto">Designed from the ground up for the African carbon market, not adapted from frameworks built for European forestry projects.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {differentiators.map(f => (

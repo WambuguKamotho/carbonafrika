@@ -104,7 +104,7 @@ export default function AdminVerificationsPage() {
       const r = await fetch(`/api/verifications/${id}/issue`, { method: "POST", headers: headers() });
       const d = await r.json();
       if (!d.success) throw new Error(d.error || "Issuance failed");
-      notify(`Credits issued — ${d.data?.tradeable ?? ""} t available`);
+      notify(`Credits issued. ${d.data?.tradeable ?? ""} t available`);
       load();
     } catch (e) { notify(e instanceof Error ? e.message : "Issuance failed"); }
     finally { setBusy(null); }
@@ -141,7 +141,7 @@ export default function AdminVerificationsPage() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-5 text-xs text-blue-800 flex items-start gap-2">
           <ShieldCheck className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <span>Maker-checker: a <strong>verifier</strong> assesses and approves; an <strong>admin</strong> then issues the credits. The reviewer who assessed a project can't also issue it — a second reviewer signs off.</span>
+          <span>Maker-checker: a <strong>verifier</strong> assesses and approves; an <strong>admin</strong> then issues the credits. The reviewer who assessed a project can't also issue it; a second reviewer signs off.</span>
         </div>
 
         <div className="flex gap-1.5 mb-6 flex-wrap">

@@ -50,7 +50,7 @@ const practices = [
   {
     icon: TrendingUp,
     title: "Community Forest Management",
-    desc: "Formalizing community protection of existing forests prevents deforestation — REDD+ credits. The most scalable approach for large communities.",
+    desc: "Formalizing community protection of existing forests prevents deforestation and earns REDD+ credits. The most scalable approach for large communities.",
     credits: "3–10 t CO₂/ha/yr",
     color: "forest",
     photo: "https://images.unsplash.com/photo-1542401886-65d6c61db217?w=800&q=80&auto=format&fit=crop",
@@ -93,7 +93,7 @@ export default function FarmingGuidePage() {
             Your land. Your income.
           </h1>
           <p className="text-forest-200 max-w-xl text-sm md:text-base leading-relaxed">
-            Six proven practices that turn African farmland and forests into verified carbon credits —
+            Six proven practices that turn African farmland and forests into verified carbon credits,
             and a steady income for your community.
           </p>
         </div>
@@ -123,7 +123,7 @@ export default function FarmingGuidePage() {
             <p className="text-sm text-forest-800 leading-relaxed">
               Credits are calculated from the difference between a <strong>baseline</strong> (what happens without your project) and
               actual CO₂ sequestered. Verifiers use satellite imagery, soil tests, and biomass measurements.
-              Ranges below are conservative — your verifier confirms the exact amount at no cost to you.
+              Ranges below are conservative, and your verifier confirms the exact amount at no cost to you.
             </p>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function FarmingGuidePage() {
 
         {/* ── How it works timeline ── */}
         <div className="mt-14 mb-10">
-          <h2 className="text-xl font-black text-gray-900 text-center mb-8">From land to income — 4 steps</h2>
+          <h2 className="text-xl font-black text-gray-900 text-center mb-8">From land to income in 4 steps</h2>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-0">
             {[
               { n: "1", title: "Submit project", desc: "Fill in your land details, location, and practice type on Kabon.Africa.", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80&auto=format&fit=crop" },

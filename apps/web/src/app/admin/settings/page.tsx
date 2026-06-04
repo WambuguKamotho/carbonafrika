@@ -39,8 +39,8 @@ export default function AdminSettingsPage() {
     { label: "Platform Fee",        value: "2% per transaction",    note: "Deducted from buyer total; remitted to project owner net of fee" },
     { label: "Fee Direction",       value: "Buyer pays (on top)",   note: "buyerTotal = tons × pricePerTon × 1.02" },
     { label: "Settlement",         value: "Async via BullMQ",      note: "Jobs queued in Redis; worker retries up to 3× with exponential backoff" },
-    { label: "Simulation mode",     value: "Active (no real USDC)", note: "BLOCKCHAIN_ENABLED=false — settlement writes 0xsim_ hashes; no funds move" },
-    { label: "Redis poll interval", value: "30 s drain delay",      note: "drainDelay=30000 on all workers — ~72K Redis commands/day" },
+    { label: "Simulation mode",     value: "Active (no real USDC)", note: "BLOCKCHAIN_ENABLED=false; settlement writes 0xsim_ hashes; no funds move" },
+    { label: "Redis poll interval", value: "30 s drain delay",      note: "drainDelay=30000 on all workers, ~72K Redis commands/day" },
     { label: "Idle timeout",        value: "10 minutes",            note: "Session cleared after 10 min of inactivity; browser-close clears cookie" },
     { label: "Buffer rate",         value: "15% permanence reserve", note: "Minting worker retains 15% of verified tonnes in buffer pool" },
     { label: "Retirement window",   value: "No expiry",             note: "Credits never expire; retiredAt cannot be before project creation or >1 year future" },
@@ -158,10 +158,10 @@ export default function AdminSettingsPage() {
             <div className="flex items-center justify-between gap-4 py-2">
               <div>
                 <div className="text-sm font-semibold text-gray-900">Clear simulation transactions</div>
-                <div className="text-xs text-gray-400">Remove 0xsim_ tx hashes from the database — does not affect real settlements</div>
+                <div className="text-xs text-gray-400">Remove 0xsim_ tx hashes from the database. Does not affect real settlements</div>
               </div>
               <button
-                onClick={() => setToast("Not implemented yet — connect to admin API first")}
+                onClick={() => setToast("Not implemented yet. Connect to admin API first")}
                 className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors">
                 Run
               </button>
@@ -172,7 +172,7 @@ export default function AdminSettingsPage() {
                 <div className="text-xs text-gray-400">Re-queue purchases where settlement has not completed</div>
               </div>
               <button
-                onClick={() => setToast("Not implemented yet — connect to admin API first")}
+                onClick={() => setToast("Not implemented yet. Connect to admin API first")}
                 className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors">
                 Run
               </button>

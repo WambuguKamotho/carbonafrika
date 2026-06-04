@@ -402,7 +402,7 @@ export default function ProjectDetailPage() {
   const saveBoundary = async (clear = false) => {
     let parsed: object | null = null;
     if (!clear) {
-      try { parsed = JSON.parse(boundaryJson); } catch { setBoundaryError('Invalid JSON — check your GeoJSON syntax'); return; }
+      try { parsed = JSON.parse(boundaryJson); } catch { setBoundaryError('Invalid JSON. Check your GeoJSON syntax.'); return; }
     }
     setSavingBoundary(true); setBoundaryError('');
     const r = await fetch(`/api/projects/${id}/boundary`, {
@@ -558,7 +558,7 @@ export default function ProjectDetailPage() {
                   Verified ✓
                   {latestVerification?.carbonTons != null && (
                     <span className="font-normal text-forest-700">
-                      {' '}— {latestVerification.carbonTons.toLocaleString()} tonnes CO₂e confirmed
+                      {': '}{latestVerification.carbonTons.toLocaleString()} tonnes CO₂e confirmed
                     </span>
                   )}
                 </div>
@@ -579,7 +579,7 @@ export default function ProjectDetailPage() {
                   </p>
                 )}
                 <p className="text-red-800 leading-relaxed mt-1">
-                  Reply in the comments below once you've addressed the issue — we'll re-review.
+                  Reply in the comments below once you've addressed the issue, and we'll re-review.
                 </p>
               </div>
             </div>
@@ -697,7 +697,7 @@ export default function ProjectDetailPage() {
               {!showBoundaryEditor && (
                 <p className="text-xs text-gray-400 mt-2">
                   {project.boundary
-                    ? 'A GeoJSON boundary is stored — visible on the map above.'
+                    ? 'A GeoJSON boundary is stored, visible on the map above.'
                     : `No precise boundary stored. The map shows an approximate ${Math.round(Math.sqrt((project.hectares * 10000) / Math.PI) / 100) / 10} km radius circle based on ${project.hectares.toLocaleString()} ha.`}
                 </p>
               )}
@@ -762,7 +762,7 @@ export default function ProjectDetailPage() {
               {readings.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">
                   <div className="text-4xl mb-2">📡</div>
-                  <p className="text-sm">No IoT readings yet — devices post data once registered and deployed.</p>
+                  <p className="text-sm">No IoT readings yet. Devices post data once registered and deployed.</p>
                 </div>
               ) : (
                 <>

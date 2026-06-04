@@ -48,7 +48,7 @@ const features = [
   { icon: Shield, title: "100% Verified", desc: "Every project is independently verified before a single credit is issued. No greenwashing." },
   { icon: Globe, title: "Blockchain Proof", desc: "Credits live on Polygon. Every mint, sale, and retirement is publicly verifiable on-chain." },
   { icon: TrendingUp, title: "Real Income", desc: "Communities earn $12–25 per tonne. Payments settle directly to your crypto wallet." },
-  { icon: TreePine, title: "Indigenous Focus", desc: "Priority for indigenous forest restoration — Africa's highest carbon-density ecosystems." },
+  { icon: TreePine, title: "Indigenous Focus", desc: "We prioritise indigenous forest restoration, Africa's highest carbon-density ecosystems." },
   { icon: Leaf, title: "Farming Guide", desc: "Expert agroforestry guidance that earns additional credits alongside your food crops." },
   { icon: Users, title: "Community Owned", desc: "Register individually or as a collective. Earnings go to the land stewards, not middlemen." },
 ];
@@ -91,7 +91,7 @@ export default async function HomePage() {
 
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
             Kabon.Africa connects African communities restoring forests, savannas, and grasslands
-            with global buyers who pay for verified carbon offsets — directly to your wallet.
+            with global buyers who pay for verified carbon offsets, straight to your wallet.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -175,7 +175,7 @@ export default async function HomePage() {
 
           <p className="text-base text-white/55 max-w-xl mx-auto mb-8 leading-relaxed">
             Every hectare of restored forest, savanna, or grassland produces verified carbon
-            credits worth $12–$28 per tonne — paid directly to you.
+            credits worth $12–$28 per tonne, paid directly to you.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -335,7 +335,7 @@ export default async function HomePage() {
                 Your land is an asset.<br />Start earning from it today.
               </h2>
               <p className="text-forest-200 mb-8 text-lg max-w-lg mx-auto">
-                Whether you have 1 hectare or 10,000 — individuals, farmers, and communities all qualify.
+                Whether you have 1 hectare or 10,000, individuals, farmers, and communities all qualify.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-white text-forest-800 font-bold px-8 py-3 rounded-xl hover:bg-forest-50 transition-all duration-150 shadow-lg">

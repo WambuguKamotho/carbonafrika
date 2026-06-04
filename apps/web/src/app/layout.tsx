@@ -14,7 +14,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Kabon.Africa — Restore Africa, Earn Carbon Credits",
+    default: "Kabon.Africa: Restore Africa, Earn Carbon Credits",
     template: "%s | Kabon.Africa",
   },
   description: DESCRIPTION,
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   openGraph: {
-    title: "Kabon.Africa — Restore Africa, Earn Carbon Credits",
+    title: "Kabon.Africa: Restore Africa, Earn Carbon Credits",
     description: DESCRIPTION,
     url: SITE_URL,
     siteName: "Kabon.Africa",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kabon.Africa — Restore Africa, Earn Carbon Credits",
+    title: "Kabon.Africa: Restore Africa, Earn Carbon Credits",
     description: "Restore Africa. Earn Carbon Credits.",
     images: ["/og.png"],
   },

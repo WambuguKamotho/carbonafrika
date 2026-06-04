@@ -292,7 +292,7 @@ export default function NewProjectPage() {
               <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
                 Your community organizer will give you their code. They earn a small share (typically 3%) of every
                 credit you sell, which comes off your payout. Most partners only ask for a code from landowners they
-                actively help register — leave blank if no one helped you.
+                actively help register, so leave blank if no one helped you.
               </p>
             </div>
           </div>
@@ -306,7 +306,7 @@ export default function NewProjectPage() {
             <div>
               <label className="label">Project Title</label>
               <input className="input" value={form.title} onChange={set("title")}
-                placeholder={category === "CLEAN_ENERGY" ? "e.g. Nairobi Biogas Hub — Kibera Community Plant" : "e.g. Aberdare Forest Restoration Initiative"}
+                placeholder={category === "CLEAN_ENERGY" ? "e.g. Nairobi Biogas Hub, Kibera Community Plant" : "e.g. Aberdare Forest Restoration Initiative"}
                 required minLength={5} />
             </div>
             <div>
@@ -382,7 +382,7 @@ export default function NewProjectPage() {
             {category === "LAND_RESTORATION" && (
               <div className="border-t border-gray-100 pt-4">
                 <label className="label flex items-center gap-1.5">
-                  Land Boundary <span className="text-gray-400 font-normal">(optional — paste GeoJSON)</span>
+                  Land Boundary <span className="text-gray-400 font-normal">(optional, paste GeoJSON)</span>
                 </label>
                 <textarea
                   className="input font-mono text-xs resize-y"

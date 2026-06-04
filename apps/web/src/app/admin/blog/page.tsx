@@ -106,7 +106,7 @@ export default function AdminBlogPage() {
         ) : posts.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
             <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">No posts yet — create your first one.</p>
+            <p className="text-sm">No posts yet. Create your first one.</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden">
@@ -266,7 +266,7 @@ function PostEditor({ post, onClose, onSaved }: { post: BlogPost | null; onClose
             <textarea rows={2} className="input resize-none" value={form.excerpt} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} />
           </div>
           <div>
-            <label className="label">Body <span className="text-gray-400 font-normal">(markdown — **bold**, ## heading, - list, [link](url))</span></label>
+            <label className="label">Body <span className="text-gray-400 font-normal">(markdown: **bold**, ## heading, - list, [link](url))</span></label>
             <textarea rows={16} className="input resize-y font-mono text-sm" value={form.body} onChange={e => setForm(f => ({ ...f, body: e.target.value }))} />
           </div>
           <div>

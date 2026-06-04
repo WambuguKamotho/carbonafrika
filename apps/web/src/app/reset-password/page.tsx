@@ -36,7 +36,7 @@ function ResetForm() {
       setDone(true);
       setTimeout(() => router.push("/login"), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Reset failed — link may be expired");
+      setError(err instanceof Error ? err.message : "Reset failed. The link may be expired.");
     } finally {
       setLoading(false);
     }

@@ -32,7 +32,7 @@ const technologies = [
   {
     icon: Cpu,
     title: "Biocharcoal Production",
-    desc: "Industrial pyrolysis of agricultural waste into clean charcoal — displaces unsustainable wood charcoal while sequestering carbon as recalcitrant char.",
+    desc: "Industrial pyrolysis of agricultural waste into clean charcoal. It displaces unsustainable wood charcoal while sequestering carbon as recalcitrant char.",
     credits: "2.5–3.5 t CO₂/t produced",
     color: "amber",
     photo: "https://images.unsplash.com/photo-1481660148723-b77ee9184660?w=800&q=80&auto=format&fit=crop",
@@ -166,7 +166,7 @@ export default function CleanEnergyGuidePage() {
             Got a clean-energy project?
           </h2>
           <p className="text-amber-100 mb-6 max-w-xl mx-auto">
-            From single-stove rollouts to multi-megawatt solar farms — register your project, set monitoring up, and start earning.
+            From single-stove rollouts to multi-megawatt solar farms. Register your project, set monitoring up, and start earning.
           </p>
           <div className="flex gap-3 flex-wrap justify-center">
             <Link href="/projects/new" className="inline-flex items-center gap-2 bg-white text-amber-900 font-bold px-6 py-3 rounded-xl hover:bg-amber-50 transition-colors">

@@ -87,7 +87,7 @@ export default function IpfsUpload({ value, onChange, accept = ACCEPTED, label =
         >
           {uploading
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading to IPFS…</>
-            : <><FileText className="w-4 h-4" />{label} — click to upload (PDF, image, zip · max 50 MB)</>
+            : <><FileText className="w-4 h-4" />{label}: click to upload (PDF, image, zip · max 50 MB)</>
           }
         </button>
       )}

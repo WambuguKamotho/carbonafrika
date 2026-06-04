@@ -79,7 +79,7 @@ export default function PortfolioPage() {
       setLocalPurchases(prev => (prev ?? data?.data ?? []).map(p =>
         p.id === purchase.id ? { ...p, settlementStatus: "RELEASED", buyerConfirmedAt: new Date().toISOString() } : p
       ));
-      setToast("Receipt confirmed — funds released to seller.");
+      setToast("Receipt confirmed. Funds released to seller.");
       setTimeout(() => setToast(null), 4000);
     } catch (e) {
       setToast(e instanceof Error ? e.message : "Confirm failed");
@@ -104,7 +104,7 @@ export default function PortfolioPage() {
       setLocalPurchases(prev => (prev ?? data?.data ?? []).map(p =>
         p.id === purchase.id ? { ...p, settlementStatus: "DISPUTED" } : p
       ));
-      setToast("Dispute opened — our team will be in touch.");
+      setToast("Dispute opened. Our team will be in touch.");
       setTimeout(() => setToast(null), 4000);
     } catch (e) {
       setToast(e instanceof Error ? e.message : "Dispute failed");
@@ -442,7 +442,7 @@ export default function PortfolioPage() {
                 : p
             ));
             setResellTarget(null);
-            setToast("Resale request submitted — our team will review it shortly.");
+            setToast("Resale request submitted. Our team will review it shortly.");
             setTimeout(() => setToast(null), 4000);
           }}
         />

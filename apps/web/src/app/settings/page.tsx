@@ -465,7 +465,7 @@ export default function SettingsPage() {
             {isLandowner
               ? "USDC payouts from buyers settle to this wallet on Polygon."
               : isBuyer
-                ? "Required to purchase carbon credits — you'll sign a USDC approval from this wallet."
+                ? "Required to purchase carbon credits. You'll sign a USDC approval from this wallet."
                 : "Optional. Used if you need to sign on-chain actions."}
           </p>
 

@@ -70,7 +70,7 @@ export default function RegisterPage() {
           </p>
           <ul className="space-y-4">
             {[
-              "Free to register — no upfront costs",
+              "Free to register, no upfront costs",
               "Verification takes 2–4 weeks",
               "Credits minted directly to your wallet",
               "Buyers pay in USDC or MATIC",

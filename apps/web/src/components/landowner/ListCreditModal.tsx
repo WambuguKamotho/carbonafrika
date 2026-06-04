@@ -37,7 +37,7 @@ export default function ListCreditModal({ credit, projectTitle, onClose, onListe
     Number.isFinite(tonsNum)  && tonsNum  > 0 && tonsNum <= credit.amount;
 
   async function submit() {
-    if (!valid) { setError("Check the price and tonnes — both must be positive and not exceed your available balance."); return; }
+    if (!valid) { setError("Check the price and tonnes. Both must be positive and not exceed your available balance."); return; }
     setSubmitting(true);
     setError(null);
     try {

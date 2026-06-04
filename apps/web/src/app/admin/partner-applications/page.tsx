@@ -330,10 +330,10 @@ function ApplicationDrawer({
               {approval && (
                 <div className="bg-forest-50 border border-forest-200 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center gap-2 text-forest-700 font-semibold text-sm">
-                    <CheckCircle className="w-4 h-4" /> Approved — invite & code ready
+                    <CheckCircle className="w-4 h-4" /> Approved. Invite & code ready
                   </div>
                   <p className="text-xs text-forest-800 leading-relaxed">
-                    Invite emailed to <strong>{app.email}</strong> — they activate at the link below.
+                    Invite emailed to <strong>{app.email}</strong>. They activate at the link below.
                     Their <strong>partner code</strong> is what landowners type when registering a project to attribute it to them.
                   </p>
                   <div>
@@ -358,7 +358,7 @@ function ApplicationDrawer({
                   </div>
                   <button onClick={onResolved}
                     className="text-xs font-semibold text-forest-700 hover:underline">
-                    Done — back to queue
+                    Done, back to queue
                   </button>
                 </div>
               )}
@@ -401,7 +401,7 @@ function ApplicationDrawer({
                     Awaiting your decision
                   </div>
                   <p className="text-sm text-amber-900 mb-3 leading-relaxed">
-                    Approve creates a community-partner account and emails them a magic link. Reject sends nothing — it's just an internal record.
+                    Approve creates a community-partner account and emails them a magic link. Reject sends nothing; it's just an internal record.
                   </p>
                   <div className="flex gap-2">
                     <button onClick={approve} disabled={pending != null}

@@ -84,7 +84,7 @@ export default function VerifierPage() {
   const assign = async (id: string) => {
     const r = await fetch(`/api/verifications/${id}/assign`, { method: "PATCH", headers: headers() });
     const d = await r.json();
-    if (d.success) { notify("Assigned to you — switching to In Progress"); setTab("mine"); load(); }
+    if (d.success) { notify("Assigned to you. Switching to In Progress"); setTab("mine"); load(); }
     else notify(d.error ?? "Failed to assign", false);
   };
 
@@ -102,7 +102,7 @@ export default function VerifierPage() {
     });
     const d = await r.json();
     setForms(p => ({ ...p, [id]: { ...form, saving: false } }));
-    if (d.success) { notify(decision === "APPROVED" ? "Project approved — credits queued for minting" : "Project rejected"); load(); }
+    if (d.success) { notify(decision === "APPROVED" ? "Project approved. Credits queued for minting" : "Project rejected"); load(); }
     else notify(d.error ?? "Failed to submit review", false);
   };
 

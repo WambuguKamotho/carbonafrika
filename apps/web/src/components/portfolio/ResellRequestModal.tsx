@@ -85,7 +85,7 @@ export default function ResellRequestModal({
               <span>
                 Kabon reviews every resale to keep prices fair and the registry consistent.
                 Once approved, your credits are relisted on the marketplace with you as the
-                seller — you're paid in {currency} when they sell. You can't retire credits
+                seller, and you're paid in {currency} when they sell. You can't retire credits
                 while a resale request is open.
               </span>
             </div>
