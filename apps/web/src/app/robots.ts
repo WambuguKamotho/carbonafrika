@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin", "/api", "/settings", "/verifier", "/dashboard", "/redeem-invite", "/reset-password"],
+      disallow: ["/admin", "/api", "/settings", "/verifier", "/dashboard", "/portfolio", "/partner", "/redeem-invite", "/reset-password", "/forgot-password"],
     },
     sitemap: "https://kabon.africa/sitemap.xml",
     host: "https://kabon.africa",

@@ -16,9 +16,10 @@ const ROUTES = [
   "/farming",
   "/guides",
   "/standard",
-  "/partner",
   "/careers",
-  "/portfolio",
+  // Public conversion funnels — worth indexing
+  "/request-access",
+  "/partner-application",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
