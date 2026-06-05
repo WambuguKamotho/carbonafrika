@@ -10,7 +10,7 @@ import {
   ArrowRight, DollarSign, Award, AlertCircle,
 } from 'lucide-react';
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 import PurchaseDetailModal from '@/components/admin/PurchaseDetailModal';
@@ -378,17 +378,27 @@ export default function AdminPage() {
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6">
                     <h3 className="font-bold text-gray-900 mb-4">Users by Role</h3>
                     <div className="flex items-center gap-4">
-                      <ResponsiveContainer width="100%" height={180}>
+                      {/* Pie on the left; manual legend on the right so long role
+                          names (e.g. COMMUNITY PARTNER) don't wrap over the chart. */}
+                      <ResponsiveContainer width="50%" height={200}>
                         <PieChart>
-                          <Pie data={roleChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={80}>
+                          <Pie data={roleChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={42} outerRadius={75} paddingAngle={2}>
                             {roleChartData.map((entry, i) => (
                               <Cell key={entry.name} fill={BAR_PALETTE[entry.name] ?? PIE_PALETTE[i % PIE_PALETTE.length]} />
                             ))}
                           </Pie>
                           <Tooltip formatter={(v: number) => [fmt(v), 'Users']} />
-                          <Legend />
                         </PieChart>
                       </ResponsiveContainer>
+                      <div className="flex-1 space-y-1.5 min-w-0">
+                        {roleChartData.map((entry, i) => (
+                          <div key={entry.name} className="flex items-center gap-2 text-xs">
+                            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: BAR_PALETTE[entry.name] ?? PIE_PALETTE[i % PIE_PALETTE.length] }} />
+                            <span className="text-gray-600 flex-1 truncate">{entry.name.replace(/_/g, ' ')}</span>
+                            <span className="font-semibold text-gray-700">{fmt(entry.value)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
