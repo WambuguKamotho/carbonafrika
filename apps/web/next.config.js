@@ -39,7 +39,10 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              // blob: is needed by some web3/wallet SDKs (and Next.js) that load
+              // scripts/workers from blob URLs; without it MetaMask/WalletConnect
+              // flows can be blocked.
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
               // Google Fonts (Inter) stylesheet + Leaflet CSS from unpkg.
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
               "img-src 'self' data: blob: https:",
