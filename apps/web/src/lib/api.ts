@@ -23,8 +23,19 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!res.ok) {
-    if (res.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("ca_token");
+    // A 401 on an authenticated request means the session expired → bounce to login.
+    // But 401s from the credential endpoints (login, wallet verify, invite, reset)
+    // are real "invalid credentials" errors — let them surface to the form instead
+    // of mislabelling them "Session expired" and redirecting.
+    const isCredentialEndpoint =
+      path.startsWith("/api/auth/login") ||
+      path.startsWith("/api/auth/register") ||
+      path.startsWith("/api/auth/wallet") ||
+      path.startsWith("/api/auth/forgot-password") ||
+      path.startsWith("/api/auth/reset-password") ||
+      path.startsWith("/api/auth/redeem-invite");
+    if (res.status === 401 && !isCredentialEndpoint && typeof window !== "undefined") {
+      sessionStorage.removeItem("ca_token");
       localStorage.removeItem("ca_user");
       document.cookie = "ca_token=; path=/; max-age=0";
       window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
