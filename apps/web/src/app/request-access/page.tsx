@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Leaf, CheckCircle, Loader2, ShieldCheck, Globe, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
+import CorporateEmissionsCalculator from "@/components/ui/CorporateEmissionsCalculator";
 
 const USE_CASES = [
   "Annual ESG / sustainability report",
@@ -209,6 +210,12 @@ function RequestAccessInner() {
             </div>
           </div>
 
+          <div className="sm:col-span-2">
+            <CorporateEmissionsCalculator
+              onTonnageChange={t => setForm(f => ({ ...f, estimatedAnnualTons: String(t) }))}
+            />
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="label">Estimated annual offsets <span className="text-gray-400 font-normal">(tonnes)</span></label>
@@ -219,7 +226,7 @@ function RequestAccessInner() {
                 className="input"
                 value={form.estimatedAnnualTons}
                 onChange={e => setForm(f => ({ ...f, estimatedAnnualTons: e.target.value }))}
-                placeholder="e.g. 5000"
+                placeholder="e.g. 5000 — or use the calculator above"
               />
             </div>
             <div>

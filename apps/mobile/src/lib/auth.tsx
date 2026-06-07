@@ -18,10 +18,18 @@ interface LoginResponse {
   user: User;
 }
 
+interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  country: string;
+}
+
 interface AuthContextValue {
   user: User | null;
   loading: boolean;      // true during the initial token bootstrap
   signIn: (email: string, password: string) => Promise<User>;
+  signUp: (payload: RegisterPayload) => Promise<User>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -58,6 +66,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data.user;
   }, []);
 
+  const signUp = useCallback(async (payload: RegisterPayload) => {
+    const data = await api.post<LoginResponse>("/api/auth/register", { ...payload, role: "LANDOWNER" });
+    await setTokens(data.accessToken, data.refreshToken);
+    setUser(data.user);
+    registerForPush();
+    return data.user;
+  }, []);
+
   const signOut = useCallback(async () => {
     await unregisterPush();   // drop this device's token while the JWT is still valid
     await clearTokens();
@@ -70,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut, refresh }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, refresh }}>
       {children}
     </AuthContext.Provider>
   );

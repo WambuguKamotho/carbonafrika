@@ -69,6 +69,9 @@ export default function Dashboard() {
           <Text style={styles.headerSub}>Your projects</Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+          <Pressable onPress={() => router.push("/calculator")} hitSlop={10}>
+            <Text style={styles.settingsLink}>Calculator</Text>
+          </Pressable>
           <Pressable onPress={() => router.push("/settings")} hitSlop={10}>
             <Text style={styles.settingsLink}>Settings</Text>
           </Pressable>

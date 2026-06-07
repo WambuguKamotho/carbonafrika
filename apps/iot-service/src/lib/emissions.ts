@@ -92,6 +92,14 @@ async function fetchFuelFactor(fuelType: string): Promise<number> {
 const FALLBACK_KWH_FACTOR  = 0.498; // kg CO₂e/kWh — East Africa grid average
 const FALLBACK_FUEL_FACTOR = 1.83;  // kg CO₂e/kg  — generic solid fuel (wood/charcoal)
 
+// ── Travel cache ──────────────────────────────────────────────────────────────
+
+const travelCache = new Map<string, { co2eKg: number; at: number }>();
+
+// ── Freight cache ─────────────────────────────────────────────────────────────
+
+const freightCache = new Map<string, { co2eKg: number; at: number }>();
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export async function co2ForKwh(kwh: number, country: string): Promise<number> {
@@ -118,5 +126,78 @@ export async function co2ForFuelDisplaced(amountKg: number, fuelType = 'wood_log
   } catch (err) {
     console.warn(`[emissions] Falling back to default fuel factor:`, (err as Error).message);
     return amountKg * FALLBACK_FUEL_FACTOR;
+  }
+}
+
+export async function co2ForTravel(params: {
+  originCountry: string;
+  destinationCountry: string;
+  passengers?: number;
+  transportMode?: string;
+  cabinClass?: string;
+  returnTrip?: boolean;
+}): Promise<number> {
+  const key = JSON.stringify(params);
+  const cached = travelCache.get(key);
+  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.co2eKg;
+
+  if (!process.env.EMISSIONS_DEV_API_KEY) {
+    // Rough fallback: ~0.115 kgCO2e per km per passenger, ~1500km average trip
+    return (params.passengers ?? 1) * 0.115 * 1500 * (params.returnTrip ? 2 : 1);
+  }
+
+  try {
+    const qs = new URLSearchParams({
+      origin_country: params.originCountry,
+      destination_country: params.destinationCountry,
+      passengers: String(params.passengers ?? 1),
+      ...(params.transportMode && { transport_mode: params.transportMode }),
+      ...(params.cabinClass && { cabin_class: params.cabinClass }),
+      ...(params.returnTrip && { return_trip: 'true' }),
+    });
+    const res = await fetch(`${API_BASE}/travel/emissions?${qs}`, { headers: authHeader() });
+    if (!res.ok) throw new Error(`travel [${res.status}]`);
+    const json = await res.json() as { data: { attributes: { emissions: { co2e: number } } } };
+    const co2eKg = json.data.attributes.emissions.co2e;
+    travelCache.set(key, { co2eKg, at: Date.now() });
+    return co2eKg;
+  } catch (err) {
+    console.warn('[emissions] Travel fallback:', (err as Error).message);
+    return (params.passengers ?? 1) * 0.115 * 1500 * (params.returnTrip ? 2 : 1);
+  }
+}
+
+export async function co2ForFreight(params: {
+  originCountry: string;
+  destinationCountry: string;
+  weightKg: number;
+  transportMode?: string;
+}): Promise<number> {
+  const key = JSON.stringify(params);
+  const cached = freightCache.get(key);
+  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.co2eKg;
+
+  if (!process.env.EMISSIONS_DEV_API_KEY) {
+    // Rough fallback: ~0.1 kgCO2e per tonne-km, ~2000km average
+    return (params.weightKg / 1000) * 0.1 * 2000;
+  }
+
+  try {
+    const qs = new URLSearchParams({
+      origin_country: params.originCountry,
+      destination_country: params.destinationCountry,
+      weight: String(params.weightKg),
+      unit: 'kg',
+      ...(params.transportMode && { transport_mode: params.transportMode }),
+    });
+    const res = await fetch(`${API_BASE}/freight/emissions?${qs}`, { headers: authHeader() });
+    if (!res.ok) throw new Error(`freight [${res.status}]`);
+    const json = await res.json() as { data: { attributes: { emissions: { co2e: number } } } };
+    const co2eKg = json.data.attributes.emissions.co2e;
+    freightCache.set(key, { co2eKg, at: Date.now() });
+    return co2eKg;
+  } catch (err) {
+    console.warn('[emissions] Freight fallback:', (err as Error).message);
+    return (params.weightKg / 1000) * 0.1 * 2000;
   }
 }

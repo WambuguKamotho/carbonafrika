@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { randomBytes } from "crypto";
 import { authenticate } from "../middleware/authenticate";
-import { co2ForKwh, co2ForFuelDisplaced } from "../lib/emissions";
+import { co2ForKwh, co2ForFuelDisplaced, co2ForTravel, co2ForFreight } from "../lib/emissions";
 
 const router = Router();
 const db = new PrismaClient();
@@ -194,6 +194,91 @@ router.patch("/devices/:id", authenticate, async (req: Request, res: Response) =
   });
   const { deviceKey: _k, ...safeDevice } = updated;
   res.json({ success: true, data: safeDevice });
+});
+
+// ── POST /iot/emissions/calculate — Public corporate footprint calculator ──────
+// Accepts one of: electricity, fuel, travel, freight.
+// Used by the web buyer onboarding page and mobile (future) to estimate
+// how many carbon credits a buyer needs to offset their activity.
+router.post("/emissions/calculate", async (req: Request, res: Response) => {
+  const { type, ...params } = req.body as Record<string, unknown>;
+
+  try {
+    let co2eKg = 0;
+    let label = "";
+
+    switch (type) {
+      case "electricity": {
+        const kwh = Number(params.kwh);
+        const country = String(params.country ?? "KE");
+        if (!kwh || kwh <= 0) { res.status(422).json({ success: false, error: "kwh must be a positive number" }); return; }
+        co2eKg = await co2ForKwh(kwh, country);
+        label = `${kwh.toLocaleString()} kWh electricity in ${country}`;
+        break;
+      }
+      case "fuel": {
+        const amountKg = Number(params.amountKg);
+        const fuelType = String(params.fuelType ?? "diesel");
+        if (!amountKg || amountKg <= 0) { res.status(422).json({ success: false, error: "amountKg must be a positive number" }); return; }
+        co2eKg = await co2ForFuelDisplaced(amountKg, fuelType);
+        label = `${amountKg.toLocaleString()} kg ${fuelType}`;
+        break;
+      }
+      case "travel": {
+        const originCountry = String(params.originCountry ?? "");
+        const destinationCountry = String(params.destinationCountry ?? "");
+        if (!originCountry || !destinationCountry) { res.status(422).json({ success: false, error: "originCountry and destinationCountry are required" }); return; }
+        co2eKg = await co2ForTravel({
+          originCountry,
+          destinationCountry,
+          passengers: Number(params.passengers ?? 1),
+          transportMode: params.transportMode ? String(params.transportMode) : undefined,
+          cabinClass: params.cabinClass ? String(params.cabinClass) : undefined,
+          returnTrip: Boolean(params.returnTrip),
+        });
+        label = `Travel ${originCountry} → ${destinationCountry}`;
+        break;
+      }
+      case "freight": {
+        const originCountry = String(params.originCountry ?? "");
+        const destinationCountry = String(params.destinationCountry ?? "");
+        const weightKg = Number(params.weightKg);
+        if (!originCountry || !destinationCountry || !weightKg || weightKg <= 0) {
+          res.status(422).json({ success: false, error: "originCountry, destinationCountry, and weightKg are required" }); return;
+        }
+        co2eKg = await co2ForFreight({
+          originCountry,
+          destinationCountry,
+          weightKg,
+          transportMode: params.transportMode ? String(params.transportMode) : undefined,
+        });
+        label = `Freight ${weightKg.toLocaleString()} kg, ${originCountry} → ${destinationCountry}`;
+        break;
+      }
+      default:
+        res.status(422).json({ success: false, error: "type must be one of: electricity, fuel, travel, freight" });
+        return;
+    }
+
+    const co2eTonnes = co2eKg / 1000;
+    const creditsNeeded = Math.ceil(co2eTonnes);
+
+    res.json({
+      success: true,
+      data: {
+        type,
+        label,
+        co2eKg: Math.round(co2eKg * 100) / 100,
+        co2eTonnes: Math.round(co2eTonnes * 100) / 100,
+        creditsNeeded,
+        estimatedCostUsd: { low: creditsNeeded * 12, high: creditsNeeded * 25 },
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Calculation failed";
+    console.error("[iot-service] /emissions/calculate failed:", msg);
+    res.status(500).json({ success: false, error: msg });
+  }
 });
 
 export default router;

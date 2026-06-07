@@ -83,9 +83,11 @@ export default function Login() {
           </Pressable>
         </View>
 
-        <Text style={styles.footnote}>
-          New here? Register your project at kabon.africa, then sign in to track it on the go.
-        </Text>
+        <Pressable onPress={() => router.push("/register")} style={{ marginTop: 20 }}>
+          <Text style={styles.footnote}>
+            New here? <Text style={{ fontWeight: "700", color: "#86efac" }}>Create a free account →</Text>
+          </Text>
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
