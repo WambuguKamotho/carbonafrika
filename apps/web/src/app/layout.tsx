@@ -54,6 +54,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
           rel="stylesheet"
         />
+      </head>
+      <body>
         {PLAUSIBLE_DOMAIN && (
           <Script
             defer
@@ -62,8 +64,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             strategy="afterInteractive"
           />
         )}
-      </head>
-      <body>
         <QueryProvider>
           <SessionGuard />
           <div className="min-h-screen flex flex-col">
