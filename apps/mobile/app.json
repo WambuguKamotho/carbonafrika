@@ -13,7 +13,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "africa.kabon.app"
+      "bundleIdentifier": "africa.kabon.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Kabon uses your location to place your project on the map when you register it.",
+        "NSPhotoLibraryUsageDescription": "Kabon uses your photos to attach evidence images to your project.",
+        "NSCameraUsageDescription": "Kabon uses your camera to capture project evidence photos.",
+        "NSMicrophoneUsageDescription": "Kabon requires microphone access for video evidence recordings."
+      }
     },
     "android": {
       "package": "africa.kabon.app",
@@ -45,15 +52,16 @@
       "expo-notifications"
     ],
     "extra": {
-      "eas": {
-        "projectId": "4b784722-31c9-4452-9d9c-f9709a0df990"
-      },
       "router": {
         "origin": false
+      },
+      "eas": {
+        "projectId": "62a65229-d826-4409-8002-6fa663250d3e"
       }
     },
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "owner": "wambugukamotho"
   }
 }
