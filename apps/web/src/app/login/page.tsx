@@ -2,9 +2,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Leaf, Wallet, ArrowRight, Eye, EyeOff } from "lucide-react";
-import { loginWithEmail, loginWithWallet } from "@/lib/auth";
-import { connectWallet, signMessage } from "@/lib/web3";
+import { Leaf, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { loginWithEmail } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,7 +11,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [walletLoading, setWalletLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Post-login landing per role. Keep in sync with /dashboard's role redirect
@@ -37,17 +35,6 @@ export default function LoginPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally { setLoading(false); }
-  };
-
-  const handleWallet = async () => {
-    setWalletLoading(true); setError("");
-    try {
-      const { address, signer } = await connectWallet();
-      const { user } = await loginWithWallet(address, (msg) => signMessage(signer, msg));
-      redirectAfterLogin(user as { role?: string });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Wallet login failed");
-    } finally { setWalletLoading(false); }
   };
 
   return (
@@ -146,21 +133,6 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100" /></div>
-              <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-gray-400">or continue with</span></div>
-            </div>
-
-            <button onClick={handleWallet}
-              className="w-full flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-xl transition-all duration-150 shadow-sm"
-              disabled={walletLoading}>
-              {walletLoading ? (
-                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-              ) : (
-                <Wallet className="w-5 h-5 text-orange-500" />
-              )}
-              {walletLoading ? "Connecting wallet..." : "MetaMask / Web3 Wallet"}
-            </button>
           </div>
 
           <p className="text-center text-sm text-gray-500 mt-6">

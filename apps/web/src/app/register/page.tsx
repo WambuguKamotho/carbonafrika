@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Leaf, ArrowRight, TreePine, ShoppingBag } from "lucide-react";
+import { Leaf, ArrowRight, TreePine, ShoppingBag, Eye, EyeOff } from "lucide-react";
 import { register } from "@/lib/auth";
 
 // Note: BUYER is intentionally NOT a self-register option — corporate buyers
@@ -27,6 +27,7 @@ export default function RegisterPage() {
     role: "LANDOWNER",
     country: "",
   });
+  const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -152,19 +153,23 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="label">Password</label>
-              <input type="password" className="input" value={form.password} onChange={set("password")}
-                placeholder="At least 8 characters" minLength={8} required autoComplete="new-password" />
-            </div>
-            {form.role !== "BUYER" && (
-              <div>
-                <label className="label">Country</label>
-                <select className="input" value={form.country} onChange={set("country")} required>
-                  <option value="">Select your country</option>
-                  {africanCountries.sort().map((c) => <option key={c} value={c}>{c}</option>)}
-                  <option value="Other">Other African country</option>
-                </select>
+              <div className="relative">
+                <input type={showPass ? "text" : "password"} className="input pr-10" value={form.password} onChange={set("password")}
+                  placeholder="At least 8 characters" minLength={8} required autoComplete="new-password" />
+                <button type="button" onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-            )}
+            </div>
+            <div>
+              <label className="label">Country <span className="text-gray-400 font-normal">(optional)</span></label>
+              <select className="input" value={form.country} onChange={set("country")}>
+                <option value="">Select your country</option>
+                {africanCountries.sort().map((c) => <option key={c} value={c}>{c}</option>)}
+                <option value="Other">Other African country</option>
+              </select>
+            </div>
 
             <button type="submit" className="btn-primary w-full py-3 text-base mt-2" disabled={loading}>
               {loading ? (

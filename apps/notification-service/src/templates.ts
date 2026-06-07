@@ -4,6 +4,48 @@ interface EmailTemplate {
 }
 
 export const templates: Record<string, EmailTemplate> = {
+  welcome: {
+    subject: "Welcome to Kabon.Africa — your account is ready",
+    html: (d) => `
+      <!DOCTYPE html>
+      <html>
+      <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,Arial,sans-serif;">
+        <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:16px;border:1px solid #e5e7eb;overflow:hidden;">
+          <div style="background:#14532d;padding:32px;text-align:center;">
+            <div style="display:inline-block;background:#16a34a;border-radius:12px;padding:12px;margin-bottom:12px;">
+              <span style="font-size:24px;">🌿</span>
+            </div>
+            <h1 style="color:#fff;margin:0;font-size:24px;font-weight:900;">Welcome to Kabon.Africa</h1>
+          </div>
+          <div style="padding:32px;">
+            <p style="color:#374151;font-size:16px;margin-top:0;">Hi <strong>${d["name"]}</strong>,</p>
+            <p style="color:#374151;">Your account is live. You're one step closer to turning your land into a stream of income through verified carbon credits.</p>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin:24px 0;">
+              <p style="margin:0 0 12px;font-weight:700;color:#14532d;font-size:14px;">What to do next:</p>
+              <ol style="color:#374151;font-size:14px;margin:0;padding-left:20px;line-height:1.8;">
+                <li>Go to your <strong>Dashboard</strong> and create your first project</li>
+                <li>Upload your land documents and GPS boundaries</li>
+                <li>Submit for verification — our team reviews in 2–4 weeks</li>
+                <li>Once approved, credits are issued and listed on the marketplace</li>
+              </ol>
+            </div>
+            <div style="text-align:center;margin:28px 0;">
+              <a href="https://kabon.africa/dashboard" style="background:#16a34a;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:15px;display:inline-block;">
+                Go to your dashboard →
+              </a>
+            </div>
+            <p style="color:#6b7280;font-size:13px;margin-bottom:0;">
+              Need help? Reply to this email or visit <a href="https://kabon.africa" style="color:#16a34a;">kabon.africa</a>.
+            </p>
+          </div>
+          <div style="background:#f9fafb;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="color:#9ca3af;font-size:12px;margin:0;">© 2025 Kabon.Africa — restoring Africa, one credit at a time.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  },
   project_submitted: {
     subject: "Your project has been submitted — CarbonAfrika",
     html: (d) => `

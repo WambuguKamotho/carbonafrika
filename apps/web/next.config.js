@@ -30,23 +30,13 @@ const nextConfig = {
           { key: "Permissions-Policy",        value: "camera=(), microphone=(), geolocation=(self)" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           { key: "X-DNS-Prefetch-Control",    value: "on" },
-          // Content-Security-Policy. Deliberately permissive where the app needs it
-          // (inline styles for Tailwind/Recharts, https/wss for RPC + WalletConnect,
-          // https/data/blob images for Unsplash/IPFS/OSM tiles) while still blocking
-          // arbitrary script/object hosts and framing. 'unsafe-eval' is required by
-          // some web3 libs; tighten later with nonces if you drop them.
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              // blob: is needed by some web3/wallet SDKs (and Next.js) that load
-              // scripts/workers from blob URLs; without it MetaMask/WalletConnect
-              // flows can be blocked.
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
-              // Google Fonts (Inter) stylesheet + Leaflet CSS from unpkg.
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://plausible.io",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
               "img-src 'self' data: blob: https:",
-              // Google Fonts serves the actual font files from fonts.gstatic.com.
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' https: wss:",
               "frame-ancestors 'none'",
@@ -66,6 +56,7 @@ const nextConfig = {
     NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
     NEXT_PUBLIC_USDC_ADDRESS: process.env.NEXT_PUBLIC_USDC_ADDRESS,
     NEXT_PUBLIC_PLATFORM_TREASURY_ADDRESS: process.env.NEXT_PUBLIC_PLATFORM_TREASURY_ADDRESS,
+    NEXT_PUBLIC_PLAUSIBLE_DOMAIN: process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN,
   },
   // Proxy /api/* to individual microservices when no API gateway is running
   async rewrites() {

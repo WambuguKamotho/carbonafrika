@@ -3,11 +3,23 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
+import { Queue } from "bullmq";
 import { prisma } from "@carbonafrika/db";
+import { redisConnectionOptions } from "@carbonafrika/types";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../lib/jwt";
 import { generateNonce, buildSignMessage, recoverAddress } from "../lib/wallet";
 import { authenticate } from "../middleware/authenticate";
 import { encryptBankFields, decryptBankFields } from "../lib/crypto";
+
+let notificationQueue: Queue | null = null;
+try {
+  const connection = redisConnectionOptions("auth-service.auth");
+  const nq = new Queue("notification", { connection });
+  nq.on("error", (err) => console.warn("[auth] notificationQueue:", err.message));
+  notificationQueue = nq;
+} catch {
+  console.warn("[auth] notification queue init failed — Redis unavailable");
+}
 
 const router = Router();
 
@@ -88,6 +100,15 @@ router.post("/register", registerLimiter, async (req, res) => {
   const user = await prisma.user.create({
     data: { name, email, passwordHash, role: role ?? "LANDOWNER", country, phone },
   });
+
+  if (notificationQueue) {
+    notificationQueue.add("send-notification", {
+      userId: user.id,
+      type: "email",
+      template: "welcome",
+      data: { name: user.name },
+    }, { attempts: 3 }).catch((err: Error) => console.warn("[auth] welcome email enqueue failed:", err.message));
+  }
 
   const payload = { sub: user.id, role: user.role };
   res.status(201).json({
