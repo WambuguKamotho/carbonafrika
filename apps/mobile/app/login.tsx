@@ -19,17 +19,24 @@ export default function Login() {
   const [error, setError] = useState<string | null>(
     unsupported ? "This account type isn't supported in the app yet. Project Owners only for now." : null,
   );
+  const [unverified, setUnverified] = useState(false);
 
   async function submit() {
     if (!email.trim() || !password) { setError("Enter your email and password."); return; }
     setLoading(true);
     setError(null);
+    setUnverified(false);
     try {
       const user = await signIn(email.trim(), password);
       if (user.role === "LANDOWNER") router.replace("/dashboard");
       else { setError("This account type isn't supported in the app yet. Project Owners only for now."); }
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Sign in failed");
+      const msg = e instanceof ApiError ? e.message : "Sign in failed";
+      if (msg.toLowerCase().includes("verify")) {
+        setUnverified(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -49,6 +56,14 @@ export default function Login() {
         <View style={styles.card}>
           {error && (
             <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>
+          )}
+          {unverified && (
+            <View style={[styles.errorBox, { backgroundColor: "#fffbeb", borderColor: "#fcd34d" }]}>
+              <Text style={[styles.errorText, { color: "#92400e" }]}>
+                📧 Your email isn't verified yet. Check your inbox for the verification link we sent when you registered.{"\n\n"}
+                Visit kabon.africa/verify-email on a browser to request a new link.
+              </Text>
+            </View>
           )}
 
           <Text style={styles.label}>Email</Text>

@@ -2,8 +2,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Leaf, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Leaf, ArrowRight, Eye, EyeOff, Mail } from "lucide-react";
 import { loginWithEmail } from "@/lib/auth";
+import { api } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +13,9 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [unverified, setUnverified] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   // Post-login landing per role. Keep in sync with /dashboard's role redirect
   // and /redeem-invite's role redirect so all three entry points behave the same.
@@ -28,13 +32,26 @@ export default function LoginPage() {
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); setError("");
+    setLoading(true); setError(""); setUnverified(false);
     try {
       const { user } = await loginWithEmail(email, password);
       redirectAfterLogin(user as { role?: string });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const msg = err instanceof Error ? err.message : "Login failed";
+      if (msg.toLowerCase().includes("verify")) {
+        setUnverified(true);
+      } else {
+        setError(msg);
+      }
     } finally { setLoading(false); }
+  };
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    try {
+      await api.post("/api/auth/resend-verify", { email });
+      setResendSent(true);
+    } finally { setResendLoading(false); }
   };
 
   return (
@@ -97,6 +114,22 @@ export default function LoginPage() {
               <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-6 flex items-start gap-2">
                 <span className="mt-0.5">⚠️</span>
                 <span>{error}</span>
+              </div>
+            )}
+            {unverified && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm mb-6">
+                <div className="flex items-start gap-2 text-amber-800 mb-2">
+                  <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>Your email isn't verified yet. Check your inbox for the link we sent.</span>
+                </div>
+                {resendSent ? (
+                  <p className="text-xs text-amber-700 pl-6">New link sent — check your inbox.</p>
+                ) : (
+                  <button onClick={handleResend} disabled={resendLoading}
+                    className="ml-6 text-xs font-semibold text-amber-800 underline hover:text-amber-900">
+                    {resendLoading ? "Sending…" : "Resend verification email"}
+                  </button>
+                )}
               </div>
             )}
 

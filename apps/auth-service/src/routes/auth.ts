@@ -80,7 +80,28 @@ const loginSchema = z.object({
   password: z.string(),
 });
 
-// Email/password register
+const resendVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many resend requests — try again later" },
+});
+
+function enqueueVerifyEmail(userId: string, name: string, token: string) {
+  if (!notificationQueue) return;
+  const appUrl = process.env.APP_URL ?? "https://kabon.africa";
+  const verifyUrl = `${appUrl}/verify-email?token=${token}`;
+  notificationQueue.add("send-notification", {
+    userId,
+    type: "email",
+    template: "verify_email",
+    data: { name, verifyUrl },
+  }, { attempts: 3 }).catch((err: Error) => console.warn("[auth] verify email enqueue failed:", err.message));
+}
+
+// Email/password register — creates account and sends verification email.
+// No tokens are issued here; the user must verify before logging in.
 router.post("/register", registerLimiter, async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -97,28 +118,101 @@ router.post("/register", registerLimiter, async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const verifyToken = crypto.randomBytes(32).toString("hex");
+  const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role: role ?? "LANDOWNER", country, phone },
+    data: {
+      name, email, passwordHash,
+      role: role ?? "LANDOWNER",
+      country, phone,
+      emailVerified: false,
+      emailVerifyToken: verifyToken,
+      emailVerifyExpiry: verifyExpiry,
+    },
   });
 
+  enqueueVerifyEmail(user.id, user.name, verifyToken);
+
+  res.status(201).json({
+    success: true,
+    data: { message: "Account created. Check your email to verify before logging in." },
+  });
+});
+
+// Verify email — consume token, activate account, return JWTs so the user
+// is logged in immediately after clicking the link.
+router.get("/verify-email", async (req, res) => {
+  const token = String(req.query.token ?? "");
+  if (!token) {
+    res.status(400).json({ success: false, error: "Verification token required" });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({ where: { emailVerifyToken: token } });
+  if (!user) {
+    res.status(404).json({ success: false, error: "Invalid or already-used verification link" });
+    return;
+  }
+  if (user.emailVerifyExpiry && user.emailVerifyExpiry < new Date()) {
+    res.status(410).json({ success: false, error: "Verification link has expired — request a new one below" });
+    return;
+  }
+
+  const updated = await prisma.user.update({
+    where: { id: user.id },
+    data: { emailVerified: true, emailVerifyToken: null, emailVerifyExpiry: null },
+    select: { id: true, name: true, email: true, role: true },
+  });
+
+  // Send the welcome email now that they're actually verified
   if (notificationQueue) {
     notificationQueue.add("send-notification", {
-      userId: user.id,
+      userId: updated.id,
       type: "email",
       template: "welcome",
-      data: { name: user.name },
+      data: { name: updated.name },
     }, { attempts: 3 }).catch((err: Error) => console.warn("[auth] welcome email enqueue failed:", err.message));
   }
 
-  const payload = { sub: user.id, role: user.role };
-  res.status(201).json({
+  const payload = { sub: updated.id, role: updated.role };
+  res.json({
     success: true,
     data: {
       accessToken: signAccessToken(payload),
       refreshToken: signRefreshToken(payload),
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: updated,
     },
   });
+});
+
+// Resend verification email — for users who lost the original.
+router.post("/resend-verify", resendVerifyLimiter, async (req, res) => {
+  const parsed = z.object({ email: z.string().email() }).safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: "Valid email required" });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+
+  // Always respond success to avoid user enumeration
+  if (!user || user.emailVerified) {
+    res.json({ success: true, data: { message: "If that email exists and is unverified, a new link is on its way." } });
+    return;
+  }
+
+  const verifyToken = crypto.randomBytes(32).toString("hex");
+  const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { emailVerifyToken: verifyToken, emailVerifyExpiry: verifyExpiry },
+  });
+
+  enqueueVerifyEmail(user.id, user.name, verifyToken);
+
+  res.json({ success: true, data: { message: "If that email exists and is unverified, a new link is on its way." } });
 });
 
 // Public buyer access request — every buyer comes through this funnel.
@@ -312,6 +406,15 @@ router.post("/login", loginLimiter, async (req, res) => {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
     res.status(401).json({ success: false, error: "Invalid credentials" });
+    return;
+  }
+
+  if (!user.emailVerified) {
+    res.status(403).json({
+      success: false,
+      error: "Please verify your email before logging in. Check your inbox or request a new link.",
+      code: "email_not_verified",
+    });
     return;
   }
 

@@ -110,6 +110,13 @@ model User {
   resetToken       String?
   resetTokenExpiry DateTime?
 
+  // Email verification — required before a self-registered user can log in.
+  // Wallet-authenticated users and admin-invited users skip this (they never set
+  // a password through the /register flow, so emailVerified defaults true for them).
+  emailVerified      Boolean   @default(false)
+  emailVerifyToken   String?   @unique
+  emailVerifyExpiry  DateTime?
+
   // Sectors a VERIFIER is authorised to assess. Empty = all sectors (back-compat).
   // Enforced when a verification is assigned, so a clean-energy reviewer can't
   // take a land-restoration project and vice-versa.

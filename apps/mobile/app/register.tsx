@@ -4,9 +4,8 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/lib/auth";
+import { api, ApiError } from "@/lib/api";
 import { colors } from "@/lib/config";
-import { ApiError } from "@/lib/api";
 
 const AFRICAN_COUNTRIES = [
   "Angola","Benin","Botswana","Burkina Faso","Burundi","Cameroon","Cape Verde",
@@ -19,13 +18,14 @@ const AFRICAN_COUNTRIES = [
 ].sort();
 
 export default function Register() {
-  const { signUp } = useAuth();
   const router = useRouter();
 
   const [form, setForm] = useState({ name: "", email: "", password: "", country: "" });
   const [countryOpen, setCountryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
 
   const set = (field: keyof typeof form) => (val: string) =>
     setForm(f => ({ ...f, [field]: val }));
@@ -39,13 +39,44 @@ export default function Register() {
     setLoading(true);
     setError(null);
     try {
-      await signUp({ name: form.name.trim(), email: form.email.trim(), password: form.password, country: form.country });
-      router.replace("/dashboard");
+      await api.post("/api/auth/register", {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        country: form.country,
+        role: "LANDOWNER",
+      });
+      setSubmittedEmail(form.email.trim());
+      setSubmitted(true);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (submitted) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.forest900, alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <View style={[styles.card, { alignItems: "center" }]}>
+          <Text style={{ fontSize: 40, marginBottom: 12 }}>📧</Text>
+          <Text style={{ fontSize: 22, fontWeight: "900", color: colors.ink, textAlign: "center", marginBottom: 8 }}>
+            Check your inbox
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.body, textAlign: "center", lineHeight: 20, marginBottom: 20 }}>
+            We sent a verification link to{"\n"}
+            <Text style={{ fontWeight: "700", color: colors.ink }}>{submittedEmail}</Text>
+            {"\n\n"}Tap the link in that email to activate your account. The link expires in 24 hours.
+          </Text>
+          <Text style={{ fontSize: 12, color: colors.faint, textAlign: "center", marginBottom: 24 }}>
+            Didn't get it? Check your spam folder or go to kabon.africa/verify-email to request a new link.
+          </Text>
+          <Pressable style={styles.button} onPress={() => router.push("/login")}>
+            <Text style={styles.buttonText}>Back to sign in</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
   }
 
   if (countryOpen) {

@@ -1,9 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Leaf, ArrowRight, TreePine, ShoppingBag, Eye, EyeOff } from "lucide-react";
-import { register } from "@/lib/auth";
+import { Leaf, ArrowRight, TreePine, ShoppingBag, Eye, EyeOff, Mail } from "lucide-react";
+import { api } from "@/lib/api";
 
 // Note: BUYER is intentionally NOT a self-register option — corporate buyers
 // come through /request-access (sales-led KYC). Only LANDOWNER (and VERIFIER
@@ -18,10 +17,6 @@ const africanCountries = [
 ];
 
 export default function RegisterPage() {
-  const router = useRouter();
-  // Self-registration is LANDOWNER-only by design. BUYER and COMMUNITY_PARTNER
-  // come through their application flows; VERIFIER, ADMIN, VIEWER are admin-promoted.
-  // Server enforces this too — see auth.ts register schema.
   const [form, setForm] = useState({
     name: "", email: "", password: "",
     role: "LANDOWNER",
@@ -30,6 +25,8 @@ export default function RegisterPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
 
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [field]: e.target.value }));
@@ -38,12 +35,43 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true); setError("");
     try {
-      await register(form);
-      router.push("/dashboard");
+      await api.post("/api/auth/register", {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        country: form.country || undefined,
+        role: "LANDOWNER",
+      });
+      setSubmittedEmail(form.email.trim());
+      setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally { setLoading(false); }
   };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+        <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-10 max-w-md w-full text-center">
+          <div className="w-14 h-14 bg-forest-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <Mail className="w-7 h-7 text-forest-600" />
+          </div>
+          <h1 className="text-2xl font-black text-gray-900 mb-3">Check your inbox</h1>
+          <p className="text-sm text-gray-500 leading-relaxed mb-6">
+            We've sent a verification link to <strong className="text-gray-800">{submittedEmail}</strong>.
+            Click it to activate your account — the link expires in 24 hours.
+          </p>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs text-gray-500 text-left space-y-1 mb-6">
+            <p>• Check your spam/junk folder if you don't see it.</p>
+            <p>• Make sure the email matches what you registered with.</p>
+          </div>
+          <Link href="/login" className="btn-secondary w-full flex items-center justify-center py-3">
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100vh] flex">
