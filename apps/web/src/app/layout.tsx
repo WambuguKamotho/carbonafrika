@@ -34,15 +34,12 @@ export const metadata: Metadata = {
     siteName: "Kabon.Africa",
     type: "website",
     locale: "en_US",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Kabon.Africa" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Kabon.Africa: Restore Africa, Earn Carbon Credits",
     description: "Restore Africa. Earn Carbon Credits.",
-    images: ["/og.png"],
   },
-  icons: { icon: "/favicon.ico" },
 };
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;

@@ -20,6 +20,7 @@ const ROUTES = [
   // Public conversion funnels — worth indexing
   "/request-access",
   "/partner-application",
+  "/register",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
