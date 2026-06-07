@@ -13,6 +13,7 @@ import {
 import RetirementCertificate from "@/components/ui/RetirementCertificate";
 import RetirementIntentModal from "@/components/ui/RetirementIntentModal";
 import ResellRequestModal from "@/components/portfolio/ResellRequestModal";
+import EmissionsTracker from "@/components/ui/EmissionsTracker";
 
 interface ResaleRequest {
   id: string; status: "REQUESTED" | "APPROVED" | "REJECTED" | "CANCELLED";
@@ -258,6 +259,9 @@ export default function PortfolioPage() {
                 </div>
               </div>
             </div>
+
+            {/* Emissions tracker */}
+            <EmissionsTracker retiredTons={retiredTons} />
 
             {/* Charts row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
