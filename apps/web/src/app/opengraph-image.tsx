@@ -13,36 +13,10 @@ export default function OGImage() {
           height: 630,
           display: "flex",
           flexDirection: "column",
-          background: "#052e16",
-          position: "relative",
+          background: "linear-gradient(135deg, #052e16 0%, #14532d 60%, #052e16 100%)",
           fontFamily: "sans-serif",
         }}
       >
-        {/* Background gradient blobs */}
-        <div
-          style={{
-            position: "absolute",
-            top: -80,
-            left: -80,
-            width: 500,
-            height: 500,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, #15803d44 0%, transparent 70%)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: -120,
-            right: -80,
-            width: 600,
-            height: 600,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, #16a34a33 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Content */}
         <div
           style={{
             display: "flex",
@@ -75,18 +49,29 @@ export default function OGImage() {
 
           {/* Main headline */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div
-              style={{
-                fontSize: 72,
-                fontWeight: 900,
-                color: "#fff",
-                lineHeight: 1.05,
-                letterSpacing: "-2px",
-              }}
-            >
-              Restore Africa.
-              <br />
-              <span style={{ color: "#4ade80" }}>Earn Carbon Credits.</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              <span
+                style={{
+                  fontSize: 72,
+                  fontWeight: 900,
+                  color: "#fff",
+                  lineHeight: 1.05,
+                  letterSpacing: "-2px",
+                }}
+              >
+                Restore Africa.
+              </span>
+              <span
+                style={{
+                  fontSize: 72,
+                  fontWeight: 900,
+                  color: "#4ade80",
+                  lineHeight: 1.05,
+                  letterSpacing: "-2px",
+                }}
+              >
+                Earn Carbon Credits.
+              </span>
             </div>
             <div style={{ fontSize: 26, color: "#86efac", fontWeight: 400, maxWidth: 700, lineHeight: 1.4 }}>
               Connect African land stewards with global carbon credit buyers. Verified. On-chain. Direct.
@@ -94,7 +79,7 @@ export default function OGImage() {
           </div>
 
           {/* Stats row */}
-          <div style={{ display: "flex", gap: 40 }}>
+          <div style={{ display: "flex", gap: 24 }}>
             {[
               { v: "$12–25", l: "Per tonne earned" },
               { v: "54+", l: "African countries" },
