@@ -116,7 +116,7 @@ function RedeemInviteInner() {
               <p className="text-sm text-gray-500 mb-6 leading-relaxed">
                 For security, invites are valid for 7 days. Reply to your invite email and we'll send a fresh link.
               </p>
-              <Link href={`mailto:hello@kabon.africa?subject=Resend my invite&body=Email%3A%20${encodeURIComponent(meta.email)}`}
+              <Link href={`mailto:kabon@kabon.africa?subject=Resend my invite&body=Email%3A%20${encodeURIComponent(meta.email)}`}
                 className="btn-secondary w-full">Email the team</Link>
             </div>
           ) : (

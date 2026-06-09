@@ -203,7 +203,7 @@ const templates: Record<string, (d: Record<string, unknown>) => EmailTemplate> =
 
 async function sendEmail(to: string, _name: string, template: EmailTemplate): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from   = process.env.FROM_EMAIL ?? "CarbonAfrika <noreply@carbonafrika.com>";
+  const from   = process.env.FROM_EMAIL ?? "Kabon.Africa <admin@kabon.africa>";
 
   if (!apiKey) {
     console.log(`[notification] (dev — no RESEND_API_KEY) Would send to ${to}: "${template.subject}"`);
@@ -229,7 +229,7 @@ async function sendEmail(to: string, _name: string, template: EmailTemplate): Pr
           <hr style="border:none;border-top:1px solid #f3f4f6;margin:32px 0" />
           <p style="color:#9ca3af;font-size:12px">
             CarbonAfrika · Verified African Carbon Credits ·
-            <a href="https://carbonafrika.com" style="color:#15803d">carbonafrika.com</a>
+            <a href="https://kabon.africa" style="color:#15803d">kabon.africa</a>
           </p>
         </div>
       `,

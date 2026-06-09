@@ -52,7 +52,7 @@ const notificationWorker = new Worker(
       }
 
       await resend.emails.send({
-        from: process.env.FROM_EMAIL || "noreply@carbonafrika.com",
+        from: process.env.FROM_EMAIL || "admin@kabon.africa",
         to: user.email,
         subject: tmpl.subject,
         html: tmpl.html(data),

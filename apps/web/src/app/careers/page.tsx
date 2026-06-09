@@ -161,11 +161,11 @@ export default function CareersPage() {
             Tell us what you'd own and why.
           </p>
           <a
-            href="mailto:careers@kabon.africa?subject=General%20application"
+            href="mailto:kabon@kabon.africa?subject=General%20application"
             className="inline-flex items-center gap-2 bg-white text-forest-900 font-bold px-6 py-2.5 rounded-xl hover:bg-forest-50 transition-colors"
           >
             <Mail className="w-4 h-4" />
-            careers@kabon.africa
+            kabon@kabon.africa
           </a>
         </section>
 
@@ -182,7 +182,7 @@ export default function CareersPage() {
 
 function RoleCard({ role }: { role: Role }) {
   const applyHref =
-    `mailto:careers@kabon.africa?subject=${encodeURIComponent(`Application: ${role.title}`)}`;
+    `mailto:kabon@kabon.africa?subject=${encodeURIComponent(`Application: ${role.title}`)}`;
 
   return (
     <article id={role.slug} className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 scroll-mt-24">
