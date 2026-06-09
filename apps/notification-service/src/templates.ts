@@ -82,6 +82,42 @@ export const templates: Record<string, EmailTemplate> = {
       </html>
     `,
   },
+  forgot_password: {
+    subject: "Reset your Kabon.Africa password",
+    html: (d) => `
+      <!DOCTYPE html>
+      <html>
+      <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,Arial,sans-serif;">
+        <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:16px;border:1px solid #e5e7eb;overflow:hidden;">
+          <div style="background:#14532d;padding:32px;text-align:center;">
+            <div style="display:inline-block;background:#16a34a;border-radius:12px;padding:12px;margin-bottom:12px;">
+              <span style="font-size:24px;">🌿</span>
+            </div>
+            <h1 style="color:#fff;margin:0;font-size:24px;font-weight:900;">Reset your password</h1>
+          </div>
+          <div style="padding:32px;">
+            <p style="color:#374151;font-size:16px;margin-top:0;">Hi <strong>${d["name"]}</strong>,</p>
+            <p style="color:#374151;">We received a request to reset your Kabon.Africa password. Click the button below to set a new one.</p>
+            <div style="text-align:center;margin:32px 0;">
+              <a href="${d["resetUrl"]}" style="background:#16a34a;color:#fff;text-decoration:none;padding:16px 32px;border-radius:10px;font-weight:700;font-size:16px;display:inline-block;">
+                Reset my password →
+              </a>
+            </div>
+            <p style="color:#6b7280;font-size:13px;">This link expires in <strong>1 hour</strong>. If you didn't request a password reset, you can safely ignore this email — your account is safe.</p>
+            <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;" />
+            <p style="color:#9ca3af;font-size:12px;word-break:break-all;">
+              Or copy this link into your browser:<br/>
+              <a href="${d["resetUrl"]}" style="color:#16a34a;">${d["resetUrl"]}</a>
+            </p>
+          </div>
+          <div style="background:#f9fafb;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="color:#9ca3af;font-size:12px;margin:0;">© 2025 Kabon.Africa — restoring Africa, one credit at a time.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  },
   project_submitted: {
     subject: "Your project has been submitted — CarbonAfrika",
     html: (d) => `

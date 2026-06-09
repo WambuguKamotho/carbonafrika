@@ -869,9 +869,16 @@ router.post("/forgot-password", resetLimiter, async (req, res) => {
     data: { resetToken: token, resetTokenExpiry: expiry },
   });
 
-  const resetUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/reset-password?token=${token}`;
-  // In production this would send an email via the notification worker
-  console.log(`[auth] Password reset link for ${email}: ${resetUrl}`);
+  const resetUrl = `${process.env.APP_URL ?? "https://kabon.africa"}/reset-password?token=${token}`;
+
+  if (notificationQueue) {
+    notificationQueue.add("send-notification", {
+      userId: user.id,
+      type: "email",
+      template: "forgot_password",
+      data: { name: user.name, resetUrl },
+    }, { attempts: 3 }).catch((err: Error) => console.warn("[auth] forgot-password email enqueue failed:", err.message));
+  }
 
   res.json({ success: true, data: { message: "If that email is registered you will receive a reset link" } });
 });
