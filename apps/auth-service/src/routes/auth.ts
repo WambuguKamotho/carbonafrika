@@ -321,6 +321,17 @@ router.post("/newsletter", newsletterLimiter, async (req, res) => {
     update: { source: parsed.data.source ?? undefined },
   });
 
+  // Sync to Resend audience for newsletter sending
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  const resendKey  = process.env.RESEND_API_KEY;
+  if (audienceId && resendKey) {
+    fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${resendKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: parsed.data.email.toLowerCase(), unsubscribed: false }),
+    }).catch((err: Error) => console.warn("[auth] Resend audience sync failed:", err.message));
+  }
+
   res.status(201).json({ success: true, message: "You're subscribed." });
 });
 
