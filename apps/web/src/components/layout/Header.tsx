@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Menu, X, Leaf, LogOut, ShieldCheck, Settings, ClipboardCheck,
   BarChart2, LayoutDashboard, Users, TreePine, BadgeCheck, Store, Mail, FileText, Repeat, Shield, ScrollText,
