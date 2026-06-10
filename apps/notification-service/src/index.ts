@@ -26,17 +26,24 @@ app.get("/health", (_req, res) => res.json({ status: "ok", service: "notificatio
 const notificationWorker = new Worker(
   "notification",
   async (job) => {
-    const { userId, type, template, data } = job.data as {
+    const { userId, type, template, data, to: toOverride } = job.data as {
       userId: string;
       type: "email" | "sms";
       template: string;
       data: Record<string, unknown>;
+      to?: string;
     };
 
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
-    if (!user?.email) {
-      console.log(`[notification] No email for user ${userId}, skipping`);
-      return;
+    // toOverride allows sending to a fixed address (e.g. admin notifications)
+    // without looking up a user record.
+    let recipient = toOverride;
+    if (!recipient) {
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+      if (!user?.email) {
+        console.log(`[notification] No email for user ${userId}, skipping`);
+        return;
+      }
+      recipient = user.email;
     }
 
     if (type === "email") {
@@ -47,18 +54,18 @@ const notificationWorker = new Worker(
       }
 
       if (!resend) {
-        console.log(`[notification] No RESEND_API_KEY — skipping email to ${user.email} (${template})`);
+        console.log(`[notification] No RESEND_API_KEY — skipping email to ${recipient} (${template})`);
         return;
       }
 
       await resend.emails.send({
-        from: process.env.FROM_EMAIL || "admin@kabon.africa",
-        to: user.email,
+        from: process.env.FROM_EMAIL || "noreply@kabon.africa",
+        to: recipient,
         subject: tmpl.subject,
         html: tmpl.html(data),
       });
 
-      console.log(`[notification] Email sent to ${user.email} (${template})`);
+      console.log(`[notification] Email sent to ${recipient} (${template})`);
     }
   },
   { connection, concurrency: 10, drainDelay: 30000, stalledInterval: 30000 }

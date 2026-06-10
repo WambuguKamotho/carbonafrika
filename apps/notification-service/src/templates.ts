@@ -82,6 +82,44 @@ export const templates: Record<string, EmailTemplate> = {
       </html>
     `,
   },
+  admin_new_registration: {
+    subject: "New user registered on Kabon.Africa",
+    html: (d) => `
+      <!DOCTYPE html>
+      <html>
+      <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,Arial,sans-serif;">
+        <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:16px;border:1px solid #e5e7eb;overflow:hidden;">
+          <div style="background:#14532d;padding:32px;text-align:center;">
+            <div style="display:inline-block;background:#16a34a;border-radius:12px;padding:12px;margin-bottom:12px;">
+              <span style="font-size:24px;">🌿</span>
+            </div>
+            <h1 style="color:#fff;margin:0;font-size:22px;font-weight:900;">New Registration</h1>
+          </div>
+          <div style="padding:32px;">
+            <p style="color:#374151;font-size:15px;margin-top:0;">A new user has registered on Kabon.Africa.</p>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin:20px 0;">
+              <table style="width:100%;border-collapse:collapse;font-size:14px;color:#374151;">
+                <tr><td style="padding:6px 0;font-weight:600;width:100px;">Name</td><td>${d["name"]}</td></tr>
+                <tr><td style="padding:6px 0;font-weight:600;">Email</td><td>${d["email"]}</td></tr>
+                <tr><td style="padding:6px 0;font-weight:600;">Country</td><td>${d["country"] ?? "—"}</td></tr>
+                <tr><td style="padding:6px 0;font-weight:600;">Role</td><td>${d["role"]}</td></tr>
+                <tr><td style="padding:6px 0;font-weight:600;">Registered</td><td>${d["registeredAt"]}</td></tr>
+              </table>
+            </div>
+            <div style="text-align:center;margin:28px 0;">
+              <a href="${d["adminUrl"]}" style="background:#16a34a;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:15px;display:inline-block;">
+                View user in admin panel →
+              </a>
+            </div>
+          </div>
+          <div style="background:#f9fafb;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="color:#9ca3af;font-size:12px;margin:0;">© 2025 Kabon.Africa — admin notification</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  },
   forgot_password: {
     subject: "Reset your Kabon.Africa password",
     html: (d) => `

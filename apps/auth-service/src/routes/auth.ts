@@ -134,6 +134,26 @@ router.post("/register", registerLimiter, async (req, res) => {
 
   enqueueVerifyEmail(user.id, user.name, verifyToken);
 
+  // Notify admin of new registration
+  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@kabon.africa";
+  const appUrl = process.env.APP_URL ?? "https://kabon.africa";
+  if (notificationQueue) {
+    notificationQueue.add("send-notification", {
+      userId: user.id,
+      type: "email",
+      template: "admin_new_registration",
+      to: adminEmail,
+      data: {
+        name: user.name,
+        email: user.email,
+        country: user.country ?? null,
+        role: user.role,
+        registeredAt: new Date().toUTCString(),
+        adminUrl: `${appUrl}/admin/users`,
+      },
+    }, { attempts: 3 }).catch((err: Error) => console.warn("[auth] admin registration notify failed:", err.message));
+  }
+
   res.status(201).json({
     success: true,
     data: { message: "Account created. Check your email to verify before logging in." },
