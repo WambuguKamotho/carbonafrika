@@ -45,7 +45,7 @@ export default function CarbonCalculator() {
           <Calculator className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h2 className="font-bold text-gray-900">Earnings Calculator</h2>
+          <h3 className="font-bold text-gray-900">Earnings Calculator</h3>
           <p className="text-xs text-gray-500">Estimate your annual carbon credit income</p>
         </div>
       </div>
@@ -53,8 +53,8 @@ export default function CarbonCalculator() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
         {/* Practice type */}
         <div className="sm:col-span-1">
-          <label className="label">Practice type</label>
-          <select className="input text-sm" value={type} onChange={e => setType(e.target.value)}>
+          <label htmlFor="calc-type" className="label">Practice type</label>
+          <select id="calc-type" className="input text-sm" value={type} onChange={e => setType(e.target.value)}>
             <optgroup label="Land Restoration">
               {["FOREST","SAVANNA","GRASSLAND","FARMLAND","WETLAND","MANGROVE","BIOCHARCOAL"].map(k => (
                 <option key={k} value={k}>{PRACTICES[k].label}</option>
@@ -70,8 +70,9 @@ export default function CarbonCalculator() {
 
         {/* Quantity */}
         <div>
-          <label className="label">{cfg.unitLabel}</label>
+          <label htmlFor="calc-quantity" className="label">{cfg.unitLabel}</label>
           <input
+            id="calc-quantity"
             type="number" min="0" step="any"
             className="input text-sm"
             placeholder={`e.g. ${cfg.unit === "ha" ? "50" : cfg.unit === "kW" ? "10" : "20"}`}
@@ -82,10 +83,11 @@ export default function CarbonCalculator() {
 
         {/* Price slider */}
         <div>
-          <label className="label flex items-center justify-between">
+          <label htmlFor="calc-price" className="label flex items-center justify-between">
             Price per tonne <span className="text-forest-700 font-bold">${price}</span>
           </label>
           <input
+            id="calc-price"
             type="range" min="8" max="28" step="1"
             className="w-full accent-forest-600 mt-2"
             value={price}

@@ -18,22 +18,22 @@ const landTypes = [
   {
     icon: "🌳", label: "Indigenous Forests", desc: "Restore native tree species and biodiversity corridors",
     color: "from-forest-600 to-forest-800",
-    photo: "https://images.unsplash.com/photo-1507041957456-9c397ce39c97?w=600&q=80&auto=format&fit=crop",
+    photo: "https://images.unsplash.com/photo-1507041957456-9c397ce39c97?w=600&q=65&auto=format&fit=crop&fm=webp",
   },
   {
     icon: "🌿", label: "Savannas", desc: "Protect and regenerate vast African grasslands",
     color: "from-savanna-500 to-savanna-700",
-    photo: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=600&q=80&auto=format&fit=crop",
+    photo: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=600&q=65&auto=format&fit=crop&fm=webp",
   },
   {
     icon: "🌾", label: "Grasslands", desc: "Revive carbon-storing native grass ecosystems",
     color: "from-earth-500 to-earth-700",
-    photo: "https://images.unsplash.com/photo-1502088513349-3ff6482aa816?w=600&q=80&auto=format&fit=crop",
+    photo: "https://images.unsplash.com/photo-1502088513349-3ff6482aa816?w=600&q=65&auto=format&fit=crop&fm=webp",
   },
   {
     icon: "🌱", label: "Efficient Farming", desc: "Agroforestry and regenerative agriculture for profit",
     color: "from-forest-500 to-forest-700",
-    photo: "https://images.unsplash.com/photo-1582409284161-5bf7c520dce9?w=600&q=80&auto=format&fit=crop",
+    photo: "https://images.unsplash.com/photo-1582409284161-5bf7c520dce9?w=600&q=65&auto=format&fit=crop&fm=webp",
   },
 ];
 
@@ -64,13 +64,15 @@ export default async function HomePage() {
     <div className="flex flex-col">
 
       {/* ── Hero ── */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-forest-950">
-        {/* Real photo background */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-forest-950" style={{ contain: "layout" }}>
+        {/* LCP hero image — fetchpriority=high so the browser fetches it in the first network burst */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=1920&q=80&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=1200&q=60&auto=format&fit=crop&fm=webp"
           alt="African savanna landscape"
           className="absolute inset-0 w-full h-full object-cover opacity-40"
+          fetchPriority="high"
+          decoding="sync"
         />
         {/* Dark + green overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-forest-950/80 via-forest-950/60 to-forest-950/90" />
@@ -146,9 +148,11 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1574169208507-84376144848b?w=1920&q=85&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1574169208507-84376144848b?w=1200&q=60&auto=format&fit=crop&fm=webp"
           alt="African landscape aerial"
           className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-forest-950/85 via-forest-950/70 to-savanna-900/80" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(0,0,0,0.35)_100%)]" />
@@ -173,7 +177,7 @@ export default async function HomePage() {
             Start earning from it today.
           </p>
 
-          <p className="text-base text-white/55 max-w-xl mx-auto mb-8 leading-relaxed">
+          <p className="text-base text-white/75 max-w-xl mx-auto mb-8 leading-relaxed">
             Every hectare of restored forest, savanna, or grassland produces verified carbon
             credits worth $12–$28 per tonne, paid directly to you.
           </p>
@@ -208,7 +212,7 @@ export default async function HomePage() {
               <div key={lt.label} className="group relative overflow-hidden rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 h-64 cursor-default">
                 {/* Photo */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={lt.photo} alt={lt.label} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={lt.photo} alt={lt.label} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
                 {/* Gradient overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-t ${lt.color} opacity-70 group-hover:opacity-60 transition-opacity duration-300`} />
                 {/* Content */}
@@ -256,9 +260,11 @@ export default async function HomePage() {
         {/* Background image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600&q=80&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1200&q=55&auto=format&fit=crop&fm=webp"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
         {/* Deep overlay so feature cards stay readable */}
         <div className="absolute inset-0 bg-forest-950/85" />
@@ -320,9 +326,11 @@ export default async function HomePage() {
             {/* Background image */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="https://images.unsplash.com/photo-1560493676-04071c5f467b?w=1600&q=80&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1560493676-04071c5f467b?w=1200&q=55&auto=format&fit=crop&fm=webp"
               alt=""
               className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
             {/* Dark green overlay so text stays readable */}
             <div className="absolute inset-0 bg-forest-900/75" />

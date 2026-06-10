@@ -337,7 +337,10 @@ export default function Header() {
           )}
           <button
             className={`p-2 rounded-lg ${isAdmin || isHome ? "text-white" : "text-gray-700"}`}
-            onClick={() => setOpen(!open)}>
+            onClick={() => setOpen(!open)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="mobile-menu">
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -345,7 +348,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {open && (
-        <div className={`md:hidden border-t px-4 py-4 space-y-1 ${isAdmin ? "bg-gray-900 border-white/10" : "bg-white border-gray-100 shadow-lg"}`}>
+        <div id="mobile-menu" className={`md:hidden border-t px-4 py-4 space-y-1 ${isAdmin ? "bg-gray-900 border-white/10" : "bg-white border-gray-100 shadow-lg"}`}>
           {isAdmin ? (
             adminNavLinks.map((l) => (
               <Link key={l.href} href={l.href}
