@@ -30,6 +30,32 @@ app.get("/health", (_req, res) => res.json({ status: "ok", service: "notificatio
 
 const connection = { url: process.env.REDIS_URL! };
 
+// Maps a template + job data → short in-app notification content.
+// Returns null for templates that should not create an in-app notification (e.g. verify_email).
+function getInAppMeta(
+  template: string,
+  data: Record<string, unknown>,
+): { title: string; body: string; link?: string } | null {
+  switch (template) {
+    case "welcome":
+      return { title: "Welcome to Kabon.Africa", body: `Your account is live, ${data["name"]}.`, link: "/dashboard" };
+    case "project_submitted":
+      return { title: "Project submitted", body: `"${data["projectTitle"]}" is now under review.`, link: data["projectId"] ? `/projects/${data["projectId"]}` : "/dashboard" };
+    case "project_approved":
+      return { title: "Project approved!", body: `"${data["projectTitle"]}" has been verified — ${data["carbonTons"]} tonnes issued.`, link: data["projectId"] ? `/projects/${data["projectId"]}` : "/dashboard" };
+    case "project_rejected":
+      return { title: "Project update", body: `"${data["projectTitle"]}" could not be verified at this time.`, link: data["projectId"] ? `/projects/${data["projectId"]}` : "/dashboard" };
+    case "credit_sold":
+      return { title: "Credits sold!", body: `${data["tons"]} tonnes from "${data["projectTitle"]}" sold for ${data["totalPrice"]} ${data["currency"]}.`, link: "/dashboard" };
+    case "admin_new_registration":
+      return { title: "New registration", body: `${data["name"]} (${data["email"]}) just signed up.`, link: (data["adminUrl"] as string) || "/admin/users" };
+    case "forgot_password":
+      return { title: "Password reset requested", body: "A password reset link has been sent to your email." };
+    default:
+      return null;
+  }
+}
+
 const notificationWorker = new Worker(
   "notification",
   async (job) => {
@@ -41,6 +67,7 @@ const notificationWorker = new Worker(
       to?: string;
     };
 
+    // Resolve the email recipient.
     let recipient = toOverride;
     if (!recipient) {
       const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
@@ -58,19 +85,44 @@ const notificationWorker = new Worker(
         return;
       }
 
+      // Send the email.
       if (!transporter) {
         console.log(`[notification] No SMTP config — skipping email to ${recipient} (${template})`);
-        return;
+      } else {
+        await transporter.sendMail({
+          from: process.env.FROM_EMAIL || "noreply@kabon.africa",
+          to: recipient,
+          subject: tmpl.subject,
+          html: tmpl.html(data),
+        });
+        console.log(`[notification] Email sent to ${recipient} (${template})`);
       }
 
-      await transporter.sendMail({
-        from: process.env.FROM_EMAIL || "noreply@kabon.africa",
-        to: recipient,
-        subject: tmpl.subject,
-        html: tmpl.html(data),
-      });
-
-      console.log(`[notification] Email sent to ${recipient} (${template})`);
+      // Persist an in-app notification.
+      // If toOverride is set (e.g. admin_new_registration), find the user by that email.
+      // Otherwise use the job's userId directly.
+      const meta = getInAppMeta(template, data);
+      if (meta) {
+        let notifyUserId = userId;
+        if (toOverride) {
+          const overrideUser = await prisma.user.findUnique({ where: { email: toOverride }, select: { id: true } });
+          if (overrideUser) notifyUserId = overrideUser.id;
+          else notifyUserId = "";  // no matching user — skip in-app
+        }
+        if (notifyUserId) {
+          await prisma.notification.create({
+            data: {
+              userId: notifyUserId,
+              type: template,
+              title: meta.title,
+              body: meta.body,
+              link: meta.link ?? null,
+            },
+          }).catch((err: unknown) => {
+            console.warn("[notification] Failed to persist in-app notification:", (err as Error).message);
+          });
+        }
+      }
     }
   },
   { connection, concurrency: 10, drainDelay: 30000, stalledInterval: 30000 }

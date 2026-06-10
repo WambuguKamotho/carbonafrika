@@ -1,12 +1,72 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   View, Text, StyleSheet, FlatList, Pressable, RefreshControl, ActivityIndicator,
+  Modal, ScrollView, TouchableOpacity,
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { api, ApiError } from "@/lib/api";
 import { colors } from "@/lib/config";
+
+interface AppNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  link: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
+function timeAgo(iso: string) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function useNotifications(loggedIn: boolean) {
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchNotifs = useCallback(async () => {
+    if (!loggedIn) return;
+    try {
+      const res = await api.get<{ data: AppNotification[] }>("/api/notifications");
+      const list = (res as unknown as { data: AppNotification[] }).data ?? [];
+      setNotifications(list);
+      setUnreadCount(list.filter((n) => !n.read).length);
+    } catch { /* silent */ }
+  }, [loggedIn]);
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    fetchNotifs();
+    timerRef.current = setInterval(fetchNotifs, 30_000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [loggedIn, fetchNotifs]);
+
+  const markRead = useCallback(async (id: string) => {
+    try {
+      await api.patch(`/api/notifications/${id}/read`, {});
+      setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
+      setUnreadCount((c) => Math.max(0, c - 1));
+    } catch { /* ignore */ }
+  }, []);
+
+  const markAllRead = useCallback(async () => {
+    try {
+      await api.patch("/api/notifications/read-all", {});
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch { /* ignore */ }
+  }, []);
+
+  return { notifications, unreadCount, markRead, markAllRead };
+}
 
 interface Credit { id: string; amount: number; status: string }
 interface Project {
@@ -40,6 +100,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bellOpen, setBellOpen] = useState(false);
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications(!!user);
 
   const load = useCallback(async () => {
     try {
@@ -75,11 +137,71 @@ export default function Dashboard() {
           <Pressable onPress={() => router.push("/settings")} hitSlop={10}>
             <Text style={styles.settingsLink}>Settings</Text>
           </Pressable>
+          {/* Bell */}
+          <Pressable onPress={() => setBellOpen(true)} hitSlop={10} style={{ position: "relative" }}>
+            <Text style={styles.settingsLink}>🔔</Text>
+            {unreadCount > 0 && (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
+              </View>
+            )}
+          </Pressable>
           <Pressable onPress={async () => { try { await signOut(); } finally { router.replace("/login"); } }} hitSlop={10}>
             <Text style={styles.signOut}>Sign out</Text>
           </Pressable>
         </View>
       </View>
+
+      {/* Notification modal */}
+      <Modal visible={bellOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setBellOpen(false)}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Notifications {unreadCount > 0 && `(${unreadCount} unread)`}</Text>
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              {unreadCount > 0 && (
+                <TouchableOpacity onPress={markAllRead}>
+                  <Text style={styles.markAllText}>Mark all read</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity onPress={() => setBellOpen(false)}>
+                <Text style={styles.closeText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+            {notifications.length === 0 ? (
+              <View style={styles.empty}>
+                <Text style={styles.emptyTitle}>No notifications yet</Text>
+                <Text style={styles.emptyBody}>Activity on your projects will appear here.</Text>
+              </View>
+            ) : (
+              notifications.map((n) => (
+                <Pressable
+                  key={n.id}
+                  style={[styles.notifRow, !n.read && styles.notifRowUnread]}
+                  onPress={() => {
+                    if (!n.read) markRead(n.id);
+                    setBellOpen(false);
+                    if (n.link?.startsWith("/project/")) {
+                      const id = n.link.replace("/project/", "").replace("/projects/", "");
+                      router.push(`/project/${id}`);
+                    } else {
+                      router.push("/dashboard");
+                    }
+                  }}
+                >
+                  {!n.read && <View style={styles.unreadDot} />}
+                  <View style={{ flex: 1, paddingLeft: n.read ? 12 : 0 }}>
+                    <Text style={styles.notifTitle}>{n.title}</Text>
+                    <Text style={styles.notifBody}>{n.body}</Text>
+                    <Text style={styles.notifTime}>{timeAgo(n.createdAt)}</Text>
+                  </View>
+                </Pressable>
+              ))
+            )}
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
 
       {/* Summary cards */}
       <View style={styles.summaryRow}>
@@ -174,4 +296,16 @@ const styles = StyleSheet.create({
   fab: { position: "absolute", right: 16, bottom: 24, backgroundColor: colors.forest600, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 18, paddingVertical: 14, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   fabPlus: { color: "#fff", fontSize: 18, fontWeight: "900" },
   fabText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  bellBadge: { position: "absolute", top: -6, right: -8, minWidth: 16, height: 16, backgroundColor: colors.red, borderRadius: 999, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 },
+  bellBadgeText: { color: "#fff", fontSize: 9, fontWeight: "900" },
+  modalHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.line },
+  modalTitle: { fontSize: 16, fontWeight: "800", color: colors.ink },
+  markAllText: { fontSize: 13, color: colors.forest600, fontWeight: "600" },
+  closeText: { fontSize: 13, color: colors.muted, fontWeight: "600" },
+  notifRow: { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.line },
+  notifRowUnread: { backgroundColor: "#f0fdf4" },
+  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.red, marginTop: 5, marginRight: 10, flexShrink: 0 },
+  notifTitle: { fontSize: 14, fontWeight: "700", color: colors.ink },
+  notifBody: { fontSize: 13, color: colors.body, marginTop: 2, lineHeight: 18 },
+  notifTime: { fontSize: 11, color: colors.muted, marginTop: 4 },
 });

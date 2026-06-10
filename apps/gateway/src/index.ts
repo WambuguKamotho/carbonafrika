@@ -76,6 +76,7 @@ function proxy(target: string, rewrite: Record<string, string>): express.Request
 // mount only matches its own prefix.
 app.use("/api/auth",          proxy(TARGETS.auth,    { "^/api/auth": "/auth" }));
 app.use("/api/admin",         proxy(TARGETS.auth,    { "^/api/admin": "/admin" }));
+app.use("/api/notifications", proxy(TARGETS.auth,    { "^/api/notifications": "/notifications" }));
 app.use("/api/projects",      proxy(TARGETS.project, { "^/api/projects": "/projects" }));
 app.use("/api/blog",          proxy(TARGETS.project, { "^/api/blog": "/blog" }));
 app.use("/api/marketplace",   proxy(TARGETS.mkt,     { "^/api/marketplace": "/marketplace" }));

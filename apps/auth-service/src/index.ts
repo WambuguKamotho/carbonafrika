@@ -5,6 +5,7 @@ import cors from "cors";
 import helmet from "helmet";
 import authRoutes from "./routes/auth";
 import adminRoutes from "./routes/admin";
+import notificationRoutes from "./routes/notifications";
 
 const app = express();
 app.set("trust proxy", 1); // behind gateway/LB in prod — for rate-limit + real client IP
@@ -22,6 +23,7 @@ app.use(express.json({ limit: "500kb" }));
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "auth-service" }));
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
+app.use("/notifications", notificationRoutes);
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error("[auth-service error]", err.message);
