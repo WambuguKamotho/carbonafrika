@@ -3,18 +3,24 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { Worker } from "bullmq";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { prisma } from "@carbonafrika/db";
 import { templates } from "./templates";
 
 const app = express();
-// 3007 to avoid colliding with iot-service (3005) and worker (3006).
-// notification-service is queue-driven and isn't fronted by the Next.js
-// rewrites, so the exact port here doesn't matter — it just needs to be
-// unique on the host.
 const PORT = process.env.NOTIFICATION_PORT || 3007;
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const connection = { url: process.env.REDIS_URL! };
+
+const transporter = (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)
+  ? nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    })
+  : null;
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
@@ -22,7 +28,8 @@ app.use(express.json());
 
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "notification-service" }));
 
-// BullMQ worker for notification queue
+const connection = { url: process.env.REDIS_URL! };
+
 const notificationWorker = new Worker(
   "notification",
   async (job) => {
@@ -34,11 +41,9 @@ const notificationWorker = new Worker(
       to?: string;
     };
 
-    // toOverride allows sending to a fixed address (e.g. admin notifications)
-    // without looking up a user record.
     let recipient = toOverride;
     if (!recipient) {
-      const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
       if (!user?.email) {
         console.log(`[notification] No email for user ${userId}, skipping`);
         return;
@@ -53,12 +58,12 @@ const notificationWorker = new Worker(
         return;
       }
 
-      if (!resend) {
-        console.log(`[notification] No RESEND_API_KEY — skipping email to ${recipient} (${template})`);
+      if (!transporter) {
+        console.log(`[notification] No SMTP config — skipping email to ${recipient} (${template})`);
         return;
       }
 
-      await resend.emails.send({
+      await transporter.sendMail({
         from: process.env.FROM_EMAIL || "noreply@kabon.africa",
         to: recipient,
         subject: tmpl.subject,
