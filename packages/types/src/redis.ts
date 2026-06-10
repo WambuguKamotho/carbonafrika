@@ -20,12 +20,13 @@ export function redisConnectionOptions(serviceLabel: string) {
       if (!warned) {
         console.warn(
           `[${serviceLabel}] Redis unreachable at ${process.env.REDIS_URL ?? "redis://localhost:6379"} — ` +
-          `queue features will be inactive. Start with: \`docker compose up -d redis\``,
+          `retrying (attempt ${times})…`,
         );
         warned = true;
       }
-      if (times > 5) return null;
-      return Math.min(times * 1000, 5000);
+      // Never give up — ioredis keeps reconnecting until Redis is reachable.
+      // Exponential backoff capped at 10 s so recovery is prompt once Redis comes up.
+      return Math.min(times * 500, 10_000);
     },
   };
 }
