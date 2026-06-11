@@ -140,15 +140,14 @@ export default function AboutPage() {
                 15 years across Africa.<br />One platform to show for it.
               </h2>
               <p className="text-gray-600 leading-relaxed mb-6">
-                Diploma in Film & Video Production (KIMC). Prince2 certified. Director at{" "}
+                Director at{" "}
                 <a href="https://www.bandikaiot.com" target="_blank" rel="noopener noreferrer"
                   className="text-forest-700 font-semibold hover:underline inline-flex items-center gap-1">
                   Bandika IoT <ExternalLink className="w-3 h-3" />
                 </a>.
-                Covered climate stories on four continents, from BBC studios in Nairobi to rural communities in Zambia and Malawi, before deciding the story he needed to tell required building infrastructure, not just recording it.
               </p>
               <div className="flex flex-wrap gap-2">
-                {["Documentary Filmmaker", "Commodity Logistics", "IoT Director @ Bandika", "Prince2 Certified", "BBC · CNN · Firelight"].map(tag => (
+                {["Documentary Filmmaker", "Commodity Logistics", "IoT Director @ Bandika"].map(tag => (
                   <span key={tag} className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full font-medium">{tag}</span>
                 ))}
               </div>
