@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getUser, getToken, isAdminLike, isReadOnly } from "@/lib/auth";
-import { RefreshCw, CheckCircle, XCircle, Clock, ArrowRight, Coins, ShieldCheck } from "lucide-react";
+import { RefreshCw, CheckCircle, XCircle, Clock, ArrowRight, Coins, ShieldCheck, UserCheck } from "lucide-react";
 import Link from "next/link";
 import ReadOnlyBanner from "@/components/admin/ReadOnlyBanner";
 
@@ -12,6 +12,13 @@ interface Verification {
   createdAt: string; updatedAt: string;
   project: { id: string; title: string; country: string; owner?: { name: string } | null };
   verifier?: { id: string; name: string } | null;
+}
+
+interface Verifier {
+  id: string;
+  name: string;
+  email: string;
+  verifierScopes: string[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -33,10 +40,12 @@ export default function AdminVerificationsPage() {
   const router = useRouter();
   const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
   const [verifications, setVerifications] = useState<Verification[]>([]);
+  const [verifiers, setVerifiers] = useState<Verifier[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [reviewForms, setReviewForms] = useState<Record<string, { carbonTons: string; notes: string; saving: boolean }>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  const [assignSelections, setAssignSelections] = useState<Record<string, string>>({});
   const [toast, setToast] = useState("");
 
   useEffect(() => {
@@ -50,9 +59,14 @@ export default function AdminVerificationsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/verifications?pageSize=100", { headers: headers() });
-      const json = await res.json();
-      setVerifications(json.data?.items ?? json.data ?? []);
+      const [vRes, uRes] = await Promise.all([
+        fetch("/api/verifications?pageSize=100", { headers: headers() }),
+        fetch("/api/admin/users?role=VERIFIER&pageSize=100", { headers: headers() }),
+      ]);
+      const vJson = await vRes.json();
+      const uJson = await uRes.json();
+      setVerifications(vJson.data?.items ?? vJson.data ?? []);
+      setVerifiers(uJson.data?.items ?? uJson.data ?? []);
     } finally { setLoading(false); }
   }, [headers]);
 
@@ -65,13 +79,18 @@ export default function AdminVerificationsPage() {
       ? verifications.filter(v => v.status === "APPROVED" && !v.creditsIssued)
       : verifications.filter(v => v.status === statusFilter);
 
-  const assignToMe = async (id: string) => {
-    setBusy(id);
+  const assign = async (verificationId: string) => {
+    const verifierId = assignSelections[verificationId];
+    setBusy(verificationId);
     try {
-      const r = await fetch(`/api/verifications/${id}/assign`, { method: "PATCH", headers: headers() });
+      const body = verifierId ? JSON.stringify({ verifierId }) : undefined;
+      const r = await fetch(`/api/verifications/${verificationId}/assign`, {
+        method: "PATCH", headers: headers(), body,
+      });
       const d = await r.json();
       if (!d.success) throw new Error(d.error || "Assign failed");
-      notify("Assigned to you");
+      const name = verifiers.find(v => v.id === verifierId)?.name ?? "you";
+      notify(`Assigned to ${name}`);
       load();
     } catch (e) { notify(e instanceof Error ? e.message : "Assign failed"); }
     finally { setBusy(null); }
@@ -189,12 +208,29 @@ export default function AdminVerificationsPage() {
                     </div>
                   </div>
 
-                  {/* PENDING → assign */}
+                  {/* PENDING → assign verifier */}
                   {v.status === "PENDING" && !readOnly && (
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <button onClick={() => assignToMe(v.id)} disabled={busy === v.id}
-                        className="flex items-center gap-1.5 text-sm text-blue-700 hover:underline font-medium disabled:opacity-50">
-                        <ShieldCheck className="w-3.5 h-3.5" /> Assign to me
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3 flex-wrap">
+                      <UserCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <select
+                        value={assignSelections[v.id] ?? ""}
+                        onChange={e => setAssignSelections(s => ({ ...s, [v.id]: e.target.value }))}
+                        className="input text-sm py-1.5 flex-1 min-w-[180px]"
+                      >
+                        <option value="">Assign to myself</option>
+                        {verifiers.map(vr => (
+                          <option key={vr.id} value={vr.id}>
+                            {vr.name}{vr.verifierScopes.length > 0 ? ` (${vr.verifierScopes.map(s => s === "LAND_RESTORATION" ? "Land" : "Energy").join(", ")})` : ""}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => assign(v.id)}
+                        disabled={busy === v.id}
+                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        {busy === v.id ? "Assigning…" : "Assign"}
                       </button>
                     </div>
                   )}
