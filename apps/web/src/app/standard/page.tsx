@@ -200,9 +200,7 @@ export default function StandardPage() {
           </h2>
           <div className="space-y-3 text-sm text-amber-900 leading-relaxed">
             <p>
-              <strong>Verification is performed by the Kabon review team.</strong> If your reporting requires
-              verification by an independently accredited third party (institutional ESG disclosures, compliance
-              markets), Kabon credits may not be the right fit yet.
+              <strong>Verification is performed by a Kabon-assigned reviewer or a client-nominated third party.</strong>
             </p>
             <p>
               <strong>The buffer pool is platform-administered.</strong> We publish its live balance on this page
