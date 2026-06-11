@@ -478,7 +478,7 @@ export default function NewProjectPage() {
               {category === "CLEAN_ENERGY"
                 ? "Upload equipment specs, installation certificates, or baseline surveys."
                 : "Upload land title, GPS survey report, or supporting photos."}
-              {" "}Files are stored permanently on IPFS via Pinata. We accept Verra, Gold Standard, or custom documentation.
+              {" "}Files are stored permanently on IPFS via Pinata. Any supporting documentation is accepted.
             </p>
             <IpfsUpload
               value={form.ipfsDocumentHash}

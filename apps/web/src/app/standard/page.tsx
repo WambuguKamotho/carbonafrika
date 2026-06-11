@@ -76,8 +76,8 @@ export default function StandardPage() {
           </h1>
           <p className="text-forest-200 text-lg max-w-2xl leading-relaxed">
             Every credit on Kabon.Africa is issued under a published methodology, backed by a permanence buffer pool,
-            and tracked on Polygon. We're not Verra. We're a faster, simpler, Africa-first alternative for
-            projects too small or too local for the global registries.
+            and tracked on Polygon. Built for African projects that are too small, too local, or too time-pressed
+            for years-long international registry processes.
           </p>
         </div>
       </div>
@@ -200,18 +200,18 @@ export default function StandardPage() {
           </h2>
           <div className="space-y-3 text-sm text-amber-900 leading-relaxed">
             <p>
-              <strong>Kabon credits are not Verra or Gold Standard credits.</strong> They are issued under our own
-              published standard. We're built for African projects too small, too local, or too time-pressed for the
-              years-long international registry process.
+              <strong>Kabon credits are issued under our own published standard.</strong> We are built for African
+              projects that need a faster, simpler path to carbon credit issuance — without the years-long process
+              required by international registries.
             </p>
             <p>
-              <strong>Verification is performed by the Kabon review team</strong>, not by an ISO 14065-accredited
-              third party. If your reporting requires accredited verification (institutional ESG disclosures,
-              compliance markets), Kabon credits may not be the right fit yet.
+              <strong>Verification is performed by the Kabon review team.</strong> If your reporting requires
+              verification by an independently accredited third party (institutional ESG disclosures, compliance
+              markets), Kabon credits may not be the right fit yet.
             </p>
             <p>
-              <strong>The buffer pool is platform-administered</strong>, not a third-party insurance product. We
-              publish its balance on this page so you can verify our reserve at any time.
+              <strong>The buffer pool is platform-administered.</strong> We publish its live balance on this page
+              so you can verify our permanence reserve at any time.
             </p>
           </div>
         </section>

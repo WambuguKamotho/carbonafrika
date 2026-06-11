@@ -52,7 +52,7 @@ const ROLES: Role[] = [
       "Excellent Swahili + English; additional regional languages a plus",
     ],
     niceToHave: [
-      "Familiarity with Verra / Gold Standard methodologies (VM0007, VM0033, VM0042)",
+      "Familiarity with international carbon accounting methodologies and MRV frameworks",
       "Drone / GIS field experience",
     ],
   },

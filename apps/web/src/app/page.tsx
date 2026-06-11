@@ -108,7 +108,7 @@ export default async function HomePage() {
 
           {/* Trust pills */}
           <div className="flex flex-wrap justify-center gap-3">
-            {["🔒 Non-custodial", "🌍 54 African nations", "⛓️ On-chain proof", "🏆 Verra compatible"].map((t) => (
+            {["🔒 Non-custodial", "🌍 54 African nations", "⛓️ On-chain proof", "📋 Published standard"].map((t) => (
               <span key={t} className="text-xs text-gray-400 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">{t}</span>
             ))}
           </div>

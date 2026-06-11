@@ -85,7 +85,7 @@ export default function Footer() {
             <NewsletterForm />
 
             <div className="flex gap-3 mt-6">
-              {["Polygon", "Verra", "IPFS"].map(t => (
+              {["Polygon", "IPFS", "Pinata"].map(t => (
                 <span key={t} className="text-xs px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-gray-400">{t}</span>
               ))}
             </div>
