@@ -200,11 +200,6 @@ export default function StandardPage() {
           </h2>
           <div className="space-y-3 text-sm text-amber-900 leading-relaxed">
             <p>
-              <strong>Kabon credits are issued under our own published standard.</strong> We are built for African
-              projects that need a faster, simpler path to carbon credit issuance — without the years-long process
-              required by international registries.
-            </p>
-            <p>
               <strong>Verification is performed by the Kabon review team.</strong> If your reporting requires
               verification by an independently accredited third party (institutional ESG disclosures, compliance
               markets), Kabon credits may not be the right fit yet.
