@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import RetirementIntentModal from "@/components/ui/RetirementIntentModal";
 import { getUser } from "@/lib/auth";
-import { getToken } from "@/lib/auth";
 import { CreditClassBadges } from "@/lib/creditClass";
 
 const TYPE_LABEL: Record<string, string> = {
