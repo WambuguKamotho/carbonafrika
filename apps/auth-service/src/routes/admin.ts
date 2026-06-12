@@ -91,7 +91,7 @@ router.get("/users", async (req, res) => {
       select: {
         id: true, name: true, email: true, role: true,
         country: true, kycVerified: true, createdAt: true,
-        walletAddress: true,
+        walletAddress: true, verifierScopes: true,
         _count: { select: { projects: true, purchases: true } },
       },
     }),

@@ -220,7 +220,7 @@ export default function AdminVerificationsPage() {
                         <option value="">Assign to myself</option>
                         {verifiers.map(vr => (
                           <option key={vr.id} value={vr.id}>
-                            {vr.name}{vr.verifierScopes.length > 0 ? ` (${vr.verifierScopes.map(s => s === "LAND_RESTORATION" ? "Land" : "Energy").join(", ")})` : ""}
+                            {vr.name}{(vr.verifierScopes ?? []).length > 0 ? ` (${(vr.verifierScopes ?? []).map(s => s === "LAND_RESTORATION" ? "Land" : "Energy").join(", ")})` : ""}
                           </option>
                         ))}
                       </select>
