@@ -133,7 +133,6 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
       const res = await api.post<{ data: { id: string; bankReference?: string } }>(
         `/api/marketplace/${params.id}/purchase`,
         { tons },
-        { headers: { Authorization: `Bearer ${getToken()}` } },
       );
       setPurchaseTxHash(res.data?.bankReference ?? null);
       setPurchaseId(res.data?.id ?? null);
