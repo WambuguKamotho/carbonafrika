@@ -1,75 +1,47 @@
 import { Worker, Queue, type Job } from "bullmq";
 import { prisma } from "@carbonafrika/db";
-import { ethers } from "ethers";
 
 /**
- * Escrow settlement state machine.
+ * Fiat settlement state machine.
  *
- *   PENDING ──collect──▶ COLLECTING ──confirmations──▶ COLLECTED
- *                                                          │
- *                                                          ▼
- *                                                      DELIVERED  (auto-release timer starts)
- *                                                          │
- *                                                          ▼
- *                                                       RELEASED  (seller paid)
+ *   PENDING ──collect──▶ COLLECTING  (bank reference generated; buyer instructed to wire)
+ *                            │
+ *                    [admin confirms payment received]
+ *                            │
+ *                        COLLECTED ──deliver──▶ DELIVERED  (auto-release timer starts)
+ *                                                   │
+ *                                               RELEASED  (seller paid out)
  *
  *   Side branches:  DISPUTED (admin),  REFUNDED (admin),  FAILED (terminal worker error).
  *
- * Each transition is driven by a named BullMQ job on the "settlement" queue.
- *   - "collect"  : transferFrom(buyer → treasury) and wait N confirmations
- *   - "deliver"  : record delivery (DB-only for now; chain transfer is phase 2)
- *   - "release"  : transfer(treasury → seller) and wait N confirmations
- *   - "refund"   : transfer(treasury → buyer) and wait N confirmations
+ * BullMQ jobs on the "settlement" queue:
+ *   - "collect"  : generate bank payment reference, flip to COLLECTING (stops here — admin confirms)
+ *   - "deliver"  : record delivery (DB-only flip, credits already marked SOLD at purchase creation)
+ *   - "release"  : record outbound bank payment reference, flip to RELEASED
+ *   - "refund"   : record refund, restore inventory
  *
- * Auto-release is implemented as a delayed "release" job queued at the DELIVERED transition.
- * If the buyer confirms early (or an admin force-releases), we enqueue an immediate "release"
- * job — the delayed one runs later but is idempotent (finds RELEASED, no-ops).
+ * Auto-release is a delayed "release" job queued at the DELIVERED transition.
  */
 
 interface SettlementPayload {
   purchaseId: string;
+  bankReference?: string;  // passed by admin on release/refund to record the transfer ref
 }
 
-const PLATFORM_FEE_BPS    = parseInt(process.env.PLATFORM_FEE_BPS ?? "200");        // 2%
-const BLOCK_CONFIRMATIONS = parseInt(process.env.BLOCK_CONFIRMATIONS ?? "3");        // Polygon PoS — 3 is plenty
-const AUTO_RELEASE_HOURS  = parseInt(process.env.AUTO_RELEASE_HOURS  ?? "24");
+const PLATFORM_FEE_BPS   = parseInt(process.env.PLATFORM_FEE_BPS ?? "200");
+const AUTO_RELEASE_HOURS = parseInt(process.env.AUTO_RELEASE_HOURS ?? "24");
 
-const USDC_ABI = [
-  "function transferFrom(address from, address to, uint256 amount) external returns (bool)",
-  "function transfer(address to, uint256 amount) external returns (bool)",
-  "function balanceOf(address owner) external view returns (uint256)",
-  "function allowance(address owner, address spender) external view returns (uint256)",
-  "function decimals() external view returns (uint8)",
-];
-
-function isBlockchainConfigured() {
-  return !!(
-    process.env.DEPLOYER_PRIVATE_KEY &&
-    process.env.POLYGON_RPC_URL &&
-    process.env.USDC_ADDRESS &&
-    process.env.PLATFORM_TREASURY_ADDRESS
-  );
-}
-
-function getUsdc() {
-  const provider = new ethers.JsonRpcProvider(process.env.POLYGON_RPC_URL);
-  const signer   = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY!, provider);
-  return {
-    provider,
-    signer,
-    usdc: new ethers.Contract(process.env.USDC_ADDRESS!, USDC_ABI, signer),
-  };
-}
-
-function deterministicSimHash(prefix: string, purchaseId: string) {
-  return `0xsim_${prefix}_${Buffer.from(purchaseId).toString("hex").slice(0, 56)}`;
+function generateBankReference(purchaseId: string): string {
+  const short = purchaseId.slice(0, 8).toUpperCase();
+  const ts    = Date.now().toString(36).toUpperCase().slice(-4);
+  return `KA-${short}-${ts}`;
 }
 
 async function loadPurchase(purchaseId: string) {
   const purchase = await prisma.purchase.findUnique({
     where: { id: purchaseId },
     include: {
-      buyer: { select: { id: true, name: true, email: true, walletAddress: true } },
+      buyer: { select: { id: true, name: true, email: true } },
       listing: {
         include: {
           credit: {
@@ -93,85 +65,43 @@ async function loadPurchase(purchaseId: string) {
 async function loadSeller(ownerId: string) {
   const seller = await prisma.user.findUnique({
     where: { id: ownerId },
-    select: { id: true, name: true, email: true, walletAddress: true },
+    select: {
+      id: true, name: true, email: true,
+      bankAccountName: true, bankName: true, bankAccountNumber: true,
+      bankIban: true, bankSwiftBic: true, bankCountry: true,
+    },
   });
   if (!seller) throw new Error(`Seller ${ownerId} not found`);
   return seller;
 }
 
-/* ── Step 1: COLLECT — pull USDC from buyer into platform treasury ─────────── */
-async function runCollect(purchaseId: string, queue: Queue) {
+/* ── Step 1: COLLECT — generate bank reference, instruct buyer to wire ──────── */
+async function runCollect(purchaseId: string) {
   const purchase = await loadPurchase(purchaseId);
 
-  // Idempotency — skip if we've moved past COLLECTING
   const finalStates = ["COLLECTED", "DELIVERED", "RELEASED", "REFUNDED"];
   if (finalStates.includes(purchase.settlementStatus)) {
-    console.log(`[settlement.collect] ${purchaseId} already past COLLECTED (${purchase.settlementStatus}) — skipping`);
+    console.log(`[settlement.collect] ${purchaseId} already past COLLECTING (${purchase.settlementStatus}) — skipping`);
     return;
   }
 
-  await prisma.purchase.update({
-    where: { id: purchaseId },
-    data: { settlementStatus: "COLLECTING", settlementError: null },
-  });
-
-  const feeAmount  = purchase.feeAmount  ?? parseFloat((purchase.totalPrice * (PLATFORM_FEE_BPS / 10000)).toFixed(6));
-  const buyerTotal = purchase.buyerTotal ?? parseFloat((purchase.totalPrice + feeAmount).toFixed(6));
-
-  let collectTxHash: string;
-  let simulated = false;
-
-  if (isBlockchainConfigured() && purchase.buyer.walletAddress) {
-    const { usdc } = getUsdc();
-    const decimals: number = await usdc.decimals();
-    const buyerUnits = ethers.parseUnits(buyerTotal.toFixed(6), decimals);
-
-    // Pre-flight: buyer must have approved treasury for at least buyerTotal
-    const allowance: bigint = await usdc.allowance(
-      purchase.buyer.walletAddress,
-      process.env.PLATFORM_TREASURY_ADDRESS!,
-    );
-    if (allowance < buyerUnits) {
-      throw new Error(
-        `Buyer USDC allowance ${ethers.formatUnits(allowance, decimals)} < required ${buyerTotal}. ` +
-        `Buyer must approve(treasury, ${buyerTotal}) before settlement.`,
-      );
-    }
-
-    const tx = await (usdc as ethers.Contract).transferFrom!(
-      purchase.buyer.walletAddress,
-      process.env.PLATFORM_TREASURY_ADDRESS!,
-      buyerUnits,
-    );
-    const receipt = await tx.wait(BLOCK_CONFIRMATIONS);
-    collectTxHash = receipt.hash;
-    console.log(`[settlement.collect] ${purchaseId} on-chain: ${collectTxHash} (${BLOCK_CONFIRMATIONS} confs)`);
-  } else {
-    simulated = true;
-    collectTxHash = deterministicSimHash("collect", purchaseId);
-    console.warn(`[settlement.collect] ${purchaseId} simulated (chain not configured or no buyer wallet)`);
-  }
+  const bankReference = generateBankReference(purchaseId);
 
   await prisma.purchase.update({
     where: { id: purchaseId },
     data: {
-      settlementStatus: "COLLECTED",
-      collectTxHash,
-      collectedAt: new Date(),
+      settlementStatus: "COLLECTING",
+      bankReference,
+      settlementError: null,
     },
   });
 
-  // Hand off to deliver step
-  await queue.add("deliver", { purchaseId }, { attempts: 3 });
-
-  return { collectTxHash, simulated };
+  console.log(`[settlement.collect] ${purchaseId} COLLECTING — bank ref: ${bankReference}`);
+  return { bankReference };
 }
 
-/* ── Step 2: DELIVER — record that the buyer holds the credits ─────────────── */
-/*  For now this is a DB-only flip; the listing/credit status was already       */
-/*  updated to SOLD inside the purchase-creation transaction. Real on-chain     */
-/*  ERC-1155 transfer is a phase-2 add-on.                                       */
-async function runDeliver(purchaseId: string, queue: Queue) {
+/* ── Step 2: DELIVER — admin confirmed payment; record delivery ─────────────── */
+async function runDeliver(purchaseId: string, queue: Queue, collectTxHash?: string) {
   const purchase = await loadPurchase(purchaseId);
 
   if (["DELIVERED", "RELEASED", "REFUNDED"].includes(purchase.settlementStatus)) {
@@ -188,21 +118,12 @@ async function runDeliver(purchaseId: string, queue: Queue) {
     where: { id: purchaseId },
     data: {
       settlementStatus: "DELIVERED",
-      deliveredAt:      new Date(),
+      deliveredAt: new Date(),
       autoReleaseAt,
-      deliverTxHash:    deterministicSimHash("deliver", purchaseId),  // DB-only placeholder
+      ...(collectTxHash ? { collectTxHash } : {}),
     },
   });
 
-  // Notify the buyer their credits are delivered + start the auto-release timer
-  if (purchase.buyer.email) {
-    await prisma.user.findUnique({ where: { id: purchase.buyer.id }, select: { id: true } });
-    // Best-effort — notification queue is hooked separately in marketplace-service / worker
-  }
-
-  // Schedule the delayed auto-release. If the buyer confirms first, an
-  // immediate release job will run first; this delayed one will then find
-  // RELEASED state and no-op.
   await queue.add(
     "release",
     { purchaseId },
@@ -212,11 +133,10 @@ async function runDeliver(purchaseId: string, queue: Queue) {
   console.log(`[settlement.deliver] ${purchaseId} DELIVERED — auto-release at ${autoReleaseAt.toISOString()}`);
 }
 
-/* ── Step 3: RELEASE — pay seller from treasury ────────────────────────────── */
-async function runRelease(purchaseId: string) {
+/* ── Step 3: RELEASE — admin confirms outbound bank transfer to seller ──────── */
+async function runRelease(purchaseId: string, bankReference?: string) {
   const purchase = await loadPurchase(purchaseId);
 
-  // Idempotency — already released, refunded, disputed, or never collected
   if (purchase.settlementStatus === "RELEASED" || purchase.settlementStatus === "REFUNDED") {
     console.log(`[settlement.release] ${purchaseId} already terminal (${purchase.settlementStatus}) — skipping`);
     return;
@@ -229,47 +149,23 @@ async function runRelease(purchaseId: string) {
     throw new Error(`Cannot RELEASE from ${purchase.settlementStatus} — must be DELIVERED first`);
   }
 
-  // On a resale, the seller is the reselling buyer (listing.sellerUserId), not
-  // the project owner. Primary sales fall back to the project owner.
-  const isResale = !!purchase.listing.sellerUserId;
-  const seller   = await loadSeller(purchase.listing.sellerUserId ?? purchase.listing.credit.project.ownerId);
-
-  // Partner royalty comes out of the seller's share (totalPrice). Locked at
-  // attribution time on Project.partnerRoyaltyPercent so existing projects
-  // don't change retroactively. Royalty applies to primary sales only — the
-  // partner already earned on the first sale; a buyer reselling later doesn't
-  // owe them again.
+  const isResale      = !!purchase.listing.sellerUserId;
+  const seller        = await loadSeller(purchase.listing.sellerUserId ?? purchase.listing.credit.project.ownerId);
   const project       = purchase.listing.credit.project;
   const royaltyPct    = isResale ? 0 : (project.partnerRoyaltyPercent ?? 0);
   const partnerRoyalty = !isResale && project.partnerId && royaltyPct > 0
     ? parseFloat((purchase.totalPrice * royaltyPct / 100).toFixed(6))
     : 0;
-  const sellerNet     = parseFloat((purchase.totalPrice - partnerRoyalty).toFixed(6));
+  const sellerNet = parseFloat((purchase.totalPrice - partnerRoyalty).toFixed(6));
 
-  let txHash: string;
-  let simulated = false;
-
-  if (isBlockchainConfigured() && seller.walletAddress) {
-    const { usdc } = getUsdc();
-    const decimals: number = await usdc.decimals();
-    const ownerUnits = ethers.parseUnits(sellerNet.toFixed(6), decimals);
-
-    const tx = await (usdc as ethers.Contract).transfer!(seller.walletAddress, ownerUnits);
-    const receipt = await tx.wait(BLOCK_CONFIRMATIONS);
-    txHash = receipt.hash;
-    console.log(`[settlement.release] ${purchaseId} on-chain payout: ${txHash}`);
-  } else {
-    simulated = true;
-    txHash = deterministicSimHash("pay", purchaseId);
-    console.warn(`[settlement.release] ${purchaseId} simulated (chain not configured or seller has no wallet)`);
-  }
+  const payoutRef = bankReference ?? `KA-PAYOUT-${purchaseId.slice(0, 8).toUpperCase()}`;
 
   await prisma.$transaction(async (tx) => {
     await tx.purchase.update({
       where: { id: purchaseId },
       data: {
         settlementStatus: "RELEASED",
-        txHash,
+        txHash: payoutRef,
         releasedAt: new Date(),
       },
     });
@@ -288,16 +184,16 @@ async function runRelease(purchaseId: string) {
   });
 
   console.log(
-    `[settlement.release] ${purchaseId} RELEASED — $${sellerNet} → ${seller.name}` +
-    (partnerRoyalty > 0 ? ` + $${partnerRoyalty} partner royalty` : "") +
-    (simulated ? " (simulated)" : ""),
+    `[settlement.release] ${purchaseId} RELEASED — ${purchase.currency} ${sellerNet} → ${seller.name}` +
+    (partnerRoyalty > 0 ? ` + ${purchase.currency} ${partnerRoyalty} partner royalty` : "") +
+    ` (bank ref: ${payoutRef})`,
   );
 
-  return { txHash, simulated };
+  return { payoutRef, sellerNet };
 }
 
-/* ── Side branch: REFUND — admin returns funds to buyer ────────────────────── */
-async function runRefund(purchaseId: string) {
+/* ── Side branch: REFUND — return funds to buyer ───────────────────────────── */
+async function runRefund(purchaseId: string, bankReference?: string) {
   const purchase = await loadPurchase(purchaseId);
 
   if (purchase.settlementStatus === "REFUNDED" || purchase.settlementStatus === "RELEASED") {
@@ -305,40 +201,22 @@ async function runRefund(purchaseId: string) {
     return;
   }
   if (!["COLLECTED", "DELIVERED", "DISPUTED"].includes(purchase.settlementStatus)) {
-    throw new Error(`Cannot REFUND from ${purchase.settlementStatus} — no funds in treasury yet`);
+    throw new Error(`Cannot REFUND from ${purchase.settlementStatus} — no funds confirmed yet`);
   }
 
-  const feeAmount  = purchase.feeAmount  ?? 0;
-  const buyerTotal = purchase.buyerTotal ?? purchase.totalPrice + feeAmount;
+  const buyerTotal  = purchase.buyerTotal ?? purchase.totalPrice + (purchase.feeAmount ?? 0);
+  const refundRef   = bankReference ?? `KA-REFUND-${purchaseId.slice(0, 8).toUpperCase()}`;
 
-  let refundTxHash: string;
-  let simulated = false;
-
-  if (isBlockchainConfigured() && purchase.buyer.walletAddress) {
-    const { usdc } = getUsdc();
-    const decimals: number = await usdc.decimals();
-    const refundUnits = ethers.parseUnits(buyerTotal.toFixed(6), decimals);
-
-    const tx = await (usdc as ethers.Contract).transfer!(purchase.buyer.walletAddress, refundUnits);
-    const receipt = await tx.wait(BLOCK_CONFIRMATIONS);
-    refundTxHash = receipt.hash;
-  } else {
-    simulated = true;
-    refundTxHash = deterministicSimHash("refund", purchaseId);
-  }
-
-  // Restore inventory back to the listing so it can be re-sold
   await prisma.$transaction(async (tx) => {
     await tx.purchase.update({
       where: { id: purchaseId },
       data: {
         settlementStatus: "REFUNDED",
         refundedAt: new Date(),
-        txHash: refundTxHash,
+        txHash: refundRef,
       },
     });
 
-    // Re-open the listing for the refunded tons (best-effort — admin can also adjust)
     await tx.listing.update({
       where: { id: purchase.listingId },
       data: {
@@ -348,32 +226,31 @@ async function runRefund(purchaseId: string) {
     });
   });
 
-  console.log(`[settlement.refund] ${purchaseId} REFUNDED $${buyerTotal} to buyer${simulated ? " (simulated)" : ""}`);
+  console.log(`[settlement.refund] ${purchaseId} REFUNDED ${purchase.currency} ${buyerTotal} to buyer (ref: ${refundRef})`);
 }
 
 /* ── Worker boot ───────────────────────────────────────────────────────────── */
 export function startSettlementWorker(connection: { url: string }) {
-  // Producer queue used by the worker itself to enqueue the next step
   const queue = new Queue("settlement", { connection });
   queue.on("error", (err) => console.warn("[settlement] queue error:", err.message));
 
   const worker = new Worker<SettlementPayload>(
     "settlement",
     async (job: Job<SettlementPayload>) => {
-      const { purchaseId } = job.data;
-      const stepName = job.name || "collect";  // legacy jobs without name default to collect
+      const { purchaseId, bankReference } = job.data;
+      const stepName = job.name || "collect";
       console.log(`[settlement.${stepName}] processing ${purchaseId}`);
 
       switch (stepName) {
         case "collect":
-        case "settle-purchase":  // back-compat with the existing job name
-          return await runCollect(purchaseId, queue);
+        case "settle-purchase":
+          return await runCollect(purchaseId);
         case "deliver":
-          return await runDeliver(purchaseId, queue);
+          return await runDeliver(purchaseId, queue, bankReference);
         case "release":
-          return await runRelease(purchaseId);
+          return await runRelease(purchaseId, bankReference);
         case "refund":
-          return await runRefund(purchaseId);
+          return await runRefund(purchaseId, bankReference);
         default:
           throw new Error(`Unknown settlement step "${stepName}"`);
       }
@@ -395,7 +272,6 @@ export function startSettlementWorker(connection: { url: string }) {
       },
     }).catch(() => {});
 
-    // Only flip Purchase to FAILED on the final attempt — transient failures should retry
     const maxAttempts = job.opts?.attempts ?? 1;
     if (job.attemptsMade >= maxAttempts) {
       await prisma.purchase.update({

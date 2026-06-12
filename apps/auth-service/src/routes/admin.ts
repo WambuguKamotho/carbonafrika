@@ -7,6 +7,7 @@ import { prisma } from "@carbonafrika/db";
 import { redisConnectionOptions } from "@carbonafrika/types";
 import { authenticate, requireRole } from "../middleware/authenticate";
 import { writeAudit } from "../lib/audit";
+import ExcelJS from "exceljs";
 
 const router = Router();
 
@@ -135,6 +136,156 @@ router.patch("/users/:id", async (req, res) => {
 });
 
 // Single purchase — full details (admin only)
+// Export all purchases as CSV or Excel — must be before /purchases/:id to avoid route collision
+router.get("/purchases/export", async (req, res) => {
+  const format = (req.query.format as string) === "xlsx" ? "xlsx" : "csv";
+  const { retired, search, status } = req.query as Record<string, string>;
+
+  const where = {
+    ...(retired === "true"  && { retired: true }),
+    ...(retired === "false" && { retired: false }),
+    ...(status  && { settlementStatus: status as never }),
+    ...(search  && {
+      OR: [
+        { buyer:   { name:  { contains: search, mode: "insensitive" as never } } },
+        { buyer:   { email: { contains: search, mode: "insensitive" as never } } },
+        { listing: { credit: { project: { title: { contains: search, mode: "insensitive" as never } } } } },
+      ],
+    }),
+  };
+
+  const rows = await prisma.purchase.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    take: 10000,
+    select: {
+      id: true,
+      bankReference: true,
+      totalTons: true,
+      totalPrice: true,
+      feeAmount: true,
+      buyerTotal: true,
+      currency: true,
+      settlementStatus: true,
+      collectTxHash: true,
+      txHash: true,
+      createdAt: true,
+      collectedAt: true,
+      deliveredAt: true,
+      releasedAt: true,
+      refundedAt: true,
+      retired: true,
+      retiredAt: true,
+      disputeReason: true,
+      buyer: { select: { name: true, email: true, country: true } },
+      listing: {
+        select: {
+          pricePerTon: true,
+          credit: {
+            select: {
+              project: {
+                select: {
+                  title: true,
+                  country: true,
+                  owner: { select: { name: true, email: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const HEADERS = [
+    "Purchase ID", "Bank Reference", "Status",
+    "Buyer Name", "Buyer Email", "Buyer Country",
+    "Project", "Project Country", "Seller Name", "Seller Email",
+    "Tonnes", "Price/t", "Subtotal", "Fee", "Buyer Total", "Currency",
+    "Inbound Ref", "Outbound Ref",
+    "Created At", "Collected At", "Delivered At", "Released At", "Refunded At",
+    "Retired", "Retired At",
+    "Dispute Reason",
+  ];
+
+  function toRow(p: (typeof rows)[number]): (string | number | boolean | null)[] {
+    const proj = p.listing.credit.project;
+    return [
+      p.id,
+      p.bankReference ?? "",
+      p.settlementStatus,
+      p.buyer.name,
+      p.buyer.email ?? "",
+      p.buyer.country ?? "",
+      proj.title,
+      proj.country ?? "",
+      proj.owner.name,
+      proj.owner.email ?? "",
+      p.totalTons,
+      p.listing.pricePerTon,
+      p.totalPrice,
+      p.feeAmount ?? "",
+      p.buyerTotal ?? "",
+      p.currency,
+      p.collectTxHash ?? "",
+      p.txHash ?? "",
+      p.createdAt.toISOString(),
+      p.collectedAt?.toISOString() ?? "",
+      p.deliveredAt?.toISOString() ?? "",
+      p.releasedAt?.toISOString() ?? "",
+      p.refundedAt?.toISOString() ?? "",
+      p.retired ? "Yes" : "No",
+      p.retiredAt?.toISOString() ?? "",
+      p.disputeReason ?? "",
+    ];
+  }
+
+  const filename = `purchases-${new Date().toISOString().slice(0, 10)}`;
+
+  if (format === "csv") {
+    const escape = (v: string | number | boolean | null) => {
+      const s = String(v ?? "");
+      return s.includes(",") || s.includes('"') || s.includes("\n")
+        ? `"${s.replace(/"/g, '""')}"`
+        : s;
+    };
+    const lines = [
+      HEADERS.map(escape).join(","),
+      ...rows.map(r => toRow(r).map(escape).join(",")),
+    ].join("\r\n");
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}.csv"`);
+    res.send(lines);
+    return;
+  }
+
+  // xlsx
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "Kabon.Africa";
+  const ws = wb.addWorksheet("Purchases");
+
+  ws.columns = HEADERS.map((h, i) => ({
+    header: h,
+    key: String(i),
+    width: [36, 20, 14, 20, 26, 14, 30, 16, 20, 26, 10, 10, 12, 10, 12, 10, 24, 24, 22, 22, 22, 22, 22, 8, 22, 30][i] ?? 16,
+  }));
+
+  const headerRow = ws.getRow(1);
+  headerRow.font = { bold: true };
+  headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1A3C2B" } };
+  headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
+
+  rows.forEach(r => ws.addRow(toRow(r)));
+
+  ws.autoFilter = { from: "A1", to: `${String.fromCharCode(65 + HEADERS.length - 1)}1` };
+
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}.xlsx"`);
+  await wb.xlsx.write(res);
+  res.end();
+});
+
 router.get("/purchases/:id", async (req, res) => {
   const purchase = await prisma.purchase.findUnique({
     where: { id: req.params.id },
@@ -287,12 +438,69 @@ router.get("/stats", async (_req, res) => {
 });
 
 // ── Settlement actions ───────────────────────────────────────────────────────
-// Admin overrides for the escrow state machine. These enqueue jobs on the
-// "settlement" queue; the worker runs them and updates Purchase rows.
+// Admin endpoints that drive the fiat settlement state machine.
 
-// Force-release: pay seller now (e.g. dispute resolved in seller's favour, or
-// stuck DELIVERED row past auto-release that the worker missed).
+// Confirm payment received: admin confirms the buyer's inbound bank transfer.
+// Moves COLLECTING → COLLECTED → triggers deliver job.
+router.post("/purchases/:id/confirm-payment", async (req, res) => {
+  const schema = z.object({ bankReference: z.string().min(1).max(100).optional() });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: parsed.error.flatten() });
+    return;
+  }
+
+  const purchase = await prisma.purchase.findUnique({
+    where: { id: req.params.id },
+    select: { id: true, settlementStatus: true },
+  });
+  if (!purchase) {
+    res.status(404).json({ success: false, error: "Purchase not found" });
+    return;
+  }
+  if (purchase.settlementStatus !== "COLLECTING") {
+    res.status(400).json({
+      success: false,
+      error: `Cannot confirm payment from ${purchase.settlementStatus} — must be COLLECTING`,
+    });
+    return;
+  }
+
+  await prisma.purchase.update({
+    where: { id: purchase.id },
+    data: {
+      settlementStatus: "COLLECTED",
+      collectedAt: new Date(),
+      ...(parsed.data.bankReference ? { collectTxHash: parsed.data.bankReference } : {}),
+    },
+  });
+
+  if (settlementQueue) {
+    await settlementQueue.add(
+      "deliver",
+      { purchaseId: purchase.id, bankReference: parsed.data.bankReference },
+      { attempts: 3 },
+    );
+  }
+
+  writeAudit(req, {
+    action: "purchase.confirm_payment",
+    targetType: "Purchase",
+    targetId: purchase.id,
+    summary: `Confirmed inbound bank transfer${parsed.data.bankReference ? ` (ref: ${parsed.data.bankReference})` : ""}`,
+  });
+  res.json({ success: true, message: "Payment confirmed. Credits will be delivered to buyer." });
+});
+
+// Release: admin confirms outbound bank transfer has been sent to seller.
 router.post("/purchases/:id/release", async (req, res) => {
+  const schema = z.object({ bankReference: z.string().min(1).max(100).optional() });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: parsed.error.flatten() });
+    return;
+  }
+
   const purchase = await prisma.purchase.findUnique({
     where: { id: req.params.id },
     select: { id: true, settlementStatus: true },
@@ -309,7 +517,6 @@ router.post("/purchases/:id/release", async (req, res) => {
     return;
   }
 
-  // If currently DISPUTED, flip back to DELIVERED first so the worker accepts release
   if (purchase.settlementStatus === "DISPUTED" || purchase.settlementStatus === "COLLECTED") {
     await prisma.purchase.update({
       where: { id: purchase.id },
@@ -317,8 +524,19 @@ router.post("/purchases/:id/release", async (req, res) => {
     });
   }
 
-  if (settlementQueue) await settlementQueue.add("release", { purchaseId: purchase.id }, { attempts: 3 });
-  writeAudit(req, { action: "purchase.release", targetType: "Purchase", targetId: purchase.id, summary: "Force-released funds to seller" });
+  if (settlementQueue) {
+    await settlementQueue.add(
+      "release",
+      { purchaseId: purchase.id, bankReference: parsed.data.bankReference },
+      { attempts: 3 },
+    );
+  }
+  writeAudit(req, {
+    action: "purchase.release",
+    targetType: "Purchase",
+    targetId: purchase.id,
+    summary: `Released payment to seller${parsed.data.bankReference ? ` (ref: ${parsed.data.bankReference})` : ""}`,
+  });
   res.json({ success: true, message: "Release queued. Seller will be paid shortly." });
 });
 

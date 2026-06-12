@@ -79,14 +79,14 @@ enum ListingStatus {
 }
 
 enum SettlementStatus {
-  PENDING        // Purchase row created, awaiting on-chain buyer payment
-  COLLECTING     // transferFrom(buyer → treasury) submitted, waiting confirmations
-  COLLECTED      // Buyer funds confirmed in treasury, awaiting credit delivery
+  PENDING        // Purchase row created, payment instructions not yet sent
+  COLLECTING     // Bank reference generated; buyer has been instructed to wire funds
+  COLLECTED      // Admin confirmed inbound bank transfer received
   DELIVERED      // Credits delivered to buyer; auto-release timer started
   RELEASED       // Seller paid out — final happy state
   DISPUTED       // Admin intervention required
-  REFUNDED       // Funds returned to buyer
-  FAILED         // Terminal failure (transient errors retry within COLLECTING)
+  REFUNDED       // Funds returned to buyer via bank transfer
+  FAILED         // Terminal failure
   SETTLED        // Legacy — kept for back-compat with pre-escrow rows; treat as RELEASED
 }
 
@@ -468,7 +468,7 @@ model Listing {
   credit      CarbonCredit  @relation(fields: [creditId], references: [id])
   pricePerTon Float
   totalTons   Float
-  currency    String        @default("USDC")
+  currency    String        @default("USD")
   status      ListingStatus @default(ACTIVE)
   txHash      String?
 
@@ -502,12 +502,13 @@ model Purchase {
   totalPrice        Float
   feeAmount         Float?
   buyerTotal        Float?
-  currency          String           @default("USDC")
+  currency          String           @default("USD")
 
-  // On-chain transaction hashes (collect = buyer→treasury, deliver = credit transfer, tx = seller payout)
-  txHash            String?
-  collectTxHash     String?
+  // Bank transfer references (collect = inbound ref, tx = outbound payout ref)
+  txHash            String?          // outbound bank transfer ref (platform → seller)
+  collectTxHash     String?          // inbound bank transfer ref (buyer → platform)
   deliverTxHash     String?
+  bankReference     String?          // human-readable ref shown to buyer on invoice
 
   // Escrow state machine — drives the settlement worker
   settlementStatus  SettlementStatus @default(PENDING)
@@ -566,7 +567,7 @@ model ResaleRequest {
   tons                Float
   proposedPricePerTon Float
   approvedPricePerTon Float?              // admin may override at approval
-  currency            String              @default("USDC")
+  currency            String              @default("USD")
   status              ResaleRequestStatus @default(REQUESTED)
   buyerNote           String?
   adminNote           String?
@@ -690,8 +691,8 @@ model PartnerEarning {
   projectId   String?
   purchaseId  String?             // only set for ROYALTY rows
   kind        PartnerEarningKind
-  amount      Float               // USDC (or platform currency)
-  currency    String              @default("USDC")
+  amount      Float               // fiat amount in platform currency
+  currency    String              @default("USD")
   status      PartnerEarningStatus @default(PENDING)
   paidAt      DateTime?
   payoutTxHash String?

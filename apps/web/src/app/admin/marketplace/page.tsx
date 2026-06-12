@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getUser, getToken, isAdminLike, isReadOnly } from "@/lib/auth";
-import { RefreshCw, DollarSign, ArrowRight, ShoppingCart, Leaf, Award } from "lucide-react";
+import { RefreshCw, DollarSign, ArrowRight, ShoppingCart, Leaf, Award, Download } from "lucide-react";
 import Link from "next/link";
 import PurchaseDetailModal from "@/components/admin/PurchaseDetailModal";
 import ReadOnlyBanner from "@/components/admin/ReadOnlyBanner";
@@ -41,6 +41,25 @@ export default function AdminMarketplacePage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPurchaseId, setSelectedPurchaseId] = useState<string | null>(null);
+  const [exporting, setExporting] = useState<"csv" | "xlsx" | null>(null);
+
+  async function handleExport(format: "csv" | "xlsx") {
+    setExporting(format);
+    try {
+      const res = await fetch(`/api/admin/purchases/export?format=${format}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `purchases-${new Date().toISOString().slice(0, 10)}.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(null);
+    }
+  }
 
   useEffect(() => {
     const u = getUser();
@@ -85,9 +104,30 @@ export default function AdminMarketplacePage() {
             <h1 className="text-xl font-black text-gray-900">Marketplace</h1>
             <p className="text-sm text-gray-500 mt-0.5">{listings.length} active listings</p>
           </div>
-          <button onClick={load} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                onClick={() => handleExport("csv")}
+                disabled={!!exporting}
+                className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-2 transition-colors disabled:opacity-50"
+              >
+                <Download className={`w-3.5 h-3.5 ${exporting === "csv" ? "animate-pulse" : ""}`} />
+                CSV
+              </button>
+              <div className="w-px h-5 bg-gray-200" />
+              <button
+                onClick={() => handleExport("xlsx")}
+                disabled={!!exporting}
+                className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-2 transition-colors disabled:opacity-50"
+              >
+                <Download className={`w-3.5 h-3.5 ${exporting === "xlsx" ? "animate-pulse" : ""}`} />
+                Excel
+              </button>
+            </div>
+            <button onClick={load} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+            </button>
+          </div>
         </div>
       </div>
 

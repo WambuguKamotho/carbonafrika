@@ -57,7 +57,7 @@ const createListingSchema = z.object({
   creditId: z.string(),
   pricePerTon: z.number().positive(),
   totalTons: z.number().positive(),
-  currency: z.enum(["USDC", "MATIC", "ETH"]).default("USDC"),
+  currency: z.enum(["USD", "KES", "EUR", "GBP"]).default("USD"),
 });
 
 // Browse all active listings
@@ -201,8 +201,7 @@ const PLATFORM_FEE_BPS = parseInt(process.env.PLATFORM_FEE_BPS ?? "200"); // 2% 
 // Purchase credits — buyers only. Sellers (LANDOWNER) and platform staff (ADMIN, VERIFIER) must not buy.
 // Gates:
 //   - Buyer must be KYC verified
-//   - Project owner (seller) must have a wallet address so we can pay them
-//   - Buyer must have approved USDC for the platform treasury (verified in the settlement worker)
+//   - Seller must have bank details on file so we can pay them out
 router.post("/:id/purchase", authenticate, requireRole("BUYER"), async (req, res) => {
   const schema = z.object({ tons: z.number().positive() });
   const parsed = schema.safeParse(req.body);
@@ -213,7 +212,7 @@ router.post("/:id/purchase", authenticate, requireRole("BUYER"), async (req, res
 
   const buyer = await prisma.user.findUnique({
     where: { id: req.user!.sub },
-    select: { id: true, kycVerified: true, walletAddress: true },
+    select: { id: true, kycVerified: true },
   });
   if (!buyer) {
     res.status(401).json({ success: false, error: "Buyer not found" });
@@ -227,21 +226,13 @@ router.post("/:id/purchase", authenticate, requireRole("BUYER"), async (req, res
     });
     return;
   }
-  if (!buyer.walletAddress) {
-    res.status(400).json({
-      success: false,
-      error: "WALLET_REQUIRED",
-      message: "Connect a wallet so we can collect USDC for this purchase.",
-    });
-    return;
-  }
 
   const listing = await prisma.listing.findUnique({
     where: { id: req.params.id },
     include: {
       credit: {
         include: {
-          project: { select: { ownerId: true, title: true, owner: { select: { walletAddress: true } } } },
+          project: { select: { ownerId: true, title: true, owner: { select: { bankAccountNumber: true } } } },
         },
       },
     },
@@ -255,11 +246,11 @@ router.post("/:id/purchase", authenticate, requireRole("BUYER"), async (req, res
     res.status(400).json({ success: false, error: "Requested tons exceed available amount" });
     return;
   }
-  if (!listing.credit.project.owner.walletAddress) {
+  if (!listing.credit.project.owner.bankAccountNumber) {
     res.status(409).json({
       success: false,
       error: "SELLER_PAYOUT_UNAVAILABLE",
-      message: "This seller has not configured a payout wallet yet. Try again later or contact support.",
+      message: "This seller has not configured bank details yet. Try again later or contact support.",
     });
     return;
   }
