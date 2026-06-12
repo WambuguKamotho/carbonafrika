@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import RetirementIntentModal from "@/components/ui/RetirementIntentModal";
 import { getUser } from "@/lib/auth";
-import { connectWallet, approveUsdcForTreasury } from "@/lib/web3";
+import { getToken } from "@/lib/auth";
 import { CreditClassBadges } from "@/lib/creditClass";
 
 const TYPE_LABEL: Record<string, string> = {
@@ -125,33 +125,17 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
 
   const listing = data?.data;
 
-  const [step, setStep] = useState<"idle" | "connecting" | "approving" | "submitting">("idle");
-
   const handlePurchase = async () => {
     if (!listing) return;
     setLoading(true);
     setError("");
-
-    const subtotalCalc = tons * listing.pricePerTon;
-    const totalCalc    = parseFloat((subtotalCalc * 1.02).toFixed(6));   // includes 2% platform fee
-
     try {
-      // 1. Connect wallet (no-op if already connected). Same flow used for wallet login.
-      setStep("connecting");
-      const { signer } = await connectWallet();
-
-      // 2. Sign USDC approval so platform treasury can pull the buyer's payment.
-      //    Skipped automatically if buyer already has enough allowance.
-      setStep("approving");
-      await approveUsdcForTreasury(signer, totalCalc);
-
-      // 3. Create the purchase server-side; settlement worker takes over from here.
-      setStep("submitting");
-      const res = await api.post<{ data: { id: string; txHash?: string } }>(
+      const res = await api.post<{ data: { id: string; bankReference?: string } }>(
         `/api/marketplace/${params.id}/purchase`,
         { tons },
+        { headers: { Authorization: `Bearer ${getToken()}` } },
       );
-      setPurchaseTxHash(res.data?.txHash ?? null);
+      setPurchaseTxHash(res.data?.bankReference ?? null);
       setPurchaseId(res.data?.id ?? null);
       if (retireImmediately && res.data?.id) {
         setShowRetireModal(true);
@@ -159,21 +143,12 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
         setSuccess(true);
       }
     } catch (err) {
-      // Treat user wallet rejection as a soft error
       const msg = err instanceof Error ? err.message : "Purchase failed";
-      setError(msg.includes("user rejected") ? "Transaction cancelled in your wallet." : msg);
+      setError(msg);
     } finally {
-      setStep("idle");
       setLoading(false);
     }
   };
-
-  const buttonLabel =
-    step === "connecting" ? "Connect wallet…" :
-    step === "approving"  ? "Approve USDC in your wallet…" :
-    step === "submitting" ? "Finalising purchase…" :
-    listing ? `Buy ${tons} tonne${tons !== 1 ? "s" : ""} · $${(tons * listing.pricePerTon * 1.02).toFixed(2)}` :
-    "Buy";
 
   if (isLoading) {
     return (
@@ -328,10 +303,15 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
                   <div className="w-14 h-14 bg-forest-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                     <CheckCircle className="w-7 h-7 text-forest-600" />
                   </div>
-                  <p className="font-bold text-gray-900 mb-1">Purchase complete</p>
-                  <p className="text-sm text-gray-500 mb-3">Credits are in your dashboard.</p>
+                  <p className="font-bold text-gray-900 mb-1">Order received</p>
+                  <p className="text-sm text-gray-500 mb-3 leading-relaxed">
+                    Bank transfer instructions will be sent to your email shortly.
+                  </p>
                   {purchaseTxHash && (
-                    <p className="text-xs text-gray-400 font-mono break-all mb-4">{purchaseTxHash.slice(0, 20)}…</p>
+                    <div className="bg-gray-50 rounded-xl px-3 py-2.5 mb-4 text-left">
+                      <p className="text-xs text-gray-400 mb-0.5">Payment reference</p>
+                      <p className="text-sm font-mono font-bold text-gray-900">{purchaseTxHash}</p>
+                    </div>
                   )}
                   <button onClick={() => router.push("/dashboard")} className="btn-primary w-full text-sm mb-2">
                     Go to Dashboard
@@ -486,11 +466,11 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
                         : "btn-primary"
                     }`}
                   >
-                    {loading ? buttonLabel : `Buy ${tons} tonne${tons !== 1 ? "s" : ""} · $${total.toFixed(2)}`}
+                    {loading ? "Processing…" : `Buy ${tons} tonne${tons !== 1 ? "s" : ""} · $${total.toFixed(2)}`}
                   </button>
 
                   <p className="text-xs text-gray-400 text-center mt-3 leading-relaxed">
-                    Payment settled on Polygon · USDC stablecoin
+                    Settled via bank transfer · Credits released on confirmation
                   </p>
                 </>
               )}
