@@ -235,7 +235,7 @@ export default function AboutPage() {
             A question that wouldn&rsquo;t go away
           </span>
           <blockquote className="text-2xl md:text-3xl font-bold text-white leading-snug mb-8">
-            &ldquo;Through years of travelling the continent (filming for NGOs, moving commodities, deploying sensors), I kept seeing the same thing: indigenous forests disappearing, communities destroying what was left because they had no resources, no income, and no alternative. The global climate conversation was happening, billions were being pledged, but it wasn&rsquo;t reaching the people whose land and labour made it possible. I couldn&rsquo;t stop asking why.&rdquo;
+            &ldquo;Years across Africa &mdash; filming, moving commodities, deploying sensors &mdash; I watched the same thing: forests disappearing, communities destroying what remained because they had no alternative. Billions were being pledged for climate. None of it was reaching the people whose land made it possible. I couldn&rsquo;t stop asking why.&rdquo;
           </blockquote>
           <div className="flex items-center justify-center gap-3">
             <div className="w-10 h-10 rounded-full bg-forest-600 flex items-center justify-center text-white text-xs font-black">WK</div>
