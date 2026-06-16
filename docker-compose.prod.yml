@@ -154,7 +154,11 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    env_file: .env                  # exposes QUANT_USERNAME / QUANT_PASSWORD_HASH to Caddyfile
+    environment:
+      # Use $$ in the server .env to escape literal $ in the bcrypt hash,
+      # e.g. QUANT_PASSWORD_HASH=$$2a$$14$$...  Docker Compose converts $$ → $
+      - QUANT_USERNAME=${QUANT_USERNAME:-admin}
+      - QUANT_PASSWORD_HASH=${QUANT_PASSWORD_HASH}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data            # persists issued TLS certificates
