@@ -52,6 +52,9 @@ export const metadata: Metadata = {
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
 
+// Languages relevant to Kabon.Africa's target markets
+const TRANSLATE_LANGS = "en,fr,sw,pt,ar,ha,am,yo,ig";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const LCP_IMAGE = "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=1200&q=60&auto=format&fit=crop&fm=webp";
 
@@ -70,6 +73,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             strategy="afterInteractive"
           />
         )}
+        {/* Google Translate — initialises the widget mounted in the Footer */}
+        <Script id="google-translate-init" strategy="afterInteractive">{`
+          function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+              pageLanguage: 'en',
+              includedLanguages: '${TRANSLATE_LANGS}',
+              layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+              autoDisplay: false,
+            }, 'google_translate_element');
+          }
+        `}</Script>
+        <Script
+          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
         <QueryProvider>
           <SessionGuard />
           <div className="min-h-screen flex flex-col">

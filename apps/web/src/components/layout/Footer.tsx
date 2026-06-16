@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import { Leaf, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Leaf, ArrowRight, CheckCircle, Loader2, Globe } from "lucide-react";
 import { api } from "@/lib/api";
 
 function NewsletterForm() {
@@ -57,6 +57,30 @@ function NewsletterForm() {
         <span className="ml-3 text-xs text-red-400 self-center">{err}</span>
       )}
     </form>
+  );
+}
+
+function LanguageSwitcher() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // Poll until the Google Translate widget has rendered
+    const id = setInterval(() => {
+      if (document.querySelector(".goog-te-combo")) {
+        setReady(true);
+        clearInterval(id);
+      }
+    }, 300);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2">
+      <Globe className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+      {/* Google Translate mounts its <select> inside this div */}
+      <div id="google_translate_element" className={ready ? "" : "opacity-0 pointer-events-none"} />
+      {!ready && <span className="text-xs text-gray-600">Loading languages…</span>}
+    </div>
   );
 }
 
@@ -117,6 +141,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-gray-500">
           <span>© 2025 Kabon.Africa. All rights reserved.</span>
+          <LanguageSwitcher />
           <span className="flex items-center gap-1">
             Built on <span className="text-forest-400 font-medium">Polygon</span> · Powered by verified science
           </span>

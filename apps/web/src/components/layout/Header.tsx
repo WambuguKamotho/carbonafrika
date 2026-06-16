@@ -11,11 +11,13 @@ import { useRouter, usePathname } from "next/navigation";
 import { useNotifications, type AppNotification } from "@/hooks/useNotifications";
 
 const publicNavLinks = [
-  { href: "/map",         label: "Map" },
-  { href: "/projects",    label: "Projects" },
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/guides",      label: "Guides" },
-  { href: "/about",       label: "About" },
+  { href: "/map",                  label: "Map" },
+  { href: "/projects",             label: "Projects" },
+  { href: "/marketplace",          label: "Marketplace" },
+  { href: "/blog",                 label: "Blog" },
+  { href: "/guides",               label: "Guides" },
+  { href: "/partner-application",  label: "Partner" },
+  { href: "/about",                label: "About" },
 ];
 
 const adminNavLinks = [

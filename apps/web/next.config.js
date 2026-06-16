@@ -34,8 +34,8 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://plausible.io",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://plausible.io https://translate.google.com https://translate.googleapis.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://translate.googleapis.com",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' https: wss:",
