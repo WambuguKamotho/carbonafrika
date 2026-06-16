@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /partner-application
+Disallow: /admin
+Disallow: /api
+Disallow: /settings
+Disallow: /verifier
+Disallow: /dashboard
+Disallow: /portfolio
+Disallow: /partner
+Disallow: /projects/new
+Disallow: /redeem-invite
+Disallow: /reset-password
+Disallow: /forgot-password
+
+Sitemap: https://kabon.africa/sitemap.xml
+Host: https://kabon.africa

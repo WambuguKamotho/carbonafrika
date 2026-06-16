@@ -124,6 +124,29 @@ services:
       - NODE_ENV=production
     expose: ["3000"]
 
+  # ── AI Quant Bot (Telegram alerts + FastAPI signal dashboard) ────────────
+  quant-bot:
+    build:
+      context: apps/quant-bot
+      dockerfile: Dockerfile
+    command: python telegram_listener.py
+    restart: unless-stopped
+    env_file: apps/quant-bot/.env
+    environment:
+      - DB_PATH=/app/db/bot.db
+    volumes:
+      - quant_db:/app/db
+      - quant_outputs:/app/outputs
+      - quant_logs:/app/logs
+      - ./apps/quant-bot/config.yaml:/app/config.yaml:ro
+    expose: ["8081"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/api/signals"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
   # ── Edge: TLS termination + routing (the only public container) ───────────
   caddy:
     image: caddy:2-alpine
@@ -138,9 +161,13 @@ services:
     depends_on:
       - web
       - gateway
+      - quant-bot
 
 volumes:
   postgres_data:
   redis_data:
   caddy_data:
   caddy_config:
+  quant_db:
+  quant_outputs:
+  quant_logs:

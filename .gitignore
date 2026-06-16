@@ -13,3 +13,6 @@ artifacts
 cache
 typechain-types
 deployments/localhost
+apps/quant-bot/.env
+apps/quant-bot/outputs/
+apps/quant-bot/logs/

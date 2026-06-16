@@ -26,3 +26,9 @@ api.kabon.africa {
 	encode gzip
 	reverse_proxy gateway:8080
 }
+
+# AI Quant Bot — signal dashboard & API (FastAPI on :8081)
+quant.kabon.africa {
+	encode gzip
+	reverse_proxy quant-bot:8081
+}

@@ -1,0 +1,237 @@
+# =====================================================================
+# AI Quant Bot configuration
+# Edit this to control what the bot watches and analyzes.
+# =====================================================================
+
+# How far back to pull price history for technical features
+lookback_days: 400
+
+# Watchlist organized by sector. Use any yfinance-compatible ticker.
+# Foreign exchanges use suffixes:  .L (London), .T (Tokyo), .HK (Hong Kong),
+# .DE (Frankfurt), .PA (Paris), .TO (Toronto), .AX (Sydney), .NS (NSE India)
+sectors:
+  Technology:
+    - AAPL
+    - MSFT
+    - NVDA
+    - GOOGL
+    - TSM        # Taiwan Semi (US ADR)
+    - ASML       # ASML
+  Financials:
+    - JPM
+    - BAC
+    - GS
+    - HSBC
+  Energy:
+    - XOM
+    - CVX
+    - SHEL
+    - BP
+  Healthcare:
+    - JNJ
+    - PFE
+    - LLY
+    - NVO        # Novo Nordisk
+  Consumer:
+    - AMZN
+    - WMT
+    - MC.PA      # LVMH (Paris)
+    - 7203.T     # Toyota (Tokyo)
+  Industrials:
+    - CAT
+    - BA
+    - SIE.DE     # Siemens
+  Defense:
+    - LMT
+    - RTX
+    - BA.L       # BAE Systems
+
+# Sector ETFs used for sector-rotation scoring
+sector_etfs:
+  Technology: XLK
+  Financials: XLF
+  Energy: XLE
+  Healthcare: XLV
+  Consumer: XLY
+  Industrials: XLI
+  Materials: XLB
+  Utilities: XLU
+  RealEstate: XLRE
+  Communications: XLC
+  Staples: XLP
+
+# Bond / fixed-income ETFs
+bond_etfs:
+  Treasury_20y: TLT
+  Treasury_7_10y: IEF
+  Treasury_1_3y: SHY
+  HighYield_Corp: HYG
+  InvGrade_Corp: LQD
+  TIPS_Inflation: TIP
+  EM_Bonds_USD: EMB
+
+# International equity ETFs (global coverage)
+international_etfs:
+  EAFE_DevelopedEx_US: EFA
+  Emerging_Markets: EEM
+  # Asia
+  China: FXI
+  Japan: EWJ
+  India: INDA
+  Taiwan: EWT
+  South_Korea: EWY
+  Singapore: EWS
+  Indonesia: EIDO
+  Vietnam: VNM
+  # Europe
+  Germany: EWG
+  UK: EWU
+  France: EWQ
+  Italy: EWI
+  # Africa & Middle East
+  South_Africa: EZA
+  Africa_Broad: AFK
+  Nigeria: NGE
+  Egypt: EGPT
+  # Americas
+  Brazil: EWZ
+  Canada: EWC
+
+# FX & commodities (yfinance symbols)
+fx_commodities:
+  # Major FX
+  EURUSD: EURUSD=X
+  USDJPY: JPY=X
+  GBPUSD: GBPUSD=X
+  DXY: DX-Y.NYB
+  # African & EM FX
+  USDZAR: ZAR=X
+  USDKES: KES=X
+  USDNGN: NGN=X
+  USDEGP: EGP=X
+  USDCNH: CNH=X
+  USDINR: INR=X
+  USDBRL: BRL=X
+  # Commodities
+  Gold: GC=F
+  Silver: SI=F
+  Crude_WTI: CL=F
+  Brent: BZ=F
+  NatGas: NG=F
+  Copper: HG=F
+  Wheat: ZW=F
+  Coffee: KC=F
+  Cocoa: CC=F
+
+# Macro indicators from FRED (free, fred.stlouisfed.org)
+fred_series:
+  GDP_real: GDPC1
+  CPI_YoY: CPIAUCSL
+  Core_CPI: CPILFESL
+  Unemployment: UNRATE
+  FedFunds: DFF
+  Yield_10y: DGS10
+  Yield_2y: DGS2
+  HighYield_Spread: BAMLH0A0HYM2
+  USD_Broad: DTWEXBGS
+
+# News sources
+news:
+  # Free RSS feeds (used by default)
+  rss_feeds:
+    - https://feeds.reuters.com/reuters/businessNews
+    - https://feeds.reuters.com/reuters/worldNews
+    - https://www.ft.com/?format=rss
+    - https://feeds.bloomberg.com/markets/news.rss
+    - https://www.investing.com/rss/news.rss
+  # Per-sector keyword search (used with NewsAPI if key is set, else filters RSS)
+  sector_keywords:
+    Technology: ["semiconductor", "AI chip", "cloud", "earnings tech"]
+    Financials: ["bank earnings", "interest rates", "credit"]
+    Energy: ["oil price", "OPEC", "gas pipeline"]
+    Healthcare: ["FDA", "drug approval", "biotech"]
+    Consumer: ["consumer spending", "retail sales"]
+    Industrials: ["manufacturing PMI", "supply chain"]
+    Defense: ["defense contract", "military spending"]
+  max_headlines_per_sector: 8
+
+# Global event signals
+events:
+  earthquakes_min_magnitude: 5.5
+  weather_severity_min: severe   # minor | moderate | severe | extreme
+
+# GDELT global news sentiment + theme-tagged events (no key)
+gdelt:
+  enabled: true
+  hours_back: 24
+  max_articles_per_theme: 4
+  themes:
+    - ECON_TRADE
+    - ECON_BANKRUPTCY
+    - ECON_INTEREST_RATES
+    - PROTEST
+    - SANCTIONS
+    - NATURAL_DISASTER
+    - GENERAL_GOVERNMENT
+    - ENERGY_RENEWABLE
+
+# World Bank global macro indicators (no key)
+worldbank:
+  enabled: true
+  countries: [USA, CHN, DEU, JPN, GBR, FRA, IND, BRA, ZAF, NGA, KEN, EGY, IDN, VNM, SGP]
+  indicators:
+    GDP_growth_pct: NY.GDP.MKTP.KD.ZG
+    Inflation_pct: FP.CPI.TOTL.ZG
+    Unemployment_pct: SL.UEM.TOTL.ZS
+    Trade_pct_GDP: NE.TRD.GNFS.ZS
+
+# EIA US energy data (free key required)
+eia:
+  enabled: true
+  series:
+    WTI_spot: PET.RWTC.D
+    Brent_spot: PET.RBRTE.D
+    US_crude_stocks: PET.WCRSTUS1.W
+    US_gasoline_stocks: PET.WGTSTUS1.W
+    US_natgas_storage: NG.NW2_EPG0_SWO_R48_BCF.W
+
+# Open-Meteo global weather (no key) — economically-relevant locations
+weather:
+  enabled: true
+  # If you leave locations empty, sensible defaults are used
+  locations: []
+
+# Reddit retail sentiment (no key, but needs a real User-Agent)
+reddit:
+  enabled: true
+  subs: [wallstreetbets, stocks, investing, options, StockMarket]
+  posts_per_sub: 8
+
+# Satellite data (all free)
+satellite:
+  # NASA FIRMS fire detection — free key at firms.modaps.eosdis.nasa.gov/api/
+  firms_enabled: true
+  firms_days_back: 1
+
+  # NASA POWER crop weather — no key needed
+  crop_weather_enabled: true
+
+  # OpenSky flight activity — no key needed
+  opensky_enabled: true
+
+# Telegram bot (optional — leave blank to disable)
+# 1. Message @BotFather on Telegram → /newbot → copy the token
+# 2. Start your bot, then run: python -m src.reports.get_chat_id
+# 3. Paste token + chat_id into .env as TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID
+telegram:
+  enabled: true
+
+# Claude analysis settings
+claude:
+  max_tokens: 4096
+  temperature: 0.3
+  # Caps to keep prompt within token limits
+  max_headlines_in_prompt: 40
+  max_events_in_prompt: 15
+  max_reddit_posts_in_prompt: 25
+  max_gdelt_articles_in_prompt: 25
