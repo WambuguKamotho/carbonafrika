@@ -27,8 +27,13 @@ api.kabon.africa {
 	reverse_proxy gateway:8080
 }
 
-# AI Quant Bot — signal dashboard & API (FastAPI on :8081)
+# AI Quant Bot — signal dashboard & API (FastAPI on :8081). Password-protected.
+# Set QUANT_USERNAME and QUANT_PASSWORD_HASH in the server .env file.
+# Generate the hash on the server: docker run --rm caddy:2-alpine caddy hash-password --plaintext "yourpassword"
 quant.kabon.africa {
 	encode gzip
+	basicauth {
+		{env.QUANT_USERNAME} {env.QUANT_PASSWORD_HASH}
+	}
 	reverse_proxy quant-bot:8081
 }

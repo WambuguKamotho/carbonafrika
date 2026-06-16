@@ -154,6 +154,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    env_file: .env                  # exposes QUANT_USERNAME / QUANT_PASSWORD_HASH to Caddyfile
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data            # persists issued TLS certificates
