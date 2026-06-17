@@ -2,7 +2,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Leaf, Loader2, CheckCircle, AlertTriangle } from "lucide-react";
+import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import { setToken, setUser } from "@/lib/auth";
 
@@ -83,8 +83,15 @@ function RedeemInviteInner() {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-black text-lg text-gray-900">
-            <div className="w-8 h-8 bg-forest-600 rounded-lg flex items-center justify-center">
-              <Leaf className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-[#00C853] rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg width="18" height="18" viewBox="0 0 40 42" fill="none">
+                <rect x="18" y="25" width="4" height="15" rx="2" fill="#7B4F2E"/>
+                <path d="M20 27 L10 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
+                <path d="M20 27 L30 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
+                <ellipse cx="8" cy="13" rx="9" ry="7" fill="#166534"/>
+                <ellipse cx="32" cy="13" rx="8" ry="6" fill="#166534"/>
+                <ellipse cx="20" cy="9" rx="12" ry="9" fill="#15803d"/>
+              </svg>
             </div>
             Kabon.Africa
           </Link>

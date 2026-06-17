@@ -28,22 +28,22 @@ export default function OGImage() {
         >
           {/* Logo row */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 14,
-                background: "#16a34a",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 28,
-              }}
-            >
-              🌿
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: "#00C853", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+              {/* Trunk */}
+              <div style={{ position: "absolute", bottom: 5, left: 24, width: 5, height: 18, background: "#7B4F2E", borderRadius: 2, display: "flex" }} />
+              {/* Left branch */}
+              <div style={{ position: "absolute", bottom: 18, left: 8, width: 16, height: 4, background: "#7B4F2E", borderRadius: 2, transform: "rotate(-28deg)", display: "flex" }} />
+              {/* Right branch */}
+              <div style={{ position: "absolute", bottom: 18, right: 6, width: 15, height: 4, background: "#7B4F2E", borderRadius: 2, transform: "rotate(28deg)", display: "flex" }} />
+              {/* Left canopy */}
+              <div style={{ position: "absolute", top: 8, left: 2, width: 20, height: 16, background: "#166534", borderRadius: "50%", display: "flex" }} />
+              {/* Right canopy */}
+              <div style={{ position: "absolute", top: 8, right: 2, width: 18, height: 14, background: "#166534", borderRadius: "50%", display: "flex" }} />
+              {/* Centre canopy */}
+              <div style={{ position: "absolute", top: 4, left: 11, width: 24, height: 18, background: "#15803d", borderRadius: "50%", display: "flex" }} />
             </div>
             <span style={{ fontSize: 28, fontWeight: 900, color: "#fff", letterSpacing: "-0.5px" }}>
-              Kabon.Africa
+              kabon.africa
             </span>
           </div>
 
