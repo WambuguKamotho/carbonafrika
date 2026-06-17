@@ -166,7 +166,6 @@ export default function Header() {
       ? scrolled ? "bg-forest-950/95 backdrop-blur-md shadow-lg shadow-black/20" : "bg-transparent"
       : "bg-white border-b border-gray-100 shadow-sm";
 
-  const logoColor = isAdmin || isHome ? "text-white" : "text-forest-900";
   const navColor  = isHome ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-forest-700";
 
   return (
