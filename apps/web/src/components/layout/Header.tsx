@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import {
   Menu, X, LogOut, ShieldCheck, Settings, ClipboardCheck,
@@ -173,18 +174,9 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href={isAdmin ? "/admin" : "/"} className={`flex items-center gap-2 font-black text-xl ${logoColor} transition-colors`}>
-          <div className="w-8 h-8 bg-[#00C853] rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg width="18" height="18" viewBox="0 0 40 42" fill="none">
-              <rect x="18" y="25" width="4" height="15" rx="2" fill="#7B4F2E"/>
-              <path d="M20 27 L10 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-              <path d="M20 27 L30 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-              <ellipse cx="8" cy="13" rx="9" ry="7" fill="#166534"/>
-              <ellipse cx="32" cy="13" rx="8" ry="6" fill="#166534"/>
-              <ellipse cx="20" cy="9" rx="12" ry="9" fill="#15803d"/>
-            </svg>
-          </div>
-          {isAdmin ? <span>Kabon<span className="text-purple-400">.Admin</span></span> : "Kabon.Africa"}
+        <Link href={isAdmin ? "/admin" : "/"} className="flex items-center gap-2 transition-opacity hover:opacity-90">
+          <Image src="/logo.png" alt="kabon.africa" width={36} height={36} className="rounded-lg" />
+          {isAdmin && <span className="font-black text-xl text-white">Kabon<span className="text-purple-400">.Admin</span></span>}
         </Link>
 
         {/* Desktop nav */}

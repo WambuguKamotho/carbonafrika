@@ -1,6 +1,7 @@
 "use client";
 import { Suspense, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, Loader2, Users, TrendingUp, Award, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
@@ -83,16 +84,7 @@ function PartnerApplicationInner() {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-black text-lg text-gray-900">
-            <div className="w-8 h-8 bg-[#00C853] rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg width="18" height="18" viewBox="0 0 40 42" fill="none">
-                <rect x="18" y="25" width="4" height="15" rx="2" fill="#7B4F2E"/>
-                <path d="M20 27 L10 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-                <path d="M20 27 L30 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-                <ellipse cx="8" cy="13" rx="9" ry="7" fill="#166534"/>
-                <ellipse cx="32" cy="13" rx="8" ry="6" fill="#166534"/>
-                <ellipse cx="20" cy="9" rx="12" ry="9" fill="#15803d"/>
-              </svg>
-            </div>
+            <Image src="/logo.png" alt="kabon.africa" width={32} height={32} className="rounded-lg" />
             Kabon.Africa
           </Link>
           <Link href="/login" className="text-sm text-gray-500 hover:text-gray-700">

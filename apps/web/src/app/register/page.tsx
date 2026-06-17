@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, TreePine, ShoppingBag, Eye, EyeOff, Mail } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -87,18 +88,8 @@ export default function RegisterPage() {
         {/* Dark gradient + brand tint so the white copy stays readable on top of the photo */}
         <div className="absolute inset-0 bg-gradient-to-br from-forest-950/85 via-forest-900/70 to-forest-950/90" />
         <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(ellipse at 70% 30%, rgb(22 101 52 / 0.45) 0%, transparent 60%)" }} />
-        <Link href="/" className="relative flex items-center gap-2 font-black text-xl text-white">
-          <div className="w-8 h-8 bg-[#00C853] rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg width="18" height="18" viewBox="0 0 40 42" fill="none">
-              <rect x="18" y="25" width="4" height="15" rx="2" fill="#7B4F2E"/>
-              <path d="M20 27 L10 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-              <path d="M20 27 L30 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-              <ellipse cx="8" cy="13" rx="9" ry="7" fill="#166534"/>
-              <ellipse cx="32" cy="13" rx="8" ry="6" fill="#166534"/>
-              <ellipse cx="20" cy="9" rx="12" ry="9" fill="#15803d"/>
-            </svg>
-          </div>
-          Kabon.Africa
+        <Link href="/" className="relative inline-flex transition-opacity hover:opacity-90">
+          <Image src="/logo.png" alt="kabon.africa" width={48} height={48} className="rounded-lg" />
         </Link>
         <div className="relative">
           <p className="text-4xl font-black text-white leading-tight mb-6">
@@ -128,18 +119,8 @@ export default function RegisterPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 font-black text-xl text-forest-800">
-              <div className="w-8 h-8 bg-[#00C853] rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg width="18" height="18" viewBox="0 0 40 42" fill="none">
-                  <rect x="18" y="25" width="4" height="15" rx="2" fill="#7B4F2E"/>
-                  <path d="M20 27 L10 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-                  <path d="M20 27 L30 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-                  <ellipse cx="8" cy="13" rx="9" ry="7" fill="#166534"/>
-                  <ellipse cx="32" cy="13" rx="8" ry="6" fill="#166534"/>
-                  <ellipse cx="20" cy="9" rx="12" ry="9" fill="#15803d"/>
-                </svg>
-              </div>
-              Kabon.Africa
+            <Link href="/" className="inline-flex transition-opacity hover:opacity-90">
+              <Image src="/logo.png" alt="kabon.africa" width={48} height={48} className="rounded-lg" />
             </Link>
           </div>
 

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Mail } from "lucide-react";
 import { loginWithEmail } from "@/lib/auth";
@@ -68,16 +69,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-forest-950/85 via-forest-900/70 to-forest-950/90" />
         <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(ellipse at 30% 40%, rgb(22 101 52 / 0.5) 0%, transparent 60%)" }} />
         <div className="relative text-center">
-          <div className="w-16 h-16 bg-[#00C853] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-forest-900">
-            <svg width="36" height="36" viewBox="0 0 40 42" fill="none">
-              <rect x="18" y="25" width="4" height="15" rx="2" fill="#7B4F2E"/>
-              <path d="M20 27 L10 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-              <path d="M20 27 L30 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-              <ellipse cx="8" cy="13" rx="9" ry="7" fill="#166534"/>
-              <ellipse cx="32" cy="13" rx="8" ry="6" fill="#166534"/>
-              <ellipse cx="20" cy="9" rx="12" ry="9" fill="#15803d"/>
-            </svg>
-          </div>
+          <Image src="/logo.png" alt="kabon.africa" width={96} height={96} className="rounded-2xl mx-auto mb-6 shadow-lg shadow-forest-900" />
           <h2 className="text-3xl font-black text-white mb-4">Kabon.Africa</h2>
           <p className="text-forest-300 text-lg max-w-xs leading-relaxed">
             Every login is a step toward a greener, wealthier Africa.
@@ -103,18 +95,8 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 font-black text-xl text-forest-800">
-              <div className="w-8 h-8 bg-[#00C853] rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg width="18" height="18" viewBox="0 0 40 42" fill="none">
-                  <rect x="18" y="25" width="4" height="15" rx="2" fill="#7B4F2E"/>
-                  <path d="M20 27 L10 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-                  <path d="M20 27 L30 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-                  <ellipse cx="8" cy="13" rx="9" ry="7" fill="#166534"/>
-                  <ellipse cx="32" cy="13" rx="8" ry="6" fill="#166534"/>
-                  <ellipse cx="20" cy="9" rx="12" ry="9" fill="#15803d"/>
-                </svg>
-              </div>
-              Kabon.Africa
+            <Link href="/" className="inline-flex transition-opacity hover:opacity-90">
+              <Image src="/logo.png" alt="kabon.africa" width={48} height={48} className="rounded-lg" />
             </Link>
           </div>
 

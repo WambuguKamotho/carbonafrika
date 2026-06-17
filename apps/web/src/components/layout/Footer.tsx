@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { ArrowRight, CheckCircle, Loader2, Globe } from "lucide-react";
 import { api } from "@/lib/api";
@@ -90,18 +91,8 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 pt-14 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           <div className="md:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-2 font-black text-lg text-white mb-4">
-              <div className="w-8 h-8 bg-[#00C853] rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg width="18" height="18" viewBox="0 0 40 42" fill="none">
-                  <rect x="18" y="25" width="4" height="15" rx="2" fill="#7B4F2E"/>
-                  <path d="M20 27 L10 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-                  <path d="M20 27 L30 20" stroke="#7B4F2E" strokeWidth="3" strokeLinecap="round"/>
-                  <ellipse cx="8" cy="13" rx="9" ry="7" fill="#166534"/>
-                  <ellipse cx="32" cy="13" rx="8" ry="6" fill="#166534"/>
-                  <ellipse cx="20" cy="9" rx="12" ry="9" fill="#15803d"/>
-                </svg>
-              </div>
-              Kabon.Africa
+            <Link href="/" className="inline-flex mb-4 transition-opacity hover:opacity-90">
+              <Image src="/logo.png" alt="kabon.africa" width={80} height={80} className="rounded-xl" />
             </Link>
             <p className="text-sm leading-relaxed max-w-xs text-gray-400 mb-6">
               Connecting African communities restoring indigenous forests, savannas, and grasslands
