@@ -37,3 +37,9 @@ quant.kabon.africa {
 	}
 	reverse_proxy quant-bot:8081
 }
+
+# WordPress blog
+blog.kabon.africa {
+	encode gzip
+	reverse_proxy blog-nginx:80
+}

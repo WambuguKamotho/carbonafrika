@@ -147,6 +147,48 @@ services:
       retries: 3
       start_period: 15s
 
+  # ── Blog (blog.kabon.africa — WordPress + MariaDB) ───────────────────────
+  blog-db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${BLOG_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: ${BLOG_DB_USER:-wordpress}
+      MYSQL_PASSWORD: ${BLOG_DB_PASSWORD}
+    volumes:
+      - blog_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  blog:
+    image: wordpress:6-php8.2-fpm-alpine
+    restart: unless-stopped
+    depends_on:
+      blog-db: { condition: service_healthy }
+    environment:
+      WORDPRESS_DB_HOST: blog-db:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: ${BLOG_DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${BLOG_DB_PASSWORD}
+      WORDPRESS_TABLE_PREFIX: wp_
+    volumes:
+      - blog_data:/var/www/html
+    expose: ["9000"]
+
+  blog-nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      - blog
+    volumes:
+      - blog_data:/var/www/html:ro
+      - ./blog-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    expose: ["80"]
+
   # ── Edge: TLS termination + routing (the only public container) ───────────
   caddy:
     image: caddy:2-alpine
@@ -167,6 +209,7 @@ services:
       - web
       - gateway
       - quant-bot
+      - blog-nginx
 
 volumes:
   postgres_data:
@@ -176,3 +219,5 @@ volumes:
   quant_db:
   quant_outputs:
   quant_logs:
+  blog_db:
+  blog_data:

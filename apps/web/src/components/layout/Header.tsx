@@ -15,7 +15,7 @@ const publicNavLinks = [
   { href: "/map",                  label: "Map" },
   { href: "/projects",             label: "Projects" },
   { href: "/marketplace",          label: "Marketplace" },
-  { href: "/blog",                 label: "Blog" },
+  { href: "https://blog.kabon.africa", label: "Blog" },
   { href: "/guides",               label: "Guides" },
   { href: "/partner-application",  label: "Partner" },
   { href: "/about",                label: "About" },
