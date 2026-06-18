@@ -88,6 +88,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"
         />
+        {/* Metricool analytics */}
+        <Script id="metricool-tracker" strategy="afterInteractive">{`
+          function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"2cba147c8808ce4d75252ea769935940"})});
+        `}</Script>
         <QueryProvider>
           <SessionGuard />
           <div className="min-h-screen flex flex-col">
