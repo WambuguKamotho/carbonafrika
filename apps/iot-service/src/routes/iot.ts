@@ -116,7 +116,7 @@ router.get("/devices/:id/readings", authenticate, async (req: Request, res: Resp
 });
 
 // ── GET /iot/projects/:projectId/readings — All readings for a project ────────
-router.get("/projects/:projectId/readings", async (req: Request, res: Response) => {
+router.get("/projects/:projectId/readings", authenticate, async (req: Request, res: Response) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 100, 1000);
     const readings = await db.deviceReading.findMany({
@@ -136,7 +136,7 @@ router.get("/projects/:projectId/readings", async (req: Request, res: Response) 
 });
 
 // ── GET /iot/projects/:projectId/devices — All devices for a project ──────────
-router.get("/projects/:projectId/devices", async (req: Request, res: Response) => {
+router.get("/projects/:projectId/devices", authenticate, async (req: Request, res: Response) => {
   const devices = await db.ioTDevice.findMany({
     where: { projectId: req.params.projectId },
     select: {

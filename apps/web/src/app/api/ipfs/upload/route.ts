@@ -1,13 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "crypto";
 
 const PINATA_URL = "https://api.pinata.cloud/pinning/pinFileToIPFS";
 
-// App Router handlers parse the body themselves via req.formData() — no
-// bodyParser config needed. Force Node runtime + dynamic since we proxy uploads.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function verifyJWT(token: string, secret: string): boolean {
+  const parts = token.split(".");
+  if (parts.length !== 3) return false;
+  const [header, payload, signature] = parts;
+  const expected = createHmac("sha256", secret)
+    .update(`${header}.${payload}`)
+    .digest("base64url");
+  try {
+    if (!timingSafeEqual(Buffer.from(expected), Buffer.from(signature))) return false;
+    const { exp } = JSON.parse(Buffer.from(payload, "base64url").toString());
+    if (exp && Date.now() / 1000 > exp) return false;
+  } catch {
+    return false;
+  }
+  return true;
+}
+
 export async function POST(req: NextRequest) {
+  const jwtSecret = process.env.JWT_SECRET;
+  const authHeader = req.headers.get("authorization") ?? "";
+  const cookieToken = req.cookies.get("ca_token")?.value ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : cookieToken;
+
+  if (!jwtSecret || !token || !verifyJWT(token, jwtSecret)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const apiKey    = process.env.PINATA_API_KEY;
   const secretKey = process.env.PINATA_SECRET_KEY;
 

@@ -36,16 +36,14 @@ const TARGETS = {
   web:     process.env.WEB_URL             ?? "http://localhost:3000",
 };
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN ?? "*")
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN ?? "https://kabon.africa")
   .split(",")
   .map((s) => s.trim());
 
 app.use(helmet());
 app.use(
   cors({
-    origin: ALLOWED_ORIGINS.includes("*")
-      ? true
-      : (origin, cb) => (!origin || ALLOWED_ORIGINS.includes(origin) ? cb(null, true) : cb(new Error("Not allowed by CORS"))),
+    origin: (origin, cb) => (!origin || ALLOWED_ORIGINS.includes(origin) ? cb(null, true) : cb(new Error("Not allowed by CORS"))),
     credentials: true,
   }),
 );

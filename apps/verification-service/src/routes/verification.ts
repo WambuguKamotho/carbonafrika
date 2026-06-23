@@ -158,6 +158,11 @@ router.patch("/:id/review", authenticate, async (req, res) => {
     return;
   }
 
+  if (req.user!.role !== "ADMIN" && verification.verifierId !== req.user!.sub) {
+    res.status(403).json({ success: false, error: "Not the assigned verifier" });
+    return;
+  }
+
   const { decision, notes, carbonTons, reportIpfsHash } = parsed.data;
 
   if (decision === "APPROVED" && !carbonTons) {
