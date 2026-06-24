@@ -216,7 +216,7 @@ router.get("/:id", async (req, res) => {
   const project = await prisma.project.findUnique({
     where: { id: req.params.id },
     include: {
-      owner: { select: { id: true, name: true, country: true, walletAddress: true } },
+      owner: { select: { id: true, name: true, country: true } },
       verifications: { orderBy: { createdAt: "desc" }, take: 1 },
       credits: { where: { status: "AVAILABLE" } },
       methodology: true,

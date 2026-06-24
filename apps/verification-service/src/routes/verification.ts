@@ -8,14 +8,10 @@ import { authenticate } from "../middleware/authenticate";
 const router = Router();
 const connection = redisConnectionOptions("verification-service");
 
-let mintingQueue: Queue | null = null;
 let notificationQueue: Queue | null = null;
 try {
-  const mq = new Queue("minting",      { connection });
   const nq = new Queue("notification", { connection });
-  mq.on("error", (err) => console.warn("[verification-service] mintingQueue:",      err.message));
   nq.on("error", (err) => console.warn("[verification-service] notificationQueue:", err.message));
-  mintingQueue = mq;
   notificationQueue = nq;
 } catch {
   console.warn("[verification-service] Queue init failed — jobs will be skipped");
@@ -58,7 +54,7 @@ router.get("/:id", authenticate, async (req, res) => {
   const verification = await prisma.verification.findUnique({
     where: { id: req.params.id },
     include: {
-      project: { include: { owner: { select: { id: true, name: true, walletAddress: true } } } },
+      project: { include: { owner: { select: { id: true, name: true } } } },
       verifier: { select: { id: true, name: true } },
     },
   });
@@ -150,7 +146,7 @@ router.patch("/:id/review", authenticate, async (req, res) => {
 
   const verification = await prisma.verification.findUnique({
     where: { id: req.params.id },
-    include: { project: { include: { owner: { select: { id: true, walletAddress: true } } } } },
+    include: { project: { include: { owner: { select: { id: true } } } } },
   });
 
   if (!verification || verification.status !== "IN_PROGRESS") {
@@ -226,7 +222,7 @@ router.post("/:id/issue", authenticate, async (req, res) => {
         select: {
           id: true, title: true, partnerId: true,
           methodology: { select: { bufferPercent: true } },
-          owner: { select: { id: true, walletAddress: true } },
+          owner: { select: { id: true } },
         },
       },
     },
@@ -319,17 +315,6 @@ router.post("/:id/issue", authenticate, async (req, res) => {
       },
     });
   });
-
-  // On-chain minting opt-in — only if owner linked a wallet and chain configured.
-  const ownerWallet = verification.project.owner.walletAddress;
-  if (ownerWallet && mintingQueue) {
-    await mintingQueue.add("mint-credits", {
-      projectId: verification.projectId,
-      verificationId: verification.id,
-      carbonTons,
-      ownerWallet,
-    }, { attempts: 3, backoff: { type: "exponential", delay: 10000 } }).catch(() => {});
-  }
 
   res.json({ success: true, data: { tradeable, bufferTons, message: "Credits issued" } });
 });

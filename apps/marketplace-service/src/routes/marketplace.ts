@@ -134,7 +134,7 @@ router.get("/:id", async (req, res) => {
               capacityKw: true, householdsServed: true, fuelDisplacedKgY: true,
               country: true, region: true, hectares: true, estimatedTons: true,
               onChainId: true, mediaUrls: true,
-              owner: { select: { id: true, name: true, country: true, walletAddress: true } },
+              owner: { select: { id: true, name: true, country: true } },
               verifications: {
                 orderBy: { createdAt: "desc" },
                 take: 1,

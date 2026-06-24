@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import {
   X, ExternalLink, Award, User, ShoppingCart, Leaf, Building2,
-  Mail, MapPin, Wallet, BadgeCheck, Clock, DollarSign, Hash, FileText,
+  Mail, MapPin, BadgeCheck, Clock, DollarSign, Hash, FileText,
   AlertTriangle, RotateCcw, Send, Loader2,
 } from "lucide-react";
 import { getToken, getUser, isReadOnly } from "@/lib/auth";
@@ -37,7 +37,7 @@ interface PurchaseDetail {
   createdAt: string;
   buyer: {
     id: string; name: string; email: string | null; country: string | null;
-    role: string; walletAddress: string | null; kycVerified: boolean; createdAt: string;
+    role: string; kycVerified: boolean; createdAt: string;
   };
   listing: {
     id: string;
@@ -381,11 +381,6 @@ export default function PurchaseDetailModal({
                     {purchase.buyer.kycVerified ? "Verified" : "Unverified"}
                   </span>
                 </Row>
-                {purchase.buyer.walletAddress && (
-                  <Row icon={Wallet} label="Wallet">
-                    <span className="font-mono text-xs">{purchase.buyer.walletAddress}</span>
-                  </Row>
-                )}
               </Section>
 
               {/* Project */}

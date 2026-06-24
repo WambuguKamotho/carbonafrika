@@ -70,7 +70,7 @@ interface ListingDetail {
       materialTonsPerYear?: number | null;
       estimatedTons: number;
       mediaUrls: string[];
-      owner: { name: string; country: string; walletAddress?: string };
+      owner: { name: string; country: string };
       verifications: Array<{ status: string; carbonTons?: number; notes?: string }>;
     };
   };

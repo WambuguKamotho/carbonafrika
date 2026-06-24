@@ -22,7 +22,7 @@ interface ResaleRequest {
   listingId: string | null;
   reviewedAt: string | null;
   createdAt: string;
-  buyer: { id: string; name: string; email: string | null; walletAddress?: string | null; country?: string | null; kycVerified?: boolean };
+  buyer: { id: string; name: string; email: string | null; country?: string | null; kycVerified?: boolean };
   purchase: {
     id: string; totalTons: number; totalPrice: number; buyerTotal?: number | null; currency: string;
     settlementStatus: string; retired: boolean; resold: boolean; createdAt?: string;
@@ -328,9 +328,6 @@ function ResaleDrawer({
                   <UserIcon className="w-4 h-4 text-gray-400" /> {request.buyer.name}
                 </div>
                 <div className="text-xs text-gray-500">{request.buyer.email}</div>
-                {!request.buyer.walletAddress && (
-                  <div className="text-xs text-amber-600">⚠ No bank details on file. Confirm payment method with seller before processing.</div>
-                )}
               </div>
 
               {/* Trade economics */}

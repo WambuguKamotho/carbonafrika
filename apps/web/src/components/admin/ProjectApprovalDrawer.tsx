@@ -18,7 +18,7 @@ interface ProjectDetail {
   mediaUrls: string[] | null;
   rejectionReason: string | null;
   createdAt: string;
-  owner: { id: string; name: string; country: string | null; walletAddress: string | null };
+  owner: { id: string; name: string; country: string | null };
 }
 
 export default function ProjectApprovalDrawer({
@@ -174,9 +174,6 @@ export default function ProjectApprovalDrawer({
                     <div className="font-semibold text-gray-900 text-sm">{project.owner.name}</div>
                     <div className="text-xs text-gray-400">
                       {project.owner.country ?? "—"}
-                      {project.owner.walletAddress && (
-                        <> · <span className="font-mono">{project.owner.walletAddress.slice(0, 6)}…{project.owner.walletAddress.slice(-4)}</span></>
-                      )}
                     </div>
                   </div>
                 </div>
