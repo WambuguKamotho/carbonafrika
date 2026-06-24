@@ -28,7 +28,6 @@ interface SettlementPayload {
   bankReference?: string;  // passed by admin on release/refund to record the transfer ref
 }
 
-const PLATFORM_FEE_BPS   = parseInt(process.env.PLATFORM_FEE_BPS ?? "200");
 const AUTO_RELEASE_HOURS = parseInt(process.env.AUTO_RELEASE_HOURS ?? "24");
 
 function generateBankReference(purchaseId: string): string {
