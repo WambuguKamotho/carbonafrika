@@ -44,6 +44,8 @@ interface Purchase {
 const projectTypeEmoji: Record<string, string> = {
   FOREST: "🌳", SAVANNA: "🌿", GRASSLAND: "🌾", FARMLAND: "🌱", WETLAND: "💧", MANGROVE: "🌊",
   SOLAR_PV: "☀️", BIOGAS: "🔥", BIOCHARCOAL: "⚫", COOKSTOVES: "🍳", MICRO_HYDRO: "💧", WIND: "💨",
+  PLASTIC_RECYCLING: "♻️", EWASTE_RECYCLING: "💻", ORGANIC_COMPOSTING: "🌿",
+  TEXTILE_RECYCLING: "👕", WASTE_HEAT_RECOVERY: "🏭", INDUSTRIAL_EFFICIENCY: "⚙️",
 };
 
 export default function DashboardPage() {
@@ -162,7 +164,7 @@ export default function DashboardPage() {
                     className="group flex items-center justify-between bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 p-5">
                     <div className="flex items-center gap-4">
                       <div className="w-11 h-11 bg-forest-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                        {projectTypeEmoji[p.energyType ?? p.landType ?? ""] ?? "🌍"}
+                        {projectTypeEmoji[(p as any).circularType ?? p.energyType ?? p.landType ?? ""] ?? "🌍"}
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900 group-hover:text-forest-700 transition-colors">{p.title}</div>
@@ -240,7 +242,7 @@ export default function DashboardPage() {
                   <div key={p.id} className="flex items-center justify-between bg-white rounded-2xl border border-gray-100 shadow-card p-5">
                     <div className="flex items-center gap-4">
                       <div className="w-11 h-11 bg-savanna-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                        {projectTypeEmoji[p.listing.credit.project.energyType ?? p.listing.credit.project.landType ?? ""] ?? "🌍"}
+                        {projectTypeEmoji[(p.listing.credit.project as any).circularType ?? p.listing.credit.project.energyType ?? p.listing.credit.project.landType ?? ""] ?? "🌍"}
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900">{p.listing.credit.project.title}</div>

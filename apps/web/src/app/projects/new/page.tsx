@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { MapPin, Upload, TreePine, Zap, ChevronRight, BookOpen, Shield } from "lucide-react";
+import { MapPin, Upload, TreePine, Zap, ChevronRight, BookOpen, Shield, Recycle } from "lucide-react";
 import { DynamicMapPicker } from "@/components/map/DynamicMapPicker";
 import IpfsUpload from "@/components/ui/IpfsUpload";
 
@@ -43,12 +43,30 @@ const energyBenchmarks: Record<string, string> = {
   WIND:        "1 kW small wind turbine avoids ~0.45 t CO₂e/year on-grid",
 };
 
+const circularTypes = [
+  { value: "PLASTIC_RECYCLING",    label: "Plastic Recycling",       emoji: "♻️", desc: "Collection & mechanical recycling of plastic waste", price: "$15–35/t" },
+  { value: "EWASTE_RECYCLING",     label: "E-Waste Recycling",       emoji: "💻", desc: "Recovery of metals & components from electronics", price: "$50–150/t" },
+  { value: "ORGANIC_COMPOSTING",   label: "Organic Composting",      emoji: "🌿", desc: "Diverting organic waste from landfill to compost", price: "$15–35/t" },
+  { value: "TEXTILE_RECYCLING",    label: "Textile Recycling",       emoji: "👕", desc: "Pre/post-consumer textile waste diversion", price: "$15–30/t" },
+  { value: "WASTE_HEAT_RECOVERY",  label: "Waste Heat Recovery",     emoji: "🏭", desc: "Capturing industrial heat for energy generation", price: "$5–12/t" },
+  { value: "INDUSTRIAL_EFFICIENCY",label: "Industrial Efficiency",   emoji: "⚙️", desc: "Manufacturing energy savings & fuel switching", price: "$5–14/t" },
+];
+
+const circularBenchmarks: Record<string, string> = {
+  PLASTIC_RECYCLING:    "Recycling 1 tonne of plastic avoids 1.5–3 t CO₂e vs. virgin production",
+  EWASTE_RECYCLING:     "Processing 1 tonne of e-waste recovers 0.5–2 t CO₂e via avoided primary metal smelting",
+  ORGANIC_COMPOSTING:   "Diverting 1 tonne of organic waste from landfill avoids ~0.5–1 t CO₂e methane",
+  TEXTILE_RECYCLING:    "Recycling 1 tonne of textiles avoids 0.5–1.5 t CO₂e vs. new fibre production",
+  WASTE_HEAT_RECOVERY:  "Recovering 1 MWh of waste heat at a cement/steel plant avoids ~0.3–0.8 t CO₂e",
+  INDUSTRIAL_EFFICIENCY:"Saving 1 MWh through efficiency upgrades or fuel switching avoids 0.3–1.5 t CO₂e",
+};
+
 const LAND_TYPE_HEX: Record<string, string> = {
   FOREST: '#16a34a', SAVANNA: '#d97706', GRASSLAND: '#65a30d',
   FARMLAND: '#92400e', WETLAND: '#0284c7', MANGROVE: '#0d9488',
 };
 
-type ProjectCategory = "LAND_RESTORATION" | "CLEAN_ENERGY";
+type ProjectCategory = "LAND_RESTORATION" | "CLEAN_ENERGY" | "CIRCULAR_ECONOMY";
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -63,6 +81,9 @@ export default function NewProjectPage() {
     // energy
     energyType: "SOLAR_PV",
     capacityKw: "", householdsServed: "", fuelDisplacedKgY: "",
+    // circular
+    circularType: "PLASTIC_RECYCLING",
+    materialTonsPerYear: "",
     // shared
     country: "", region: "", lat: "", lng: "",
     hectares: "", estimatedTons: "", ipfsDocumentHash: "",
@@ -107,7 +128,10 @@ export default function NewProjectPage() {
     return () => { cancelled = true; clearTimeout(t); };
   }, [form.lat, form.lng]);
 
-  const expectedCategory = category === "LAND_RESTORATION" ? "Land Restoration" : "Clean Energy";
+  const expectedCategory =
+    category === "LAND_RESTORATION" ? "Land Restoration" :
+    category === "CLEAN_ENERGY"     ? "Clean Energy" :
+    "Circular Economy";
   const eligibleMethodologies = methodologies.filter(m => m.category === expectedCategory);
   const selectedMethodology = methodologies.find(m => m.code === form.methodologyCode);
 
@@ -153,12 +177,22 @@ export default function NewProjectPage() {
       const validMediaUrls = form.mediaUrls.filter(u => u.trim().startsWith("http"));
       const payload = category === "LAND_RESTORATION"
         ? { ...shared, landType: form.landType, ...(boundary ? { boundary } : {}), ...(validMediaUrls.length ? { mediaUrls: validMediaUrls } : {}) }
-        : {
+        : category === "CLEAN_ENERGY"
+        ? {
             ...shared,
             energyType: form.energyType,
-            ...(form.capacityKw     ? { capacityKw:        parseFloat(form.capacityKw) }     : {}),
-            ...(form.householdsServed ? { householdsServed: parseInt(form.householdsServed) } : {}),
-            ...(form.fuelDisplacedKgY ? { fuelDisplacedKgY: parseFloat(form.fuelDisplacedKgY) } : {}),
+            ...(form.capacityKw       ? { capacityKw:        parseFloat(form.capacityKw) }       : {}),
+            ...(form.householdsServed ? { householdsServed:   parseInt(form.householdsServed) }   : {}),
+            ...(form.fuelDisplacedKgY ? { fuelDisplacedKgY:  parseFloat(form.fuelDisplacedKgY) } : {}),
+            ...(validMediaUrls.length ? { mediaUrls: validMediaUrls } : {}),
+          }
+        : {
+            ...shared,
+            circularType: form.circularType,
+            ...(form.materialTonsPerYear ? { materialTonsPerYear: parseFloat(form.materialTonsPerYear) } : {}),
+            ...(form.capacityKw       ? { capacityKw:        parseFloat(form.capacityKw) }       : {}),
+            ...(form.householdsServed ? { householdsServed:   parseInt(form.householdsServed) }   : {}),
+            ...(form.fuelDisplacedKgY ? { fuelDisplacedKgY:  parseFloat(form.fuelDisplacedKgY) } : {}),
             ...(validMediaUrls.length ? { mediaUrls: validMediaUrls } : {}),
           };
 
@@ -199,7 +233,7 @@ export default function NewProjectPage() {
               <span className={`${stepLabel} bg-forest-100 text-forest-700`}>0</span>
               <h2 className="font-bold text-gray-900">Project Category</h2>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button type="button" onClick={() => setCategory("LAND_RESTORATION")}
                 className={`flex flex-col items-start gap-2 p-4 rounded-xl border-2 transition-all text-left ${category === "LAND_RESTORATION" ? "border-forest-500 bg-forest-50" : "border-gray-200 hover:border-gray-300"}`}>
                 <div className="w-10 h-10 rounded-xl bg-forest-100 flex items-center justify-center">
@@ -220,13 +254,23 @@ export default function NewProjectPage() {
                   <div className="text-xs text-gray-500 mt-0.5">Biogas, solar, biocharcoal, cookstoves & more</div>
                 </div>
               </button>
+              <button type="button" onClick={() => setCategory("CIRCULAR_ECONOMY")}
+                className={`flex flex-col items-start gap-2 p-4 rounded-xl border-2 transition-all text-left ${category === "CIRCULAR_ECONOMY" ? "border-purple-500 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}>
+                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                  <Recycle className="w-5 h-5 text-purple-700" />
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900 text-sm">Circular Economy</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Recycling, e-waste, composting & industrial efficiency</div>
+                </div>
+              </button>
             </div>
           </div>
 
           {/* ── Step 0b: Methodology ── */}
           <div id="step-methodology" className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 scroll-mt-24">
             <div className="flex items-center gap-2 pb-3 border-b border-gray-50 mb-5">
-              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : "bg-forest-100 text-forest-700"}`}>
+              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : category === "CIRCULAR_ECONOMY" ? "bg-purple-100 text-purple-700" : "bg-forest-100 text-forest-700"}`}>
                 <BookOpen className="w-3.5 h-3.5" />
               </span>
               <h2 className="font-bold text-gray-900">Methodology</h2>
@@ -250,7 +294,7 @@ export default function NewProjectPage() {
                         onClick={() => setForm(f => ({ ...f, methodologyCode: m.code }))}
                         className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                           active
-                            ? (category === "CLEAN_ENERGY" ? "border-amber-500 bg-amber-50" : "border-forest-500 bg-forest-50")
+                            ? (category === "CLEAN_ENERGY" ? "border-amber-500 bg-amber-50" : category === "CIRCULAR_ECONOMY" ? "border-purple-500 bg-purple-50" : "border-forest-500 bg-forest-50")
                             : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
@@ -300,13 +344,13 @@ export default function NewProjectPage() {
           {/* ── Step 1: Basic Info ── */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 space-y-5">
             <div className="flex items-center gap-2 pb-2 border-b border-gray-50">
-              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : "bg-forest-100 text-forest-700"}`}>1</span>
+              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : category === "CIRCULAR_ECONOMY" ? "bg-purple-100 text-purple-700" : "bg-forest-100 text-forest-700"}`}>1</span>
               <h2 className="font-bold text-gray-900">Basic Information</h2>
             </div>
             <div>
               <label className="label">Project Title</label>
               <input className="input" value={form.title} onChange={set("title")}
-                placeholder={category === "CLEAN_ENERGY" ? "e.g. Nairobi Biogas Hub, Kibera Community Plant" : "e.g. Aberdare Forest Restoration Initiative"}
+                placeholder={category === "CLEAN_ENERGY" ? "e.g. Nairobi Biogas Hub, Kibera Community Plant" : category === "CIRCULAR_ECONOMY" ? "e.g. Nairobi Plastic Recycling Hub, Mombasa E-Waste Recovery" : "e.g. Aberdare Forest Restoration Initiative"}
                 required minLength={5} />
             </div>
             <div>
@@ -314,11 +358,13 @@ export default function NewProjectPage() {
               <textarea className="input resize-none leading-relaxed" rows={4} value={form.description} onChange={set("description")}
                 placeholder={category === "CLEAN_ENERGY"
                   ? "Describe the technology, feedstock or fuel source, communities served, and expected emissions avoided..."
+                  : category === "CIRCULAR_ECONOMY"
+                  ? "Describe the type of waste handled, collection process, recycling / recovery technology, and expected annual throughput..."
                   : "Describe the land, its current state, your restoration approach, and expected outcomes..."}
                 required minLength={20} />
             </div>
 
-            {/* Land type OR Energy type selector */}
+            {/* Land / Energy / Circular type selector */}
             {category === "LAND_RESTORATION" ? (
               <div>
                 <label className="label">Land Type</label>
@@ -332,7 +378,7 @@ export default function NewProjectPage() {
                   ))}
                 </div>
               </div>
-            ) : (
+            ) : category === "CLEAN_ENERGY" ? (
               <div>
                 <label className="label">Energy Type</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -346,13 +392,30 @@ export default function NewProjectPage() {
                   ))}
                 </div>
               </div>
+            ) : (
+              <div>
+                <label className="label">Project Type</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {circularTypes.map((t) => (
+                    <button key={t.value} type="button" onClick={() => setForm(f => ({ ...f, circularType: t.value }))}
+                      className={`flex flex-col items-start gap-1 p-3 rounded-xl border-2 transition-all text-left ${form.circularType === t.value ? "border-purple-500 bg-purple-50" : "border-gray-200 bg-white hover:border-gray-300"}`}>
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-xl">{t.emoji}</span>
+                        <span className="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded-full">{t.price}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900">{t.label}</span>
+                      <span className="text-xs text-gray-400 leading-snug">{t.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
           {/* ── Step 2: Location ── */}
           <div id="step-location" className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 space-y-5 scroll-mt-24">
             <div className="flex items-center gap-2 pb-2 border-b border-gray-50">
-              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : "bg-forest-100 text-forest-700"}`}>2</span>
+              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : category === "CIRCULAR_ECONOMY" ? "bg-purple-100 text-purple-700" : "bg-forest-100 text-forest-700"}`}>2</span>
               <h2 className="font-bold text-gray-900 flex items-center gap-2"><MapPin className="w-4 h-4" /> Location</h2>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -367,7 +430,7 @@ export default function NewProjectPage() {
             </div>
             <div>
               <label className="label">
-                {category === "CLEAN_ENERGY" ? "Pin the installation site on the map" : "Pin your land on the map"}
+                {category === "CLEAN_ENERGY" ? "Pin the installation site on the map" : category === "CIRCULAR_ECONOMY" ? "Pin the facility location on the map" : "Pin your land on the map"}
               </label>
               <DynamicMapPicker
                 lat={form.lat ? parseFloat(form.lat) : undefined}
@@ -375,7 +438,7 @@ export default function NewProjectPage() {
                 onChange={(lat, lng) => setForm(f => ({ ...f, lat: String(lat), lng: String(lng) }))}
                 boundary={(() => { try { return form.boundaryJson.trim() ? JSON.parse(form.boundaryJson) : null; } catch { return null; } })()}
                 hectares={form.hectares ? parseFloat(form.hectares) : undefined}
-                typeColor={category === "LAND_RESTORATION" ? (LAND_TYPE_HEX[form.landType] ?? '#16a34a') : '#f59e0b'}
+                typeColor={category === "LAND_RESTORATION" ? (LAND_TYPE_HEX[form.landType] ?? '#16a34a') : category === "CLEAN_ENERGY" ? '#f59e0b' : '#9333ea'}
               />
             </div>
 
@@ -412,9 +475,9 @@ export default function NewProjectPage() {
           {/* ── Step 3: Carbon Estimates ── */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 space-y-5">
             <div className="flex items-center gap-2 pb-2 border-b border-gray-50">
-              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : "bg-forest-100 text-forest-700"}`}>3</span>
+              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : category === "CIRCULAR_ECONOMY" ? "bg-purple-100 text-purple-700" : "bg-forest-100 text-forest-700"}`}>3</span>
               <h2 className="font-bold text-gray-900">
-                {category === "CLEAN_ENERGY" ? "Output & Carbon Estimates" : "Carbon Estimates"}
+                {category === "CLEAN_ENERGY" ? "Output & Carbon Estimates" : category === "CIRCULAR_ECONOMY" ? "Throughput & Carbon Estimates" : "Carbon Estimates"}
               </h2>
             </div>
 
@@ -435,9 +498,17 @@ export default function NewProjectPage() {
               </div>
             )}
 
+            {category === "CIRCULAR_ECONOMY" && (
+              <div>
+                <label className="label">Material Throughput (tonnes / year) <span className="text-gray-400 font-normal">optional</span></label>
+                <input type="number" step="0.1" min="0" className="input" value={form.materialTonsPerYear} onChange={set("materialTonsPerYear")} placeholder="e.g. 500" />
+                <p className="text-xs text-gray-400 mt-1.5">Total weight of material collected and processed annually. Used to display your project scale on the marketplace.</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">{category === "CLEAN_ENERGY" ? "Project Footprint (ha)" : "Total Area (hectares)"}</label>
+                <label className="label">{category === "CLEAN_ENERGY" ? "Project Footprint (ha)" : category === "CIRCULAR_ECONOMY" ? "Facility Footprint (ha)" : "Total Area (hectares)"}</label>
                 <input type="number" step="0.1" min="0.1" className="input" value={form.hectares} onChange={set("hectares")} placeholder="e.g. 0.5" required />
               </div>
               <div>
@@ -447,12 +518,18 @@ export default function NewProjectPage() {
             </div>
 
             {/* Contextual benchmark hint */}
-            <div className={`border rounded-xl p-4 text-sm ${category === "CLEAN_ENERGY" ? "bg-amber-50 border-amber-100 text-amber-900" : "bg-forest-50 border-forest-100 text-forest-800"}`}>
+            <div className={`border rounded-xl p-4 text-sm ${category === "CLEAN_ENERGY" ? "bg-amber-50 border-amber-100 text-amber-900" : category === "CIRCULAR_ECONOMY" ? "bg-purple-50 border-purple-100 text-purple-900" : "bg-forest-50 border-forest-100 text-forest-800"}`}>
               {category === "CLEAN_ENERGY" ? (
                 <>
                   <strong className="font-semibold">Benchmark for {energyTypes.find(t => t.value === form.energyType)?.label}:</strong>
                   <p className="mt-1 text-sm">{energyBenchmarks[form.energyType]}</p>
                   <p className="mt-2 text-xs opacity-70">Our verifiers will confirm exact figures from IoT meter data and field inspections.</p>
+                </>
+              ) : category === "CIRCULAR_ECONOMY" ? (
+                <>
+                  <strong className="font-semibold">Benchmark for {circularTypes.find(t => t.value === form.circularType)?.label}:</strong>
+                  <p className="mt-1 text-sm">{circularBenchmarks[form.circularType]}</p>
+                  <p className="mt-2 text-xs opacity-70">Our verifiers will confirm exact figures using material flow audits and third-party lab reports.</p>
                 </>
               ) : (
                 <>
@@ -471,20 +548,22 @@ export default function NewProjectPage() {
           {/* ── Step 4: Documents ── */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-gray-50">
-              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : "bg-forest-100 text-forest-700"}`}>4</span>
+              <span className={`${stepLabel} ${category === "CLEAN_ENERGY" ? "bg-amber-100 text-amber-700" : category === "CIRCULAR_ECONOMY" ? "bg-purple-100 text-purple-700" : "bg-forest-100 text-forest-700"}`}>4</span>
               <h2 className="font-bold text-gray-900 flex items-center gap-2"><Upload className="w-4 h-4" /> Supporting Documents</h2>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed">
               {category === "CLEAN_ENERGY"
                 ? "Upload equipment specs, installation certificates, or baseline surveys."
+                : category === "CIRCULAR_ECONOMY"
+                ? "Upload business registration, facility permits, material flow audits, or waste management certifications."
                 : "Upload land title, GPS survey report, or supporting photos."}
               {" "}Files are stored permanently on IPFS via Pinata. Any supporting documentation is accepted.
             </p>
             <IpfsUpload
               value={form.ipfsDocumentHash}
               onChange={hash => setForm(f => ({ ...f, ipfsDocumentHash: hash }))}
-              label={category === "CLEAN_ENERGY" ? "Equipment / Certification Document" : "Land Title / Survey Document"}
-              accentColor={category === "CLEAN_ENERGY" ? "amber" : "forest"}
+              label={category === "CLEAN_ENERGY" ? "Equipment / Certification Document" : category === "CIRCULAR_ECONOMY" ? "Facility Permit / Audit Report" : "Land Title / Survey Document"}
+              accentColor={category === "CLEAN_ENERGY" ? "amber" : category === "CIRCULAR_ECONOMY" ? "purple" : "forest"}
             />
 
             {/* Project Photos */}
@@ -520,7 +599,7 @@ export default function NewProjectPage() {
                 {form.mediaUrls.length < 5 && (
                   <button type="button"
                     onClick={() => setForm(f => ({ ...f, mediaUrls: [...f.mediaUrls, ""] }))}
-                    className={`text-sm font-medium hover:underline ${category === "CLEAN_ENERGY" ? "text-amber-600" : "text-forest-600"}`}>
+                    className={`text-sm font-medium hover:underline ${category === "CLEAN_ENERGY" ? "text-amber-600" : category === "CIRCULAR_ECONOMY" ? "text-purple-600" : "text-forest-600"}`}>
                     + Add photo URL
                   </button>
                 )}
@@ -542,7 +621,7 @@ export default function NewProjectPage() {
             </div>
           )}
 
-          <button type="submit" className={`w-full py-4 text-base font-bold rounded-2xl flex items-center justify-center gap-2 transition-all ${category === "CLEAN_ENERGY" ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-900/20" : "btn-primary"}`} disabled={loading}>
+          <button type="submit" className={`w-full py-4 text-base font-bold rounded-2xl flex items-center justify-center gap-2 transition-all ${category === "CLEAN_ENERGY" ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-900/20" : category === "CIRCULAR_ECONOMY" ? "bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-900/20" : "btn-primary"}`} disabled={loading}>
             {loading ? (
               <>
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -550,7 +629,7 @@ export default function NewProjectPage() {
               </>
             ) : (
               <>
-                Submit {category === "CLEAN_ENERGY" ? "Energy" : "Land"} Project for Verification
+                Submit {category === "CLEAN_ENERGY" ? "Energy" : category === "CIRCULAR_ECONOMY" ? "Circular Economy" : "Land"} Project for Verification
                 <ChevronRight className="w-4 h-4" />
               </>
             )}

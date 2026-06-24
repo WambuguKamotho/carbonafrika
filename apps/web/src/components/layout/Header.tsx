@@ -19,6 +19,7 @@ const publicNavLinks = [
   { href: "/guides",               label: "Guides" },
   { href: "/partner-application",  label: "Partner" },
   { href: "/about",                label: "About" },
+  { href: "/contact",              label: "Contact" },
 ];
 
 const adminNavLinks = [

@@ -5,12 +5,17 @@ import { CreditClassBadges } from "@/lib/creditClass";
 const TYPE_EMOJI: Record<string, string> = {
   FOREST: "🌳", SAVANNA: "🌿", GRASSLAND: "🌾", FARMLAND: "🌱", WETLAND: "💧", MANGROVE: "🌊",
   SOLAR_PV: "☀️", BIOGAS: "🔥", BIOCHARCOAL: "⚫", COOKSTOVES: "🍳", MICRO_HYDRO: "💧", WIND: "💨",
+  PLASTIC_RECYCLING: "♻️", EWASTE_RECYCLING: "💻", ORGANIC_COMPOSTING: "🌿",
+  TEXTILE_RECYCLING: "👕", WASTE_HEAT_RECOVERY: "🏭", INDUSTRIAL_EFFICIENCY: "⚙️",
 };
 const TYPE_LABEL: Record<string, string> = {
   FOREST: "Forest", SAVANNA: "Savanna", GRASSLAND: "Grassland", FARMLAND: "Farmland",
   WETLAND: "Wetland", MANGROVE: "Mangrove",
   SOLAR_PV: "Solar PV", BIOGAS: "Biogas", BIOCHARCOAL: "Biocharcoal",
   COOKSTOVES: "Cookstoves", MICRO_HYDRO: "Micro-Hydro", WIND: "Wind",
+  PLASTIC_RECYCLING: "Plastic Recycling", EWASTE_RECYCLING: "E-Waste Recycling",
+  ORGANIC_COMPOSTING: "Organic Composting", TEXTILE_RECYCLING: "Textile Recycling",
+  WASTE_HEAT_RECOVERY: "Waste Heat Recovery", INDUSTRIAL_EFFICIENCY: "Industrial Efficiency",
 };
 const TYPE_PHOTO: Record<string, string> = {
   FOREST:    "https://images.unsplash.com/photo-1507041957456-9c397ce39c97?w=600&q=70&auto=format&fit=crop",
@@ -25,6 +30,12 @@ const TYPE_PHOTO: Record<string, string> = {
   COOKSTOVES: "https://images.unsplash.com/photo-1551982932-92d213f565a7?w=600&q=70&auto=format&fit=crop",
   MICRO_HYDRO: "https://images.unsplash.com/photo-1509390874189-d75fd22f19f7?w=600&q=70&auto=format&fit=crop",
   WIND:      "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=70&auto=format&fit=crop",
+  PLASTIC_RECYCLING:    "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=600&q=70&auto=format&fit=crop",
+  EWASTE_RECYCLING:     "https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=600&q=70&auto=format&fit=crop",
+  ORGANIC_COMPOSTING:   "https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=600&q=70&auto=format&fit=crop",
+  TEXTILE_RECYCLING:    "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&q=70&auto=format&fit=crop",
+  WASTE_HEAT_RECOVERY:  "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=70&auto=format&fit=crop",
+  INDUSTRIAL_EFFICIENCY:"https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=70&auto=format&fit=crop",
 };
 const STATUS_BADGE: Record<string, string> = {
   ACTIVE:       "bg-forest-100 text-forest-700",
@@ -41,10 +52,12 @@ export interface ProjectCardData {
   region?: string | null;
   landType: string | null;
   energyType: string | null;
+  circularType?: string | null;
   projectType: string;
   status: string;
   hectares: number;
   capacityKw?: number | null;
+  materialTonsPerYear?: number | null;
   estimatedTons: number;
   mediaUrls: string[];
   owner: { name: string };
@@ -52,8 +65,9 @@ export interface ProjectCardData {
 }
 
 export default function ProjectCard({ project }: { project: ProjectCardData }) {
-  const key = project.energyType ?? project.landType ?? "FOREST";
-  const isEnergy = !!project.energyType;
+  const key = project.circularType ?? project.energyType ?? project.landType ?? "FOREST";
+  const isEnergy   = !!project.energyType;
+  const isCircular = !!project.circularType;
   const photo = project.mediaUrls?.[0] || TYPE_PHOTO[key];
   const label = TYPE_LABEL[key] ?? key;
   const emoji = TYPE_EMOJI[key] ?? "🌍";
@@ -70,7 +84,8 @@ export default function ProjectCard({ project }: { project: ProjectCardData }) {
           <span className="text-white text-xs font-bold bg-black/30 backdrop-blur-sm px-2.5 py-1 rounded-full">
             {emoji} {label}
           </span>
-          {isEnergy && <span className="text-xs font-bold bg-amber-500/80 text-white px-2 py-1 rounded-full">⚡</span>}
+          {isEnergy   && <span className="text-xs font-bold bg-amber-500/80 text-white px-2 py-1 rounded-full">⚡</span>}
+          {isCircular && <span className="text-xs font-bold bg-purple-500/80 text-white px-2 py-1 rounded-full">♻️</span>}
         </div>
         <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
           <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_BADGE[project.status] ?? "bg-gray-100 text-gray-600"}`}>
@@ -94,7 +109,11 @@ export default function ProjectCard({ project }: { project: ProjectCardData }) {
         <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
           <div className="text-sm">
             <span className="font-bold text-gray-900">
-              {isEnergy && project.capacityKw ? `${project.capacityKw.toLocaleString()} kW` : `${project.hectares.toLocaleString()} ha`}
+              {isCircular && project.materialTonsPerYear
+                ? `${project.materialTonsPerYear.toLocaleString()} t/yr`
+                : isEnergy && project.capacityKw
+                  ? `${project.capacityKw.toLocaleString()} kW`
+                  : `${project.hectares.toLocaleString()} ha`}
             </span>
             {project.estimatedTons > 0 && (
               <span className="text-gray-400 ml-1.5">· {project.estimatedTons.toLocaleString()} t CO₂/yr</span>

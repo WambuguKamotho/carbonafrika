@@ -21,6 +21,7 @@ enum UserRole {
 enum ProjectType {
   LAND_RESTORATION
   CLEAN_ENERGY
+  CIRCULAR_ECONOMY
 }
 
 enum LandType {
@@ -39,6 +40,15 @@ enum EnergyType {
   COOKSTOVES
   MICRO_HYDRO
   WIND
+}
+
+enum CircularType {
+  PLASTIC_RECYCLING
+  EWASTE_RECYCLING
+  ORGANIC_COMPOSTING
+  TEXTILE_RECYCLING
+  WASTE_HEAT_RECOVERY
+  INDUSTRIAL_EFFICIENCY
 }
 
 enum DeviceType {
@@ -185,11 +195,15 @@ model Project {
   // Land restoration fields (null for energy projects)
   landType         LandType?
 
-  // Clean energy fields (null for land projects)
+  // Clean energy fields (null for land/circular projects)
   energyType       EnergyType?
-  capacityKw       Float?        // installed capacity (solar kWp, biogas kW, etc.)
-  householdsServed Int?          // number of households benefitting
-  fuelDisplacedKgY Float?        // kg of solid fuel displaced per year (cookstoves/biochar)
+  capacityKw       Float?        // installed capacity (solar kWp, biogas kW, etc.) or facility output for circular
+  householdsServed Int?          // households benefitting or workers/community members for circular
+  fuelDisplacedKgY Float?        // kg of solid fuel displaced per year (cookstoves/biochar/industrial)
+
+  // Circular economy fields (null for land/energy projects)
+  circularType     CircularType?
+  materialTonsPerYear Float?     // tonnes of material processed/recycled annually
 
   // Kabon Carbon Standard methodology — describes how carbon impact is
   // calculated for this project type. Optional so legacy rows still work; new
@@ -240,6 +254,7 @@ model Project {
   @@index([status])
   @@index([landType])
   @@index([energyType])
+  @@index([circularType])
   @@index([projectType])
   @@index([country])
   @@index([methodologyCode])

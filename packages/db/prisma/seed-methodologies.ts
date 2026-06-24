@@ -17,7 +17,7 @@ import { prisma } from "../src";
 interface Seed {
   code: string;
   name: string;
-  category: "Land Restoration" | "Clean Energy";
+  category: "Land Restoration" | "Clean Energy" | "Circular Economy";
   scope?: string;
   summary: string;
   bufferPercent: number;
@@ -108,6 +108,51 @@ const METHODOLOGIES: Seed[] = [
       "energy meter and the country grid emission factor (or diesel benchmark).",
     bufferPercent: 8,
     monitoringPeriodMonths: 6,
+  },
+
+  // ── Circular Economy methodologies ────────────────────────────────────────
+  {
+    code: "KCS-REC-01",
+    name: "Plastic & Material Waste Recycling",
+    category: "Circular Economy",
+    scope: "Waste diversion / Material recovery",
+    summary:
+      "Collection and mechanical recycling of plastic, textile, or mixed solid waste that would otherwise " +
+      "be landfilled or incinerated. Carbon impact calculated via lifecycle assessment: emissions avoided = " +
+      "virgin-material production emissions minus recycling-process emissions. Aligned with Verra PWRM0001/0002 " +
+      "principles. Typical avoided emissions: 1.5–3 t CO₂e per tonne of plastic recycled, 0.5–1.5 t CO₂e " +
+      "per tonne of textiles diverted. Verification via waste manifests, gate weights, and material certificates.",
+    bufferPercent: 10,
+    monitoringPeriodMonths: 12,
+  },
+  {
+    code: "KCS-EWASTE-01",
+    name: "E-Waste Recovery & Recycling",
+    category: "Circular Economy",
+    scope: "Electronic waste / Material recovery",
+    summary:
+      "Formal collection, refurbishment, and materials recovery from end-of-life electronic equipment " +
+      "(computers, phones, appliances). Carbon impact covers: avoided primary metal smelting emissions, " +
+      "avoided informal burning, and energy saved through refurbishment vs. new manufacture. Aligned with " +
+      "Verra AMS-III.BA. Typical range: 0.5–2 t CO₂e per tonne of e-waste processed. Verification via " +
+      "collection logs, refurbishment certificates, and downstream recycler audit trails.",
+    bufferPercent: 10,
+    monitoringPeriodMonths: 12,
+  },
+  {
+    code: "KCS-IEE-01",
+    name: "Industrial Energy Efficiency & Waste Heat Recovery",
+    category: "Circular Economy",
+    scope: "Manufacturing / Industrial process",
+    summary:
+      "Reduction of industrial greenhouse gas emissions through energy efficiency upgrades, fuel switching " +
+      "(fossil to cleaner alternatives), or waste heat recovery at manufacturing plants (cement, steel, " +
+      "food processing). Carbon impact = baseline energy consumption × grid/fuel factor minus post-project " +
+      "consumption. Aligned with Verra AMS-III.Q for waste heat and UNFCCC AMS-II.E for energy efficiency. " +
+      "Typical range: 0.3–1.5 t CO₂e saved per MWh of efficiency gain. Continuous monitoring via IoT " +
+      "energy meters; annual third-party verification required.",
+    bufferPercent: 8,
+    monitoringPeriodMonths: 12,
   },
 ];
 

@@ -7,20 +7,21 @@ import { fetchNdvi } from "../lib/satellite";
 
 const router = Router();
 
-type ProjectTypeRow = { id: string; energyType: string | null; projectType: string };
+type ProjectTypeRow = { id: string; energyType: string | null; circularType: string | null; projectType: string };
 
-async function mergeProjectTypeFields(projects: Array<{ id: string; energyType?: string | null; projectType?: string }>) {
+async function mergeProjectTypeFields(projects: Array<{ id: string; energyType?: string | null; circularType?: string | null; projectType?: string }>) {
   if (projects.length === 0) return;
   const ids = projects.map(p => p.id);
   const rows = await prisma.$queryRaw<ProjectTypeRow[]>`
-    SELECT id, "energyType", "projectType" FROM "Project" WHERE id IN (${Prisma.join(ids)})
+    SELECT id, "energyType", "circularType", "projectType" FROM "Project" WHERE id IN (${Prisma.join(ids)})
   `;
   const map = new Map(rows.map(r => [r.id, r]));
   for (const p of projects) {
     const r = map.get(p.id);
     if (r) {
-      p.energyType  = r.energyType;
-      p.projectType = r.projectType;
+      p.energyType   = r.energyType;
+      p.circularType = r.circularType;
+      p.projectType  = r.projectType;
     }
   }
 }
@@ -75,6 +76,28 @@ const createProjectSchema = z.discriminatedUnion("projectType", [
     partnerCode:       z.string().min(4).max(40).optional(),
     ipfsDocumentHash:  z.string().optional(),
     mediaUrls:         z.array(z.string().url()).optional(),
+  }),
+  // Circular economy project (manufacturing, recycling, industrial efficiency)
+  z.object({
+    projectType:          z.literal("CIRCULAR_ECONOMY"),
+    title:                z.string().min(5).max(200),
+    description:          z.string().min(20).max(5000),
+    circularType:         z.enum(["PLASTIC_RECYCLING", "EWASTE_RECYCLING", "ORGANIC_COMPOSTING", "TEXTILE_RECYCLING", "WASTE_HEAT_RECOVERY", "INDUSTRIAL_EFFICIENCY"]),
+    country:              z.string().max(100),
+    region:               z.string().max(100).optional(),
+    lat:                  z.number().min(-90).max(90),
+    lng:                  z.number().min(-180).max(180),
+    boundary:             z.any().optional(),
+    hectares:             z.number().positive(),
+    estimatedTons:        z.number().positive(),
+    materialTonsPerYear:  z.number().positive().optional(),
+    capacityKw:           z.number().positive().optional(),
+    householdsServed:     z.number().int().positive().optional(),
+    fuelDisplacedKgY:     z.number().positive().optional(),
+    methodologyCode:      methodologyCodeSchema,
+    partnerCode:          z.string().min(4).max(40).optional(),
+    ipfsDocumentHash:     z.string().optional(),
+    mediaUrls:            z.array(z.string().url()).optional(),
   }),
 ]);
 
@@ -231,7 +254,10 @@ router.post("/", authenticate, requireRole("LANDOWNER", "ADMIN"), async (req, re
     res.status(400).json({ success: false, error: "Unknown or inactive methodology" });
     return;
   }
-  const expectedCategory = parsed.data.projectType === "LAND_RESTORATION" ? "Land Restoration" : "Clean Energy";
+  const expectedCategory =
+    parsed.data.projectType === "LAND_RESTORATION" ? "Land Restoration" :
+    parsed.data.projectType === "CLEAN_ENERGY"     ? "Clean Energy" :
+    "Circular Economy";
   if (methodology.category !== expectedCategory) {
     res.status(400).json({
       success: false,
