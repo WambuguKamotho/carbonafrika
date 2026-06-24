@@ -111,7 +111,7 @@ function PartnerApplicationInner() {
               </div>
               <div>
                 <div className="font-bold text-gray-900">Onboarding payout</div>
-                <div className="text-gray-500 text-xs">USDC paid once a project you register is admin-approved.</div>
+                <div className="text-gray-500 text-xs">Paid to your bank account once a project you register is admin-approved.</div>
               </div>
             </li>
             <li className="flex items-start gap-3">

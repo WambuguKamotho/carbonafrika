@@ -4,9 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setUser, getToken } from "@/lib/auth";
 import { api } from "@/lib/api";
-import { connectWallet, signMessage } from "@/lib/web3";
 import {
-  User, Shield, CheckCircle, Wallet, Globe, Phone, FileText, Save, Loader2,
+  User, Shield, CheckCircle, Globe, Phone, FileText, Save, Loader2,
   Landmark, Camera, KeyRound, ShieldCheck, ArrowRight, AlertCircle, Lock,
 } from "lucide-react";
 
@@ -76,9 +75,6 @@ export default function SettingsPage() {
   // Avatar upload
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-
-  // Wallet binding
-  const [walletPending, setWalletPending] = useState(false);
 
   // KYC submission
   const [kycNote, setKycNote] = useState("");
@@ -179,32 +175,6 @@ export default function SettingsPage() {
       notify("err", e instanceof Error ? e.message : "Avatar upload failed");
     } finally {
       setUploadingAvatar(false);
-    }
-  }
-
-  async function handleConnectWallet() {
-    setWalletPending(true);
-    try {
-      const { address, signer } = await connectWallet();
-      // Step 1: get a nonce bound to OUR session (not log-in-with-wallet)
-      const nonceRes = await api.post<{ data: { message: string } }>(
-        "/api/auth/me/wallet/nonce",
-        { address },
-      );
-      // Step 2: sign and bind
-      const signature = await signMessage(signer, nonceRes.data.message);
-      const bindRes = await api.post<{ data: Me }>(
-        "/api/auth/me/wallet/verify",
-        { address, signature },
-      );
-      setMe(bindRes.data);
-      setUser(bindRes.data);
-      notify("ok", "Wallet linked to your account");
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Wallet connect failed";
-      notify("err", msg.includes("user rejected") ? "Wallet signing cancelled" : msg);
-    } finally {
-      setWalletPending(false);
     }
   }
 
@@ -455,47 +425,6 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* Wallet section */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 mb-6">
-          <div className="flex items-center gap-2 mb-2 pb-2">
-            <Wallet className="w-4 h-4 text-forest-600" />
-            <h2 className="font-bold text-gray-900">Crypto Wallet</h2>
-          </div>
-          <p className="text-xs text-gray-500 mb-5 pb-4 border-b border-gray-50 leading-relaxed">
-            {isLandowner
-              ? "USDC payouts from buyers settle to this wallet on Polygon."
-              : isBuyer
-                ? "Required to purchase carbon credits. You'll sign a USDC approval from this wallet."
-                : "Optional. Used if you need to sign on-chain actions."}
-          </p>
-
-          {me?.walletAddress ? (
-            <div className="flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
-              <div className="flex items-center gap-2 min-w-0">
-                <CheckCircle className="w-4 h-4 text-forest-600 flex-shrink-0" />
-                <span className="font-mono text-xs text-gray-800 truncate">{me.walletAddress}</span>
-              </div>
-              <button
-                onClick={handleConnectWallet}
-                disabled={walletPending}
-                className="text-xs font-semibold text-gray-500 hover:text-gray-700 disabled:opacity-50"
-                title="Replace with a different wallet"
-              >
-                {walletPending ? "Signing…" : "Change"}
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={handleConnectWallet}
-              disabled={walletPending}
-              className="w-full flex items-center justify-center gap-2 bg-forest-700 hover:bg-forest-800 disabled:opacity-50 text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
-            >
-              {walletPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wallet className="w-4 h-4" />}
-              {walletPending ? "Waiting for signature…" : "Connect wallet"}
-            </button>
-          )}
-        </div>
-
         {/* Bank payout details — LANDOWNER only */}
         {isLandowner && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 mb-6">
@@ -504,8 +433,8 @@ export default function SettingsPage() {
               <h2 className="font-bold text-gray-900">Bank Payout Details</h2>
             </div>
             <p className="text-xs text-gray-500 mb-5 pb-4 border-b border-gray-50 leading-relaxed">
-              For the upcoming fiat phase: Kabon.Africa will collect buyer payments and disburse to your bank account.
-              Fill this in now so payouts are ready when fiat goes live. (Crypto USDC payouts continue to use your wallet.)
+              Enter your bank details to receive payouts from credit sales.
+              Kabon.Africa collects buyer payments and disburses to your account in our weekly payout run.
             </p>
 
             <div className="space-y-4">

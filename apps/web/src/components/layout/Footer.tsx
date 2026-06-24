@@ -107,7 +107,7 @@ export default function Footer() {
             <NewsletterForm />
 
             <div className="flex gap-3 mt-6">
-              {["Polygon", "IPFS", "Pinata"].map(t => (
+              {["IPFS", "Pinata"].map(t => (
                 <span key={t} className="text-xs px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-gray-400">{t}</span>
               ))}
             </div>
@@ -141,7 +141,7 @@ export default function Footer() {
           <span>© 2025 Kabon.Africa. All rights reserved.</span>
           <LanguageSwitcher />
           <span className="flex items-center gap-1">
-            Built on <span className="text-forest-400 font-medium">Polygon</span> · Powered by verified science
+            Powered by verified science · Built for Africa
           </span>
         </div>
       </div>

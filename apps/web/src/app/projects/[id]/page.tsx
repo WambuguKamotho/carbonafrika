@@ -565,7 +565,7 @@ export default function ProjectDetailPage() {
                   )}
                 </div>
                 <p className="text-forest-800 leading-relaxed">
-                  Independent carbon assessment complete. Credits have been minted and {project.status === 'ACTIVE' ? 'are live on the marketplace.' : 'will appear in your dashboard once minted on-chain.'}
+                  Independent carbon assessment complete. Credits have been issued and {project.status === 'ACTIVE' ? 'are live on the marketplace.' : 'will appear in your dashboard once issued.'}
                 </p>
               </div>
             </div>

@@ -286,7 +286,7 @@ export default function PartnerDashboardPage() {
         <section className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-xs text-gray-600 leading-relaxed flex items-start gap-3">
           <Leaf className="w-4 h-4 text-forest-600 flex-shrink-0 mt-0.5" />
           <div>
-            Pending earnings settle to your wallet or bank in our weekly payout run.
+            Pending earnings settle to your bank account in our weekly payout run.
             Royalties accrue automatically every time a credit from one of your projects is sold and released to the seller.
           </div>
         </section>

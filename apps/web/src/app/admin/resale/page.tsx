@@ -328,11 +328,8 @@ function ResaleDrawer({
                   <UserIcon className="w-4 h-4 text-gray-400" /> {request.buyer.name}
                 </div>
                 <div className="text-xs text-gray-500">{request.buyer.email}</div>
-                {request.buyer.walletAddress && (
-                  <div className="text-xs text-gray-400 font-mono truncate">Payout wallet: {request.buyer.walletAddress}</div>
-                )}
                 {!request.buyer.walletAddress && (
-                  <div className="text-xs text-amber-600">⚠ No payout wallet on file. Seller can't be paid until they connect one.</div>
+                  <div className="text-xs text-amber-600">⚠ No bank details on file. Confirm payment method with seller before processing.</div>
                 )}
               </div>
 

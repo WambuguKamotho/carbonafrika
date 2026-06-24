@@ -99,8 +99,8 @@ export default function RegisterPage() {
             {[
               "Free to register, no upfront costs",
               "Verification takes 2–4 weeks",
-              "Credits minted directly to your wallet",
-              "Buyers pay in USDC or MATIC",
+              "Credits issued directly to your account",
+              "Buyers pay via bank transfer or M-Pesa",
             ].map(item => (
               <li key={item} className="flex items-center gap-3 text-forest-200 text-sm">
                 <span className="w-5 h-5 rounded-full bg-forest-600 flex items-center justify-center flex-shrink-0 text-xs">✓</span>

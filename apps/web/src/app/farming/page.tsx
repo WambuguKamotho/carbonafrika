@@ -180,7 +180,7 @@ export default function FarmingGuidePage() {
               { n: "1", title: "Submit project", desc: "Fill in your land details, location, and practice type on Kabon.Africa.", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80&auto=format&fit=crop" },
               { n: "2", title: "Satellite review", desc: "Our system runs NDVI analysis on your land to confirm baseline carbon stock.", img: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&q=80&auto=format&fit=crop" },
               { n: "3", title: "Field verification", desc: "A certified verifier visits or conducts a video inspection. You get your credit amount.", img: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80&auto=format&fit=crop" },
-              { n: "4", title: "Get paid", desc: "Credits are minted and listed. Buyers purchase; funds go directly to your wallet.", img: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&q=80&auto=format&fit=crop" },
+              { n: "4", title: "Get paid", desc: "Credits are issued and listed. Buyers purchase; funds go directly to your bank or M-Pesa account.", img: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&q=80&auto=format&fit=crop" },
             ].map((step, i) => (
               <div key={step.n} className="flex sm:flex-col items-start sm:items-center gap-4 sm:gap-0">
                 <div className="flex sm:flex-col items-center sm:items-center w-full sm:w-auto">
@@ -224,7 +224,7 @@ export default function FarmingGuidePage() {
             <h2 className="text-2xl font-black text-white mb-2">Ready to earn from your land?</h2>
             <p className="text-forest-200 mb-6 text-sm max-w-md mx-auto">
               Once you implement any of these practices, submit your land as a project.
-              Our verifiers confirm your sequestration and mint credits to your wallet within 90 days.
+              Our verifiers confirm your sequestration and issue credits to your account within 90 days.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/projects/new" className="btn-primary inline-flex items-center gap-2 justify-center">

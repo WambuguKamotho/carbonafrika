@@ -21,7 +21,7 @@ const PRICE_PRESETS = [8, 12, 18];
 export default function ListCreditModal({ credit, projectTitle, onClose, onListed }: Props) {
   const [pricePerTon, setPricePerTon] = useState<string>("12");
   const [tonsToList, setTonsToList]   = useState<string>(String(Math.floor(credit.amount)));
-  const [currency,    setCurrency]    = useState<"USDC" | "MATIC" | "ETH">("USDC");
+  const currency = "USD";
   const [submitting,  setSubmitting]  = useState(false);
   const [error,       setError]       = useState<string | null>(null);
   const [done,        setDone]        = useState(false);
@@ -123,7 +123,7 @@ export default function ListCreditModal({ credit, projectTitle, onClose, onListe
 
               {/* Price */}
               <div>
-                <label className="label">Price per tonne (USDC)</label>
+                <label className="label">Price per tonne (USD)</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                   <input
@@ -150,16 +150,6 @@ export default function ListCreditModal({ credit, projectTitle, onClose, onListe
                 <p className="text-xs text-gray-400 mt-2 leading-relaxed">
                   African voluntary-market prices typically range $5–$25/t depending on project type and co-benefits.
                 </p>
-              </div>
-
-              {/* Currency */}
-              <div>
-                <label className="label">Settlement currency</label>
-                <select className="input" value={currency} onChange={e => setCurrency(e.target.value as "USDC" | "MATIC" | "ETH")}>
-                  <option value="USDC">USDC (recommended)</option>
-                  <option value="MATIC">MATIC</option>
-                  <option value="ETH">ETH</option>
-                </select>
               </div>
 
               {/* Pricing breakdown */}

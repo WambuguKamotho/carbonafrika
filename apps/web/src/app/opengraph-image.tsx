@@ -71,7 +71,7 @@ export default async function OGImage() {
             {[
               { v: "$12–25", l: "Per tonne earned" },
               { v: "54+", l: "African countries" },
-              { v: "100%", l: "On-chain proof" },
+              { v: "100%", l: "Independently verified" },
               { v: "$0", l: "Upfront cost" },
             ].map((s) => (
               <div

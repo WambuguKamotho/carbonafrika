@@ -78,7 +78,7 @@ export default function LoginPage() {
             {[
               { v: "$12–25", l: "Per tonne earned" },
               { v: "54", l: "Countries served" },
-              { v: "100%", l: "On-chain proof" },
+              { v: "100%", l: "Independently verified" },
               { v: "0%", l: "Upfront cost" },
             ].map(s => (
               <div key={s.l} className="bg-white/5 border border-white/10 rounded-xl p-4">

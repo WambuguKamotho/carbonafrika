@@ -52,7 +52,7 @@ const timeline = [
   { year: "2022", event: "Joins Fork Freight, expanding freight logistics into African markets" },
   { year: "2023", event: "Leads Bandika IoT as Director, building real-time sensor networks across East Africa" },
   { year: "2024", event: "Films Firelight Foundation across Zambia & Malawi, where the insight crystallises" },
-  { year: "2025", event: "Founds Kabon.Africa: IoT proof, blockchain settlement, and direct community income" },
+  { year: "2025", event: "Founds Kabon.Africa: IoT proof, verified settlement, and direct community income" },
 ];
 
 const differentiators = [
@@ -63,10 +63,10 @@ const differentiators = [
     alt: "Smart agriculture sensor in field",
   },
   {
-    title: "On-chain settlement",
-    desc: "Carbon credits minted as blockchain tokens on Polygon. Every sale settles in USDC directly to the land owner's wallet. No escrow. No 90-day wire transfers.",
-    photo: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&q=80&auto=format&fit=crop",
-    alt: "Blockchain network visualization",
+    title: "Direct fiat settlement",
+    desc: "Every sale settles directly to the land owner's bank account or M-Pesa. No escrow. No 90-day wire transfers. Fully compliant with local financial regulations.",
+    photo: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80&auto=format&fit=crop",
+    alt: "Bank transfer and mobile money payment",
   },
   {
     title: "Built for African realities",

@@ -40,14 +40,14 @@ const landTypes = [
 const steps = [
   { n: "01", title: "Register Your Land", desc: "Submit GPS coordinates, land type, and project docs online.", icon: "📍" },
   { n: "02", title: "Get Verified", desc: "Independent verifiers + satellite monitoring confirm sequestration.", icon: "✅" },
-  { n: "03", title: "Earn Credits", desc: "Verified CO₂ is minted as blockchain tokens to your wallet.", icon: "🪙" },
-  { n: "04", title: "Get Paid", desc: "Corporations buy your credits. You receive USDC or MATIC directly.", icon: "💰" },
+  { n: "03", title: "Earn Credits", desc: "Verified CO₂ is issued as certified carbon credits to your account.", icon: "🪙" },
+  { n: "04", title: "Get Paid", desc: "Corporations buy your credits. Payments settle directly to your bank or M-Pesa.", icon: "💰" },
 ];
 
 const features = [
   { icon: Shield, title: "100% Verified", desc: "Every project is independently verified before a single credit is issued. No greenwashing." },
-  { icon: Globe, title: "Blockchain Proof", desc: "Credits live on Polygon. Every mint, sale, and retirement is publicly verifiable on-chain." },
-  { icon: TrendingUp, title: "Real Income", desc: "Communities earn $12–25 per tonne. Payments settle directly to your crypto wallet." },
+  { icon: Globe, title: "Verified Proof", desc: "Every project is independently verified. All issuances, sales, and retirements are permanently recorded." },
+  { icon: TrendingUp, title: "Real Income", desc: "Communities earn $12–25 per tonne. Payments settle directly to your bank or M-Pesa account." },
   { icon: TreePine, title: "Indigenous Focus", desc: "We prioritise indigenous forest restoration, Africa's highest carbon-density ecosystems." },
   { icon: Leaf, title: "Farming Guide", desc: "Expert agroforestry guidance that earns additional credits alongside your food crops." },
   { icon: Users, title: "Community Owned", desc: "Register individually or as a collective. Earnings go to the land stewards, not middlemen." },
@@ -80,7 +80,7 @@ export default async function HomePage() {
         <div className="relative max-w-5xl mx-auto px-4 text-center py-24">
           <div className="inline-flex items-center gap-2 bg-forest-500/10 border border-forest-500/20 text-forest-300 px-4 py-1.5 rounded-full text-sm font-medium mb-8">
             <span className="w-2 h-2 bg-forest-400 rounded-full animate-pulse-slow" />
-            Polygon Blockchain · Verified by Science · Real Financial Returns
+            Verified by Science · Compliant · Real Financial Returns
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.05] tracking-tight mb-6">
@@ -93,7 +93,7 @@ export default async function HomePage() {
 
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
             Kabon.Africa connects African communities restoring forests, savannas, and grasslands
-            with global buyers who pay for verified carbon offsets, straight to your wallet.
+            with global buyers who pay for verified carbon offsets, straight to your bank account.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -108,7 +108,7 @@ export default async function HomePage() {
 
           {/* Trust pills */}
           <div className="flex flex-wrap justify-center gap-3">
-            {["🔒 Non-custodial", "🌍 54 African nations", "⛓️ On-chain proof", "📋 Published standard"].map((t) => (
+            {["🔒 Secure", "🌍 54 African nations", "✅ Independently verified", "📋 Published standard"].map((t) => (
               <span key={t} className="text-xs text-gray-400 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">{t}</span>
             ))}
           </div>
@@ -232,7 +232,7 @@ export default async function HomePage() {
         <div className="container mx-auto">
           <div className="text-center mb-14">
             <span className="text-xs font-semibold text-forest-600 uppercase tracking-widest">Process</span>
-            <h2 className="text-4xl font-bold text-gray-900 mt-2 mb-3">From Land to Wallet in 4 Steps</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mt-2 mb-3">From Land to Payment in 4 Steps</h2>
             <p className="text-gray-500">Simple enough for individuals. Robust enough for communities of thousands.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

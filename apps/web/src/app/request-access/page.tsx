@@ -121,7 +121,7 @@ function RequestAccessInner() {
               </div>
               <div>
                 <div className="font-bold text-gray-900">Verified African projects only</div>
-                <div className="text-gray-500 text-xs">Independent verification + on-chain provenance.</div>
+                <div className="text-gray-500 text-xs">Independent verification + permanent audit trail.</div>
               </div>
             </li>
             <li className="flex items-start gap-3">

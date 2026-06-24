@@ -76,7 +76,7 @@ export default function StandardPage() {
           </h1>
           <p className="text-forest-200 text-lg max-w-2xl leading-relaxed">
             Every credit on Kabon.Africa is issued under a published methodology, backed by a permanence buffer pool,
-            and tracked on Polygon. Built for African projects that are too small, too local, or too time-pressed
+            and backed by a government-compliant fiat settlement layer. Built for African projects that are too small, too local, or too time-pressed
             for years-long international registry processes.
           </p>
         </div>
@@ -137,9 +137,9 @@ export default function StandardPage() {
                 <StandardStep number={3} title="Carbon assessment"
                   body="An assigned reviewer measures the carbon impact against the chosen methodology: baseline, project emissions, and net tonnes. The number stamps onto a Verification record." />
                 <StandardStep number={4} title="Issuance + buffer split"
-                  body="Credits are minted on Polygon (ERC-1155). The methodology's buffer percentage is automatically diverted to the platform-wide Buffer Pool. Only the remainder is tradeable." />
+                  body="Credits are issued and recorded in the Kabon registry. The methodology's buffer percentage is automatically diverted to the platform-wide Buffer Pool. Only the remainder is tradeable." />
                 <StandardStep number={5} title="Trade & retirement"
-                  body="Approved buyers purchase credits in USDC. Retired credits become non-transferable on-chain and receive a printable retirement certificate with QR-verified provenance." />
+                  body="Approved buyers purchase credits via bank transfer. Retired credits are permanently marked non-transferable and receive a printable retirement certificate with QR-verified provenance." />
                 <StandardStep number={6} title="Ongoing monitoring"
                   body="Per the methodology, projects re-submit monitoring evidence on a fixed cadence. Reversal events (fire, conversion) trigger pool drawdown, where pool credits are retired to backfill so buyer offsets stay whole." />
               </ol>
@@ -221,7 +221,7 @@ export default function StandardPage() {
             <Eye className="w-8 h-8 mx-auto mb-3 text-forest-300" />
             <h2 className="text-2xl font-black mb-2">Every credit, traceable.</h2>
             <p className="text-forest-200 text-sm mb-6 max-w-md mx-auto">
-              Each retirement certificate carries the methodology code, project ID, and on-chain transaction hash.
+              Each retirement certificate carries the methodology code, project ID, and a unique registry reference.
               Audit any credit from the certificate's QR.
             </p>
             <Link href="/marketplace" className="inline-flex items-center gap-2 bg-white text-forest-900 font-bold px-6 py-2.5 rounded-xl hover:bg-forest-50 transition-colors">
