@@ -7,7 +7,7 @@ interface Props {
   onChange: (hash: string) => void;
   accept?: string;
   label?: string;
-  accentColor?: "forest" | "amber";
+  accentColor?: "forest" | "amber" | "purple";
 }
 
 const ACCEPTED = ".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.zip";
@@ -19,6 +19,8 @@ export default function IpfsUpload({ value, onChange, accept = ACCEPTED, label =
 
   const accent = accentColor === "amber"
     ? { btn: "bg-amber-600 hover:bg-amber-700 text-white", ring: "border-amber-300 bg-amber-50", text: "text-amber-700" }
+    : accentColor === "purple"
+    ? { btn: "bg-purple-600 hover:bg-purple-700 text-white", ring: "border-purple-300 bg-purple-50", text: "text-purple-700" }
     : { btn: "bg-forest-600 hover:bg-forest-700 text-white", ring: "border-forest-300 bg-forest-50", text: "text-forest-700" };
 
   async function handleFile(file: File) {
