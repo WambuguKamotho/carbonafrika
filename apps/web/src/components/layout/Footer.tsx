@@ -100,7 +100,7 @@ export default function Footer() {
             </p>
 
             {/* Newsletter signup */}
-            <h4 className="text-white font-bold mb-2 text-sm">Stay in the loop</h4>
+            <h3 className="text-white font-bold mb-2 text-sm">Stay in the loop</h3>
             <p className="text-xs text-gray-500 mb-3 max-w-sm">
               Monthly digest of new projects, retirement stats and African carbon market news.
             </p>
@@ -113,7 +113,7 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4 text-sm">Platform</h4>
+            <h3 className="text-white font-bold mb-4 text-sm">Platform</h3>
             <ul className="space-y-2.5 text-sm">
               <li><Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link></li>
               <li><Link href="/projects/new" className="hover:text-white transition-colors">Register a Project</Link></li>
@@ -123,12 +123,12 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4 text-sm">For Buyers</h4>
+            <h3 className="text-white font-bold mb-4 text-sm">For Buyers</h3>
             <ul className="space-y-2.5 text-sm">
               <li><Link href="/marketplace" className="hover:text-white transition-colors">Browse Credits</Link></li>
               <li><Link href="/request-access" className="hover:text-white transition-colors">Request Access</Link></li>
             </ul>
-            <h4 className="text-white font-bold mb-4 text-sm mt-6">Community</h4>
+            <h3 className="text-white font-bold mb-4 text-sm mt-6">Community</h3>
             <ul className="space-y-2.5 text-sm">
               <li><Link href="/partner-application" className="hover:text-white transition-colors">Become a Partner</Link></li>
               <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
@@ -138,7 +138,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-gray-500">
-          <span>© 2025 Kabon.Africa. All rights reserved.</span>
+          <span>© 2026 Kabon.Africa. All rights reserved.</span>
           <LanguageSwitcher />
           <span className="flex items-center gap-1">
             Powered by verified science · Built for Africa

@@ -203,7 +203,7 @@ export default async function HomePage() {
       <section className="section bg-gray-50">
         <div className="container mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-semibold text-forest-600 uppercase tracking-widest">Eligible Land</span>
+            <span className="text-xs font-semibold text-forest-700 uppercase tracking-widest">Eligible Land</span>
             <h2 className="text-4xl font-bold text-gray-900 mt-2 mb-3">What You Can Restore</h2>
             <p className="text-gray-500 max-w-xl mx-auto">Any African land restoration qualifies. Our verifiers confirm the carbon potential of your specific ecosystem.</p>
           </div>
@@ -231,7 +231,7 @@ export default async function HomePage() {
       <section className="section bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-semibold text-forest-600 uppercase tracking-widest">Process</span>
+            <span className="text-xs font-semibold text-forest-700 uppercase tracking-widest">Process</span>
             <h2 className="text-4xl font-bold text-gray-900 mt-2 mb-3">From Land to Payment in 4 Steps</h2>
             <p className="text-gray-500">Simple enough for individuals. Robust enough for communities of thousands.</p>
           </div>
@@ -245,7 +245,7 @@ export default async function HomePage() {
                   <div className="w-16 h-16 rounded-2xl bg-forest-50 border border-forest-100 flex items-center justify-center text-2xl mb-5">
                     {s.icon}
                   </div>
-                  <div className="text-xs font-bold text-forest-500 mb-2 tracking-widest">{s.n}</div>
+                  <div className="text-xs font-bold text-forest-700 mb-2 tracking-widest">{s.n}</div>
                   <h3 className="font-bold text-gray-900 mb-2">{s.title}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed">{s.desc}</p>
                 </div>
@@ -294,7 +294,7 @@ export default async function HomePage() {
       <section className="section bg-gray-50">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <span className="text-xs font-semibold text-forest-600 uppercase tracking-widest">Stories</span>
+            <span className="text-xs font-semibold text-forest-700 uppercase tracking-widest">Stories</span>
             <h2 className="text-4xl font-bold text-gray-900 mt-2">Real People. Real Impact.</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
