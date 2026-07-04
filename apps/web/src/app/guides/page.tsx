@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, TreePine, Zap, BookOpen } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Project Guides",
+  description:
+    "Step-by-step guides for forest, savanna, farmland, wetland, and clean-energy carbon projects on Kabon.Africa. Pick the sector that fits your project.",
+  alternates: { canonical: "/guides" },
+};
 
 const guides = [
   {

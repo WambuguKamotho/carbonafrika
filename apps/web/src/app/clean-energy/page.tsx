@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { Sun, Flame, Wind, Zap, Droplets, Cpu, ArrowRight, TrendingUp } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Clean Energy Projects",
+  description:
+    "Turn solar, biogas, cookstoves, and micro-hydro into verified carbon credits. Explore clean energy technologies eligible for Kabon.Africa's carbon registry.",
+  alternates: { canonical: "/clean-energy" },
+};
 
 const technologies = [
   {

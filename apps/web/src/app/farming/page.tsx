@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { Leaf, Sun, Droplets, Wind, TreePine, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Regenerative Farming & Land Restoration",
+  description:
+    "Turn your land into income. List farmland, savanna, or grassland restoration projects and earn verified carbon credits with Kabon.Africa.",
+  alternates: { canonical: "/farming" },
+};
 
 const practices = [
   {

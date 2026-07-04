@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, MapPin, Cpu, Package, Film, Leaf, ExternalLink } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description:
+    "Kabon.Africa was built by a documentary filmmaker who spent 14 years watching African communities restore degraded land and get nothing for it. Meet the story behind the platform.",
+  alternates: { canonical: "/about" },
+};
 
 const chapters = [
   {

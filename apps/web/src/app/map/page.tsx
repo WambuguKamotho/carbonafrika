@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { DynamicAllProjectsMap } from "@/components/map/DynamicAllProjectsMap";
+
+export const metadata: Metadata = {
+  title: "Project Map",
+  description:
+    "Explore verified and active land restoration and clean energy carbon projects across Africa on an interactive map.",
+  alternates: { canonical: "/map" },
+};
 
 const LAND_LEGEND = [
   { label: "Forest",    color: "#16a34a", shape: "circle" },

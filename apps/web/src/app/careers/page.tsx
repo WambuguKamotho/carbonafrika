@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import {
   Leaf, ArrowRight, MapPin, Clock, Briefcase, Globe, Users, Heart,
   TrendingUp, Sparkles, Mail,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Careers",
+  description:
+    "Help build the carbon market Africa actually needs. Explore open roles at Kabon.Africa.",
+  alternates: { canonical: "/careers" },
+};
 
 interface Role {
   slug: string;
