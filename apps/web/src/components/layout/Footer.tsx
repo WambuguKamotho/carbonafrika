@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { ArrowRight, CheckCircle, Loader2, Globe } from "lucide-react";
 import { api } from "@/lib/api";
+import { getUser } from "@/lib/auth";
 
 function NewsletterForm() {
   const [email, setEmail]       = useState("");
@@ -86,6 +87,9 @@ function LanguageSwitcher() {
 }
 
 export default function Footer() {
+  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
+  useEffect(() => { setUser(getUser()); }, []);
+
   return (
     <footer className="bg-forest-950 text-gray-400">
       <div className="max-w-6xl mx-auto px-4 pt-14 pb-8">
@@ -119,7 +123,7 @@ export default function Footer() {
               <li><Link href="/projects/new" className="hover:text-white transition-colors">Register a Project</Link></li>
               <li><Link href="/standard" className="hover:text-white transition-colors">Carbon Standard</Link></li>
               <li><Link href="/guides" className="hover:text-white transition-colors">Project Guides</Link></li>
-              <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
+              {user && <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>}
             </ul>
           </div>
           <div>

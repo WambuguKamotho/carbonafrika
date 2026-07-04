@@ -8,7 +8,6 @@ Disallow: /verifier
 Disallow: /dashboard
 Disallow: /portfolio
 Disallow: /partner
-Disallow: /projects/new
 Disallow: /redeem-invite
 Disallow: /reset-password
 Disallow: /forgot-password
