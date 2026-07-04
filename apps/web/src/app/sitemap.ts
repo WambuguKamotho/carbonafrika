@@ -10,7 +10,6 @@ const ROUTES = [
   "/about",
   "/marketplace",
   "/projects",
-  "/projects/new",
   "/map",
   "/blog",
   "/clean-energy",

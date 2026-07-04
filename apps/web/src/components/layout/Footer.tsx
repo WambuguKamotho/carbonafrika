@@ -120,7 +120,7 @@ export default function Footer() {
             <h3 className="text-white font-bold mb-4 text-sm">Platform</h3>
             <ul className="space-y-2.5 text-sm">
               <li><Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link></li>
-              <li><Link href="/projects/new" className="hover:text-white transition-colors">Register a Project</Link></li>
+              <li><Link href={user ? "/projects/new" : "/register"} className="hover:text-white transition-colors">Register a Project</Link></li>
               <li><Link href="/standard" className="hover:text-white transition-colors">Carbon Standard</Link></li>
               <li><Link href="/guides" className="hover:text-white transition-colors">Project Guides</Link></li>
               {user && <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>}
