@@ -66,7 +66,14 @@ const ORG_SCHEMA = {
   foundingDate: "2024",
   areaServed: "Africa",
   address: { "@type": "PostalAddress", addressLocality: "Nairobi", addressCountry: "KE" },
-  sameAs: ["https://blog.kabon.africa"],
+  sameAs: [
+    "https://blog.kabon.africa",
+    "https://bsky.app/profile/kabonafrica.bsky.social",
+    "https://www.facebook.com/kabon.africa",
+    "https://www.instagram.com/kabon.africa",
+    "https://www.tiktok.com/@kabon.africa",
+    "https://www.threads.net/@kabon.africa",
+  ],
 };
 
 const WEBSITE_SCHEMA = {
