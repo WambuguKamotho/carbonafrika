@@ -73,6 +73,7 @@ const ORG_SCHEMA = {
     "https://www.instagram.com/kabon.africa",
     "https://www.tiktok.com/@kabon.africa",
     "https://www.threads.net/@kabon.africa",
+    "https://www.linkedin.com/company/134394177",
   ],
 };
 

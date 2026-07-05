@@ -16,6 +16,7 @@ const SOCIAL_LINKS: { name: string; icon: React.ComponentProps<typeof FontAwesom
   { name: "Instagram", icon: "instagram", href: "https://www.instagram.com/kabon.africa" },
   { name: "TikTok", icon: "tiktok", href: "https://www.tiktok.com/@kabon.africa" },
   { name: "Threads", icon: "threads", href: "https://www.threads.net/@kabon.africa" },
+  { name: "LinkedIn", icon: "linkedin", href: "https://www.linkedin.com/company/134394177" },
 ];
 
 interface Me {
