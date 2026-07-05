@@ -5,8 +5,18 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { FontAwesome6 } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
 import { api, ApiError } from "@/lib/api";
 import { colors } from "@/lib/config";
+
+const SOCIAL_LINKS: { name: string; icon: React.ComponentProps<typeof FontAwesome6>["name"]; href: string }[] = [
+  { name: "Bluesky", icon: "bluesky", href: "https://bsky.app/profile/kabonafrica.bsky.social" },
+  { name: "Facebook", icon: "facebook", href: "https://www.facebook.com/kabon.africa" },
+  { name: "Instagram", icon: "instagram", href: "https://www.instagram.com/kabon.africa" },
+  { name: "TikTok", icon: "tiktok", href: "https://www.tiktok.com/@kabon.africa" },
+  { name: "Threads", icon: "threads", href: "https://www.threads.net/@kabon.africa" },
+];
 
 interface Me {
   id: string; name: string; email: string | null; role: string;
@@ -151,6 +161,21 @@ export default function Settings() {
                 {savingPw ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryText}>Update password</Text>}
               </Pressable>
             </View>
+
+            {/* Follow us */}
+            <Text style={styles.section}>Follow us</Text>
+            <View style={styles.socialRow}>
+              {SOCIAL_LINKS.map(({ name, icon, href }) => (
+                <Pressable
+                  key={name}
+                  onPress={() => Linking.openURL(href)}
+                  style={styles.socialBtn}
+                  accessibilityLabel={`Kabon.Africa on ${name}`}
+                >
+                  <FontAwesome6 name={icon} brand size={18} color={colors.body} />
+                </Pressable>
+              ))}
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       )}
@@ -190,6 +215,8 @@ const styles = StyleSheet.create({
   primaryText: { color: "#fff", fontWeight: "700", fontSize: 15 },
   kyc: { fontSize: 15, fontWeight: "700" },
   kycHint: { fontSize: 14, color: colors.muted, marginBottom: 12 },
+  socialRow: { flexDirection: "row", gap: 12, justifyContent: "center" },
+  socialBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, alignItems: "center", justifyContent: "center" },
   errBox: { backgroundColor: "#fef2f2", borderWidth: 1, borderColor: "#fecaca", borderRadius: 12, padding: 12, marginBottom: 12 },
   errText: { color: "#b91c1c", fontSize: 13 },
   toast: { position: "absolute", top: 70, alignSelf: "center", backgroundColor: colors.ink, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 999 },
