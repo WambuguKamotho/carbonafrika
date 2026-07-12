@@ -85,7 +85,7 @@ export default function AboutPage() {
             </div>
             <div>
               <p className="text-gray-600 leading-relaxed mb-2">
-                &ldquo;I spent years watching African communities do the hard work of restoring their land and get nothing for it. Kabon.Africa is built to fix that.&rdquo;
+                &ldquo;I&apos;ve traveled across this continent and watched communities destroy the little land they have left just to survive, because nothing rewards them for protecting it instead. Kabon.Africa exists to fix that incentive, so more people and communities have a reason to take part in climate action.&rdquo;
               </p>
               <p className="text-sm font-black text-gray-900">Wambugu Kamotho</p>
               <p className="text-xs text-forest-600 font-semibold">Founder · Nairobi, Kenya</p>
