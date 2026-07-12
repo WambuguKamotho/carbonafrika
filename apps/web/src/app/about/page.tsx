@@ -71,7 +71,7 @@ export default function AboutPage() {
             Carbon markets pay everyone except the people doing the work.
           </h2>
           <p className="text-gray-600 leading-relaxed text-lg">
-            Farmers and cooperatives across Africa restore degraded land, protect forests, and cut emissions every day &mdash; but the credits generated from that work are usually claimed by brokers and middlemen who never set foot on the land. Kabon.Africa cuts them out: sensors on the ground verify the impact, and buyers pay the land stewards directly.
+            Farmers and cooperatives across Africa restore degraded land, protect forests, and cut emissions every day, but the credits generated from that work are usually claimed by brokers and middlemen who never set foot on the land. Kabon.Africa cuts them out: sensors on the ground verify the impact, and buyers pay the land stewards directly.
           </p>
         </div>
       </section>
