@@ -17,10 +17,10 @@ const differentiators = [
     alt: "Smart agriculture sensor in field",
   },
   {
-    title: "Direct fiat settlement",
-    desc: "Every sale settles directly to the land owner's bank account or M-Pesa. No escrow. No 90-day wire transfers. Fully compliant with local financial regulations.",
+    title: "Direct settlement",
+    desc: "Every sale settles directly to the land steward who earned it, with no escrow, no middlemen, and no lengthy delays. Returns reach the people doing the work, fully compliant with local regulations.",
     photo: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80&auto=format&fit=crop",
-    alt: "Bank transfer and mobile money payment",
+    alt: "Direct settlement reaching land stewards",
   },
   {
     title: "Built for African realities",
