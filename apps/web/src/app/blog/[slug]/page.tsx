@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Calendar, Loader2, User as UserIcon, Leaf } from "lucide-react";
 import { api } from "@/lib/api";
+import { useBreadcrumbLabel } from "@/components/layout/BreadcrumbContext";
 
 interface BlogPost {
   id: string;
@@ -73,6 +74,7 @@ export default function BlogPostPage() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  useBreadcrumbLabel(post?.title);
 
   useEffect(() => {
     if (!slug) return;

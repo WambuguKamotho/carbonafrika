@@ -8,6 +8,7 @@ import Link from "next/link";
 import RetirementIntentModal from "@/components/ui/RetirementIntentModal";
 import { getUser } from "@/lib/auth";
 import { CreditClassBadges } from "@/lib/creditClass";
+import { useBreadcrumbLabel } from "@/components/layout/BreadcrumbContext";
 
 const TYPE_LABEL: Record<string, string> = {
   FOREST: "Forest", SAVANNA: "Savanna", GRASSLAND: "Grassland", FARMLAND: "Farmland",
@@ -136,6 +137,7 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
   });
 
   const listing = data?.data;
+  useBreadcrumbLabel(listing?.credit.project.title);
 
   const handlePurchase = async () => {
     if (!listing) return;

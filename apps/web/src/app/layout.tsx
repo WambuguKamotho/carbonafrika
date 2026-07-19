@@ -11,6 +11,8 @@ const inter = Inter({
   variable: "--font-inter",
 });
 import Footer from "@/components/layout/Footer";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import { BreadcrumbProvider } from "@/components/layout/BreadcrumbContext";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/Toaster";
 import SessionGuard from "@/components/providers/SessionGuard";
@@ -141,12 +143,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         `}</Script>
         <QueryProvider>
           <SessionGuard />
-          <div className="min-h-screen flex flex-col">
-            <BetaBanner />
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <BreadcrumbProvider>
+            <div className="min-h-screen flex flex-col">
+              <BetaBanner />
+              <Header />
+              <Breadcrumbs />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </BreadcrumbProvider>
           <Toaster />
         </QueryProvider>
       </body>

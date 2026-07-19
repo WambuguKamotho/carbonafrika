@@ -8,6 +8,7 @@ import { getUser, getToken } from '@/lib/auth';
 import ProjectCommentThread from '@/components/projects/ProjectCommentThread';
 import { DynamicMapPicker } from '@/components/map/DynamicMapPicker';
 import { CreditClassBadges } from '@/lib/creditClass';
+import { useBreadcrumbLabel } from '@/components/layout/BreadcrumbContext';
 import {
   BarChart, Bar, AreaChart, Area, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend,
@@ -365,6 +366,7 @@ export default function ProjectDetailPage() {
   const [snapshots, setSnapshots] = useState<SatelliteSnapshot[]>([]);
   const [refreshingNdvi, setRefreshingNdvi] = useState(false);
   const [ndviError, setNdviError] = useState<string | null>(null);
+  useBreadcrumbLabel(project?.title);
 
   async function refreshNdvi() {
     if (!id) return;
