@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, MapPin, Calendar, Leaf, BarChart3, Globe, User, Zap, Thermometer, Droplets, Wind, Pencil, CheckCircle, X, Clock, XCircle, MessageSquare } from 'lucide-react';
@@ -357,6 +357,71 @@ function NdviChart({ snapshots }: { snapshots: SatelliteSnapshot[] }) {
   );
 }
 
+// ── Demo IoT data ────────────────────────────────────────────────────────────
+// Used only when a project has no real device readings yet, so the monitoring
+// UI has something to show during the beta rather than an empty state on every
+// project. Deterministic per project (seeded on its id) so it doesn't reshuffle
+// on every render, and always clearly labelled "Simulated" in the UI.
+
+const GRID_EMISSION_FACTOR_KG_PER_KWH = 0.498; // East Africa grid factor, matches the note under the readings table
+
+function seededRandom(seed: string) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+  return function next() {
+    h = Math.imul(h ^ (h >>> 15), h | 1);
+    h ^= h + Math.imul(h ^ (h >>> 7), h | 61);
+    return ((h ^ (h >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function generateDemoReadings(project: Project): DeviceReading[] {
+  const rand = seededRandom(project.id);
+  const isEnergy = !!project.energyType;
+  const isCookstove = project.energyType === 'COOKSTOVES' || project.energyType === 'BIOCHARCOAL';
+  const isBiogas = project.energyType === 'BIOGAS';
+  const isWind = project.energyType === 'WIND';
+  const baseDaily = isEnergy ? Math.max(8, (project.capacityKw ?? 5) * 4.2) : 0; // rough daily yield per installed kW
+
+  const deviceLabel = isCookstove ? 'Fuel Log Sensor #1'
+    : isBiogas ? 'Gas Flow Meter #1'
+    : isEnergy ? 'Energy Meter #1'
+    : 'Field Sensor #1';
+  const deviceType = project.energyType ?? 'SOIL_MOISTURE';
+
+  const days = 21;
+  const out: DeviceReading[] = [];
+  // Newest first (index 0 = today), matching the real readings API's ordering.
+  for (let i = 0; i < days; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const noise = 0.75 + rand() * 0.5; // ±25% day-to-day variance
+
+    const kwh = isEnergy && !isCookstove ? parseFloat((baseDaily * noise).toFixed(2)) : null;
+    const fuelDisplacedKg = isCookstove ? parseFloat((baseDaily * noise * 0.55).toFixed(2)) : null;
+    const co2AvoidedKg = isEnergy
+      ? parseFloat(((kwh ?? fuelDisplacedKg ?? 0) * GRID_EMISSION_FACTOR_KG_PER_KWH).toFixed(2))
+      : null;
+
+    out.push({
+      id: `demo-${project.id}-${i}`,
+      kwhGenerated: kwh,
+      co2AvoidedKg,
+      householdsServed: isEnergy ? project.householdsServed ?? Math.round(3 + rand() * 15) : null,
+      fuelDisplacedKg,
+      temperatureC: parseFloat((21 + rand() * 11).toFixed(1)),
+      humidityPct: parseFloat((38 + rand() * 42).toFixed(0)),
+      soilMoisturePct: !isEnergy ? parseFloat((15 + rand() * 35).toFixed(0)) : null,
+      rainfallMm: !isEnergy ? parseFloat((rand() * 12).toFixed(1)) : null,
+      windSpeedMs: isWind ? parseFloat((3 + rand() * 6).toFixed(1)) : null,
+      gasFlowM3h: isBiogas ? parseFloat((1 + rand() * 3).toFixed(2)) : null,
+      recordedAt: date.toISOString(),
+      device: { deviceType, label: deviceLabel },
+    });
+  }
+  return out;
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ProjectDetailPage() {
@@ -388,6 +453,7 @@ export default function ProjectDetailPage() {
     }
   }
   const [readings,  setReadings]  = useState<DeviceReading[]>([]);
+  const demoReadings = useMemo(() => (project ? generateDemoReadings(project) : []), [project]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState('');
   const [currentUser, setCurrentUser] = useState<ReturnType<typeof getUser>>(null);
@@ -495,9 +561,12 @@ export default function ProjectDetailPage() {
     ? (ENERGY_TYPE_LABELS[project.energyType!] ?? project.energyType)
     : (project.landType ? project.landType.charAt(0) + project.landType.slice(1).toLowerCase() : '');
 
-  const totalKwh   = readings.reduce((s, r) => s + (r.kwhGenerated ?? 0), 0);
-  const totalCo2Kg = readings.reduce((s, r) => s + (r.co2AvoidedKg ?? 0), 0);
-  const latestReading = readings[0] ?? null;
+  const usingDemoReadings = readings.length === 0 && demoReadings.length > 0;
+  const displayReadings   = readings.length > 0 ? readings : demoReadings;
+
+  const totalKwh   = displayReadings.reduce((s, r) => s + (r.kwhGenerated ?? 0), 0);
+  const totalCo2Kg = displayReadings.reduce((s, r) => s + (r.co2AvoidedKg ?? 0), 0);
+  const latestReading = displayReadings[0] ?? null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -761,15 +830,26 @@ export default function ProjectDetailPage() {
             <div className="card">
               <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-500" /> Live IoT Monitoring
+                {usingDemoReadings && (
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-amber-700 bg-amber-100 border border-amber-200 rounded-full px-2 py-0.5">
+                    Simulated
+                  </span>
+                )}
               </h2>
 
-              {readings.length === 0 ? (
+              {displayReadings.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">
                   <div className="text-4xl mb-2">📡</div>
                   <p className="text-sm">No IoT readings yet. Devices post data once registered and deployed.</p>
                 </div>
               ) : (
                 <>
+                  {usingDemoReadings && (
+                    <p className="mb-5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                      No devices have reported readings for this project yet — showing simulated data so you can see how live monitoring will look.
+                    </p>
+                  )}
+
                   {/* Summary cards */}
                   <div className="grid grid-cols-3 gap-3 mb-6">
                     <div className="bg-amber-50 rounded-xl p-3.5 text-center">
@@ -781,13 +861,13 @@ export default function ProjectDetailPage() {
                       <div className="text-xs text-forest-600 mt-0.5">tCO₂e Avoided</div>
                     </div>
                     <div className="bg-blue-50 rounded-xl p-3.5 text-center">
-                      <div className="text-2xl font-black text-blue-700">{latestReading?.householdsServed ?? readings.length}</div>
+                      <div className="text-2xl font-black text-blue-700">{latestReading?.householdsServed ?? displayReadings.length}</div>
                       <div className="text-xs text-blue-600 mt-0.5">{latestReading?.householdsServed != null ? 'Households' : 'Readings'}</div>
                     </div>
                   </div>
 
                   {/* Charts */}
-                  <EnergyCharts readings={readings} energyType={project.energyType} />
+                  <EnergyCharts readings={displayReadings} energyType={project.energyType} />
 
                   {/* Recent readings table */}
                   <div className="mt-6">
@@ -805,7 +885,7 @@ export default function ProjectDetailPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {readings.slice(0, 10).map((r) => (
+                          {displayReadings.slice(0, 10).map((r) => (
                             <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50">
                               <td className="py-2 pr-3 text-gray-600">
                                 {new Date(r.recordedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
@@ -820,8 +900,8 @@ export default function ProjectDetailPage() {
                         </tbody>
                       </table>
                     </div>
-                    {readings.length > 10 && (
-                      <p className="text-xs text-gray-400 mt-2">Showing 10 of {readings.length} readings</p>
+                    {displayReadings.length > 10 && (
+                      <p className="text-xs text-gray-400 mt-2">Showing 10 of {displayReadings.length} readings</p>
                     )}
                   </div>
 
@@ -903,11 +983,21 @@ export default function ProjectDetailPage() {
           )}
 
           {/* Climate sensors for land projects */}
-          {!isEnergy && readings.length > 0 && (
+          {!isEnergy && displayReadings.length > 0 && (
             <div className="card">
               <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Thermometer className="w-4 h-4 text-blue-500" /> Climate Sensor Data
+                {usingDemoReadings && (
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-amber-700 bg-amber-100 border border-amber-200 rounded-full px-2 py-0.5">
+                    Simulated
+                  </span>
+                )}
               </h2>
+              {usingDemoReadings && (
+                <p className="mb-4 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                  No devices have reported readings for this project yet — showing simulated data so you can see how live monitoring will look.
+                </p>
+              )}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {latestReading?.temperatureC    != null && <div className="bg-orange-50 rounded-xl p-3 text-center"><Thermometer className="w-4 h-4 text-orange-500 mx-auto mb-1" /><div className="font-bold text-orange-700">{latestReading.temperatureC.toFixed(1)}°C</div><div className="text-xs text-gray-500">Temperature</div></div>}
                 {latestReading?.humidityPct     != null && <div className="bg-blue-50 rounded-xl p-3 text-center"><Droplets className="w-4 h-4 text-blue-500 mx-auto mb-1" /><div className="font-bold text-blue-700">{latestReading.humidityPct.toFixed(0)}%</div><div className="text-xs text-gray-500">Humidity</div></div>}
@@ -915,9 +1005,9 @@ export default function ProjectDetailPage() {
                 {latestReading?.windSpeedMs     != null && <div className="bg-gray-50 rounded-xl p-3 text-center"><Wind className="w-4 h-4 text-gray-500 mx-auto mb-1" /><div className="font-bold text-gray-700">{latestReading.windSpeedMs.toFixed(1)} m/s</div><div className="text-xs text-gray-500">Wind Speed</div></div>}
               </div>
               {/* Climate chart */}
-              {aggregateDaily(readings).length >= 2 && (
+              {aggregateDaily(displayReadings).length >= 2 && (
                 <ResponsiveContainer width="100%" height={180}>
-                  <LineChart data={aggregateDaily(readings)} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <LineChart data={aggregateDaily(displayReadings)} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                     <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9ca3af' }} tickLine={false} />
                     <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickLine={false} axisLine={false} />
