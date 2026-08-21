@@ -176,6 +176,7 @@ export default function Footer() {
               <li><Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link></li>
               <li><Link href={user ? "/projects/new" : "/register"} className="hover:text-white transition-colors">Register a Project</Link></li>
               <li><Link href="/standard" className="hover:text-white transition-colors">Carbon Standard</Link></li>
+              <li><Link href="/technology" className="hover:text-white transition-colors">Technology</Link></li>
               <li><Link href="/guides" className="hover:text-white transition-colors">Project Guides</Link></li>
               {user && <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>}
             </ul>

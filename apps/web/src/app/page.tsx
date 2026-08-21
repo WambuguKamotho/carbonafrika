@@ -39,14 +39,14 @@ const landTypes = [
 
 const steps = [
   { n: "01", title: "Register Your Land", desc: "Submit GPS coordinates, land type, and project docs online.", icon: "📍" },
-  { n: "02", title: "Get Verified", desc: "Independent verifiers + satellite monitoring confirm sequestration.", icon: "✅" },
+  { n: "02", title: "Get Measured & Certified", desc: "Our satellite + IoT pipeline measures your project; an independent reviewer certifies the result.", icon: "✅" },
   { n: "03", title: "Earn Credits", desc: "Verified CO₂ is issued as certified carbon credits to your account.", icon: "🪙" },
   { n: "04", title: "Get Paid", desc: "Corporations buy your credits. Payments settle directly to your bank or M-Pesa.", icon: "💰" },
 ];
 
 const features = [
-  { icon: Shield, title: "100% Verified", desc: "Every project is independently verified before a single credit is issued. No greenwashing." },
-  { icon: Globe, title: "Verified Proof", desc: "Every project is independently verified. All issuances, sales, and retirements are permanently recorded." },
+  { icon: Shield, title: "Measured, Not Self-Reported", desc: "Our own satellite + IoT pipeline measures every project; an independent reviewer certifies it before a single credit is issued." },
+  { icon: Globe, title: "Verified Proof", desc: "Every issuance, sale, and retirement is permanently recorded and traceable back to its measurement evidence." },
   { icon: TrendingUp, title: "Real Income", desc: "Communities earn $12–25 per tonne. Payments settle directly to your bank or M-Pesa account." },
   { icon: TreePine, title: "Indigenous Focus", desc: "We prioritise indigenous forest restoration, Africa's highest carbon-density ecosystems." },
   { icon: Leaf, title: "Farming Guide", desc: "Expert agroforestry guidance that earns additional credits alongside your food crops." },
@@ -108,7 +108,7 @@ export default async function HomePage() {
 
           {/* Trust pills */}
           <div className="flex flex-wrap justify-center gap-3">
-            {["🔒 Secure", "🌍 54 African nations", "✅ Independently verified", "📋 Published standard"].map((t) => (
+            {["🔒 Secure", "🌍 54 African nations", "🛰️ Satellite-measured", "📋 Published standard"].map((t) => (
               <span key={t} className="text-xs text-gray-400 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">{t}</span>
             ))}
           </div>
@@ -142,6 +142,11 @@ export default async function HomePage() {
             </div>
           ))}
         </div>
+        {!liveStats && (
+          <p className="text-center text-xs text-gray-400 mt-6">
+            Beta platform — figures above are illustrative targets, not live transaction data.
+          </p>
+        )}
       </section>
 
       {/* ── Land Asset Banner + Calculator ── */}
@@ -296,6 +301,7 @@ export default async function HomePage() {
           <div className="text-center mb-12">
             <span className="text-xs font-semibold text-forest-700 uppercase tracking-widest">Stories</span>
             <h2 className="text-4xl font-bold text-gray-900 mt-2">Real People. Real Impact.</h2>
+            <p className="text-xs text-gray-400 mt-2">Illustrative examples of the outcomes we're building toward, not verified customer testimonials.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {testimonials.map((t) => (

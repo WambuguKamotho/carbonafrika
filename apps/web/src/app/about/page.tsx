@@ -5,14 +5,20 @@ import { ArrowRight, MapPin, Leaf } from "lucide-react";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Kabon.Africa connects African land stewards directly to carbon credit buyers, verified by IoT sensors and settled directly to their bank account or M-Pesa.",
+    "Kabon.Africa connects African land stewards directly to carbon credit buyers, measured by our own satellite + IoT pipeline and settled directly to their bank account or M-Pesa.",
   alternates: { canonical: "/about" },
 };
 
 const differentiators = [
   {
-    title: "IoT-verified data",
-    desc: "Soil sensors, gas flow meters, satellite NDVI: continuous, tamper-proof readings from the project site. No self-reporting. No consultants with clipboards.",
+    title: "Satellite-measured, not self-reported",
+    desc: "Our own Earth Observation pipeline processes Sentinel-2 satellite bands into an NDVI reading for the project's exact parcel — not a third-party dashboard bolted on for show.",
+    photo: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80&auto=format&fit=crop",
+    alt: "Satellite view of African landscape",
+  },
+  {
+    title: "IoT ground sensors",
+    desc: "Soil moisture, gas flow meters, temperature: continuous, tamper-proof readings from the project site, feeding the same review record as the satellite evidence.",
     photo: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=600&q=80&auto=format&fit=crop",
     alt: "Smart agriculture sensor in field",
   },
@@ -56,7 +62,7 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Kabon.Africa connects the communities restoring and protecting African land directly to carbon credit buyers &mdash; verified by IoT sensors, settled without middlemen.
+            Kabon.Africa connects the communities restoring and protecting African land directly to carbon credit buyers &mdash; measured by our own satellite + IoT pipeline, settled without middlemen.
           </p>
         </div>
 
@@ -71,7 +77,7 @@ export default function AboutPage() {
             Carbon markets pay everyone except the people doing the work.
           </h2>
           <p className="text-gray-600 leading-relaxed text-lg">
-            Farmers, cooperatives, and circular economy entrepreneurs across Africa restore degraded land, protect forests, and cut emissions every day, but the credits generated from that work are usually claimed by brokers and middlemen who never visit the site. Kabon.Africa cuts them out: sensors on the ground verify the impact, and buyers pay them directly.
+            Farmers, cooperatives, and circular economy entrepreneurs across Africa restore degraded land, protect forests, and cut emissions every day, but the credits generated from that work are usually claimed by brokers and middlemen who never visit the site. Kabon.Africa cuts them out: our own satellite and IoT pipeline measures the impact directly, and buyers pay the land stewards directly.
           </p>
         </div>
       </section>
@@ -102,7 +108,7 @@ export default function AboutPage() {
             <h2 className="text-4xl font-bold text-gray-900 mt-2 mb-3">What Kabon.Africa does differently</h2>
             <p className="text-gray-500 max-w-xl mx-auto">Designed from the ground up for the African carbon market, not adapted from frameworks built for European forestry projects.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {differentiators.map(f => (
               <div key={f.title} className="bg-gray-50 rounded-2xl border border-gray-100 shadow-card overflow-hidden">
                 <div className="h-44 overflow-hidden">
@@ -115,6 +121,12 @@ export default function AboutPage() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="text-center mt-10">
+            <Link href="/technology" className="inline-flex items-center gap-2 text-forest-600 font-semibold hover:text-forest-700">
+              See how the measurement pipeline works
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>

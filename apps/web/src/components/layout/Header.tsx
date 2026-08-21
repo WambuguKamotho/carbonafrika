@@ -17,6 +17,7 @@ const publicNavLinks = [
   { href: "/marketplace",          label: "Marketplace" },
   { href: "https://blog.kabon.africa", label: "Blog" },
   { href: "/guides",               label: "Guides" },
+  { href: "/technology",           label: "Technology" },
   { href: "/partner-application",  label: "Partner" },
   { href: "/about",                label: "About" },
   { href: "/contact",              label: "Contact" },
