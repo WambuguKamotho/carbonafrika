@@ -16,7 +16,9 @@ const ROUTES = [
   "/farming",
   "/guides",
   "/standard",
+  "/technology",
   "/careers",
+  "/contact",
   // Public conversion funnels — worth indexing
   "/request-access",
   "/partner-application",
